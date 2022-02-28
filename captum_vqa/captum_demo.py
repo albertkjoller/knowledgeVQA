@@ -6,6 +6,8 @@
 #sys.path.append(os.path.realpath(f"{PROJECT_DIR}/pytorch_resnet"))
 
 import threading
+
+import matplotlib.pyplot as plt
 import numpy as np
 
 import torch
@@ -158,7 +160,7 @@ if USE_INTERPRETABLE_EMBEDDING_LAYER:
 
 
 
-image_size = 448  # scale image to given size and center
+image_size = 28  # scale image to given size and center
 central_fraction = 1.0
 
 transform = get_transform(image_size, central_fraction=central_fraction)
@@ -245,6 +247,9 @@ def vqa_resnet_interpret(image_filename, questions, targets):
                                                     titles=["Original Image", "Attribution Magnitude"],
                                                     cmap=default_cmap,
                                                     show_colorbar=True)
+        temp = image_filename.split(".")
+        plt.savefig(f'{(".").join(temp[:-1])}_attribution.{temp[-1]}')
+
         print('Text Contributions: ', attributions[1].sum().item())
         print('Image Contributions: ', attributions[0].sum().item())
         print('Total Contribution: ', attributions[0].sum().item() + attributions[1].sum().item())
