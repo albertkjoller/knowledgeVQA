@@ -1,9 +1,7 @@
 import h5py
-from torch.autograd import Variable
 import torch.nn as nn
 import torch.backends.cudnn as cudnn
 import torch.utils.data
-import torchvision.models as models
 from tqdm import tqdm
 
 import config

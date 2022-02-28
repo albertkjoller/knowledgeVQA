@@ -1,12 +1,9 @@
 import sys
 import os.path
-import math
-import json
 
 import torch
 import torch.nn as nn
 import torch.optim as optim
-from torch.autograd import Variable
 import torch.backends.cudnn as cudnn
 from tqdm import tqdm
 
@@ -17,7 +14,7 @@ import utils
 
 
 def update_learning_rate(optimizer, iteration):
-    lr = config.initial_lr * 0.5**(float(iteration) / config.lr_halflife)
+    lr = config.initial_lr * 0.5 ** (float(iteration) / config.lr_halflife)
     for param_group in optimizer.param_groups:
         param_group['lr'] = lr
 

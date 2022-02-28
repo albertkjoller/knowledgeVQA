@@ -4,7 +4,7 @@ import torch.nn.functional as F
 import torch.nn.init as init
 from torch.nn.utils.rnn import pack_padded_sequence
 
-import config
+from pytorch_vqa import config
 
 
 class Net(nn.Module):
@@ -41,7 +41,7 @@ class Net(nn.Module):
 
         for m in self.modules():
             if isinstance(m, nn.Linear) or isinstance(m, nn.Conv2d):
-                init.xavier_uniform(m.weight)
+                init.xavier_uniform_(m.weight)
                 if m.bias is not None:
                     m.bias.data.zero_()
 
@@ -83,7 +83,7 @@ class TextProcessor(nn.Module):
         self.lstm.bias_ih_l0.data.zero_()
         self.lstm.bias_hh_l0.data.zero_()
 
-        init.xavier_uniform(self.embedding.weight)
+        init.xavier_uniform_(self.embedding.weight)
 
     def _init_lstm(self, weight):
         for w in weight.chunk(4, 0):

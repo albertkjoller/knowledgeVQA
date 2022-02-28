@@ -40,7 +40,7 @@ from captum.attr._utils.input_layer_wrapper import ModelInputWrapper
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 # load
-saved_state = torch.load('captum_vqa/models/2017-08-04_00.55.19.pth', map_location=device)
+saved_state = torch.load('models/2017-08-04_00.55.19.pth', map_location=device)
 
 # reading vocabulary, tokens and answers from saved model
 vocab = saved_state['vocab']
@@ -249,19 +249,19 @@ def vqa_resnet_interpret(image_filename, questions, targets):
         print('Image Contributions: ', attributions[0].sum().item())
         print('Total Contribution: ', attributions[0].sum().item() + attributions[1].sum().item())
 
-images = ['./captum_vqa/img/vqa/siamese.jpg',
-          './captum_vqa/img/vqa/elephant.jpg',
-          './captum_vqa/img/vqa/zebra.jpg']
+images = ['./img/vqa/siamese.jpg',
+          './img/vqa/elephant.jpg',
+          './img/vqa/zebra.jpg']
 
 import IPython
 # the index of image in the test set. Please, change it if you want to play with different test images/samples.
 image_idx = 1 # elephant
 vqa_resnet_interpret(images[image_idx],
-                     ["what is on the picture",
-                      "what color is the elephant",
-                      "where is the elephant"],
-                     ['elephant', 'gray', 'zoo'])
-IPython.display.Image(filename='captum_vqa/img/vqa/elephant_attribution.jpg')
+                     ["what is on the picture"],
+#                      "what color is the elephant",
+#                      "where is the elephant"],
+                     ['elephant'])#, 'gray', 'zoo'])
+IPython.display.Image(filename='img/vqa/elephant_attribution.jpg')
 
 
 image_idx = 0 # cat
@@ -273,12 +273,12 @@ vqa_resnet_interpret(images[image_idx], [
     "how many ears does the cat have",
     "where is the cat"
 ], ['cat', 'blue', 'cat', 'white and brown', '2', 'at the wall'])
-IPython.display.Image(filename='captum_vqa/img/vqa/siamese_attribution.jpg')
+IPython.display.Image(filename='img/vqa/siamese_attribution.jpg')
 
 IPython.display.Image(filename='captum_vqa/img/vqa/elephant_attribution.jpg')
 
 
-
+# TODO: find out what this is
 if USE_INTERPRETABLE_EMBEDDING_LAYER:
     remove_interpretable_embedding_layer(vqa_resnet, interpretable_embedding)
 

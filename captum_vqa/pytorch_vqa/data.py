@@ -7,7 +7,6 @@ from PIL import Image
 import h5py
 import torch
 import torch.utils.data as data
-import torchvision.transforms as transforms
 
 import config
 import utils

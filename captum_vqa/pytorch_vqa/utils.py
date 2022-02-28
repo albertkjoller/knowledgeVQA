@@ -1,11 +1,8 @@
 import os
-import json
 
-import torch
-import torch.nn as nn
 import torchvision.transforms as transforms
 
-import config
+from pytorch_vqa import config
 
 
 def batch_accuracy(predicted, true):

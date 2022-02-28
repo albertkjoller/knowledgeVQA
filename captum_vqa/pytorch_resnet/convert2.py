@@ -1,6 +1,5 @@
 import os
 os.environ["GLOG_minloglevel"] = "2"
-import sys
 import re
 import caffe
 import numpy as np
@@ -9,7 +8,6 @@ from caffe.proto import caffe_pb2
 from synset import *
 import torch
 from torch.autograd import Variable
-import torchvision.models as models
 import torch.nn.functional as F
 import resnet
 from collections import OrderedDict
@@ -253,7 +251,7 @@ def convert(img, img_p, layers):
     elif layers == 152:
         num_blocks = [3, 8, 36, 3]
 
-    model = getattr(resnet, 'resnet'+str(layers))()
+    model = getattr(resnet, 'resnet' + str(layers))()
     model.eval()
 
     #from copy import deepcopy
