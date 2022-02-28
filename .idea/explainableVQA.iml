@@ -9,12 +9,4 @@
     <option name="format" value="PLAIN" />
     <option name="myDocStringFormat" value="Plain" />
   </component>
-  <component name="PyNamespacePackagesService">
-    <option name="namespacePackageFolders">
-      <list>
-        <option value="$MODULE_DIR$/captum_vqa/pytorch_resnet" />
-        <option value="$MODULE_DIR$/captum_vqa/pytorch_vqa" />
-      </list>
-    </option>
-  </component>
 </module>

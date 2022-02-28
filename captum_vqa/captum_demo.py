@@ -1,5 +1,3 @@
-import os, sys
-
 # project-directory
 #PROJECT_DIR = os.getcwd()
 
@@ -11,18 +9,16 @@ import threading
 import numpy as np
 
 import torch
-import torchvision
 import torchvision.transforms as transforms
 import torch.nn.functional as F
 
-from pytorch_resnet import resnet  # from pytorch_resnet
+from captum_vqa.pytorch_resnet import resnet
 
-import matplotlib.pyplot as plt
 from PIL import Image
 from matplotlib.colors import LinearSegmentedColormap
 
-from pytorch_vqa.model import Net, apply_attention, tile_2d_over_nd # from pytorch_vqa
-from pytorch_vqa.utils import get_transform # from pytorch_vqa
+from captum_vqa.pytorch_vqa.model import Net, apply_attention  # from pytorch_vqa
+from captum_vqa.pytorch_vqa.utils import get_transform # from pytorch_vqa
 
 from captum.attr import (
     IntegratedGradients,
