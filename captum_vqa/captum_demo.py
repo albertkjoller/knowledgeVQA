@@ -4,8 +4,8 @@ import os, sys
 #PROJECT_DIR = os.getcwd()
 
 # add pytorch_vqa and pytorch_resnet to filepath
-#sys.path.append(os.path.realpath(f"{PROJECT_DIR}/pytorch-vqa"))
-#sys.path.append(os.path.realpath(f"{PROJECT_DIR}/pytorch-resnet"))
+#sys.path.append(os.path.realpath(f"{PROJECT_DIR}/pytorch_vqa"))
+#sys.path.append(os.path.realpath(f"{PROJECT_DIR}/pytorch_resnet"))
 
 import threading
 import numpy as np
