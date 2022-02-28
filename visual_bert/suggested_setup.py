@@ -36,9 +36,9 @@ bert_tokenizer = BertTokenizerFast.from_pretrained("bert-base-uncased")
 visualbert_vqa = VisualBertForQuestionAnswering.from_pretrained("uclanlp/visualbert-vqa")
 
 
-IMAGE_DIR = r'C:\Users\Bruger\Desktop\test'
+IMAGE_DIR = r'C:\Users\Bruger\Desktop\test' # directory with images
 
-IMAGE_DIR = r'C:\Users\Bruger\Desktop\test'
+# extract filenames from folder
 files = [filename for filename in glob.glob(IMAGE_DIR + '/*', recursive=True)]
 
 # run frcnn
