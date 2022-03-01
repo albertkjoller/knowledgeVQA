@@ -4,7 +4,7 @@ import torch.nn.functional as F
 import torch.nn.init as init
 from torch.nn.utils.rnn import pack_padded_sequence
 
-from pytorch_vqa import config
+from captum_vqa.pytorch_vqa import config
 
 
 class Net(nn.Module):
