@@ -2,6 +2,8 @@ import PIL.Image
 import io
 import torch
 
+import torch.nn as nn
+
 import cv2
 import os
 import glob
@@ -36,6 +38,12 @@ image_preprocess = Preprocess(frcnn_cfg)
 bert_tokenizer = BertTokenizerFast.from_pretrained("bert-base-uncased")
 visualbert_vqa = VisualBertForQuestionAnswering.from_pretrained("uclanlp/visualbert-vqa")
 
+class visualbert_vqa2(nn.module):
+
+    def __init__(self):
+
+        super(visualbert_vqa2, self).__init__()
+        self.baseLayer = visualbert_vqa # i.e. VisualBertForQuestionAnswering.from_pretrained("uclanlp/visualbert-vqa")
 
 IMAGE_DIR = r'/Users/philliphoejbjerg/Desktop/UNI/6.semester/Bachelors_project/Github/explainableVQA/visual_bert/imgs'
 
