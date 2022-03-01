@@ -1662,7 +1662,10 @@ class GeneralizedRCNN(nn.Module):
 
         self.device = torch.device(cfg.MODEL.DEVICE)
         self.backbone = build_backbone(cfg)
+
+        # Region Proposal Network
         self.proposal_generator = RPN(cfg, self.backbone.output_shape())
+        # Region Of Interest
         self.roi_heads = Res5ROIHeads(cfg, self.backbone.output_shape())
         self.roi_outputs = ROIOutputs(cfg)
         self.to(self.device)

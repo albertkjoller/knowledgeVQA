@@ -31,63 +31,72 @@ vqa_answers = utils.get_data(VQA_URL)
 frcnn_cfg = Config.from_pretrained("unc-nlp/frcnn-vg-finetuned")
 frcnn = GeneralizedRCNN.from_pretrained("unc-nlp/frcnn-vg-finetuned", config=frcnn_cfg)
 
+# Preprocess, resizing, padding, change to tensor, normalize etc.
 image_preprocess = Preprocess(frcnn_cfg)
 bert_tokenizer = BertTokenizerFast.from_pretrained("bert-base-uncased")
 visualbert_vqa = VisualBertForQuestionAnswering.from_pretrained("uclanlp/visualbert-vqa")
 
 
-IMAGE_DIR = r'C:\Users\Bruger\Desktop\test'
+IMAGE_DIR = r'/Users/philliphoejbjerg/Desktop/UNI/6.semester/Bachelors_project/Github/explainableVQA/visual_bert/imgs'
 
-IMAGE_DIR = r'C:\Users\Bruger\Desktop\test'
 files = [filename for filename in glob.glob(IMAGE_DIR + '/*', recursive=True)]
 
-# run frcnn
-images, sizes, scales_yx = image_preprocess(files)
-output_dict = frcnn(images,
-                    sizes,
-                    scales_yx=scales_yx,
-                    padding="max_detections",
-                    max_detections=frcnn_cfg.max_detections, # max number of objects to detect (read paper)
-                    return_tensors="pt",
-                    )
+for file in files:
+
+    print("\n\nImage:", file.split("/")[-1], "\n\n")
+
+    # run frcnn
+    images, sizes, scales_yx = image_preprocess(file)
+
+    # detection of objects happens in frcnn
+    output_dict = frcnn(images,
+                        sizes,
+                        scales_yx=scales_yx,
+                        padding="max_detections",
+                        max_detections=frcnn_cfg.max_detections, # max number of objects to detect (read paper)
+                        return_tensors="pt",
+                        )
 
 
-test_questions_for_url = [
-     "Where is this scene?",
-     "what is the man riding?",
-     "What is the man wearing?",
-     "What is the color of the horse?" ]
+    test_questions_for_url = [
+         "Where is this scene?",
+         "what is the man riding?",
+         "What is the man wearing?",
+         "What is the color of the horse?",
+         "Who is the man?",
+         "Do you like the man?",
+         "Do you agree with his policies?",
+         "What are his opinions?",
+         "What is their relationship?"]
 
 
-# Very important that the boxes are normalized
-# normalized_boxes = output_dict.get("normalized_boxes")
-features = output_dict.get("roi_features")
+    # Very important that the boxes are normalized
+    # normalized_boxes = output_dict.get("normalized_boxes")
+    features = output_dict.get("roi_features")
 
+    for test_question in test_questions_for_url:
+        test_question = [test_question]
 
+        inputs = bert_tokenizer(
+            test_question,
+            padding="max_length",
+            max_length=20,
+            truncation=True,
+            return_token_type_ids=True,
+            return_attention_mask=True,
+            add_special_tokens=True,
+            return_tensors="pt",
+        )
 
-for test_question in test_questions_for_url:
-    test_question = [test_question]
-
-    inputs = bert_tokenizer(
-        test_question,
-        padding="max_length",
-        max_length=20,
-        truncation=True,
-        return_token_type_ids=True,
-        return_attention_mask=True,
-        add_special_tokens=True,
-        return_tensors="pt",
-    )
-
-    output_vqa = visualbert_vqa(
-        input_ids=inputs.input_ids,
-        attention_mask=inputs.attention_mask,
-        visual_embeds=features,
-        visual_attention_mask=torch.ones(features.shape[:-1]),
-        token_type_ids=inputs.token_type_ids,
-        output_attentions=False,
-    )
-    # get prediction
-    pred_vqa = output_vqa["logits"].argmax(-1)
-    print("Question:", test_question)
-    print("prediction from VisualBert VQA:", vqa_answers[pred_vqa])
+        output_vqa = visualbert_vqa(
+            input_ids=inputs.input_ids,
+            attention_mask=inputs.attention_mask,
+            visual_embeds=features,
+            visual_attention_mask=torch.ones(features.shape[:-1]),
+            token_type_ids=inputs.token_type_ids,
+            output_attentions=False,
+        )
+        # get prediction
+        pred_vqa = output_vqa["logits"].argmax(-1)
+        print("Question:", test_question)
+        print("prediction from VisualBert VQA:", vqa_answers[pred_vqa])
