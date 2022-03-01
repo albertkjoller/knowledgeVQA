@@ -1,0 +1,9 @@
+numpy==1.16.5
+matplotlib==3.1.1
+Pillow==6.2.0
+torch==1.10.0
+torchvision
+sen2vec==1.44
+sent2vec==0.2.4
+spacy==3.2.2
+pandas==1.4.1

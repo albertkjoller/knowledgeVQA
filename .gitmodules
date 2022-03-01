@@ -1,3 +1,0 @@
-[submodule "ConceptBERT"]
-	path = ConceptBERT
-	url = https://github.com/ThalesGroup/ConceptBERT
