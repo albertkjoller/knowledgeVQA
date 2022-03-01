@@ -287,4 +287,3 @@ IPython.display.Image(filename='captum_vqa/img/vqa/elephant_attribution.jpg')
 if USE_INTERPRETABLE_EMBEDDING_LAYER:
     remove_interpretable_embedding_layer(vqa_resnet, interpretable_embedding)
 
-print("breakpoint")
