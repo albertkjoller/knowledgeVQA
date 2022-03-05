@@ -31,14 +31,6 @@ model_config:
         output_attentions: false
         output_hidden_states: false
 
-    optimizer:
-      type: adam_w
-      params:
-        lr: 5e-5
-        eps: 1e-8
-
-    losses:
-      type: cross_entropy
 
 
     classifier:

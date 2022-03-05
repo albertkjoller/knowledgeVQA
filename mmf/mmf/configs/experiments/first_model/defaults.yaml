@@ -12,7 +12,7 @@ model_config:
       params:
         num_layers: 2
     losses:
-      type: cross_entropy
+      - type: cross_entropy
 
 scheduler:
   type: warmup_linear
