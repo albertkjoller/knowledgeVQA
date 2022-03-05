@@ -1,3 +1,5 @@
+# the model’s default hyperparameters
+
 model_config:
   first_model:
     # Type of bert model
@@ -29,8 +31,6 @@ model_config:
         output_attentions: false
         output_hidden_states: false
 
-    losses:
-      type: cross_entropy
 
     classifier:
       type: mlp
