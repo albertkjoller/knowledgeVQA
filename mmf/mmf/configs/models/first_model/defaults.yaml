@@ -10,7 +10,7 @@ model_config:
     # Dimension of the embedding finally returned by the text encoder
     text_hidden_size: 768
     # Used when classification head is activated
-    num_labels: 2
+    num_labels: 10
     # Number of features extracted out per image
     num_features: 1
 
@@ -31,14 +31,12 @@ model_config:
         output_attentions: false
         output_hidden_states: false
 
-
-
     classifier:
       type: mlp
       params:
         # 2048 + 768 in case of features
         # Modal_Dim * Number of embeddings + Text Dim
         in_dim: 2816
-        out_dim: 2
+        out_dim: 10
         hidden_dim: 768
         num_layers: 2

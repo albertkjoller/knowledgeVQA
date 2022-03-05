@@ -6,7 +6,7 @@ includes:
   - configs/datasets/okvqa/bert.yaml
 
 model_config:
-  first_model:
+  OKVQAbaseline:
     classifier:
       type: mlp
       params:
@@ -25,9 +25,6 @@ optimizer:
   params:
     lr: 5e-5
     eps: 1e-8
-
-
-
 
 evaluation:
   metrics:
