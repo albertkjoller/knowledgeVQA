@@ -33,5 +33,5 @@ training:
   lr_scheduler: true
   max_updates: 22000
   early_stop:
-    criteria: vqa2/roc_auc
+    criteria: okvqa/roc_auc
     minimize: false
