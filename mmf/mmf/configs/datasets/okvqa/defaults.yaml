@@ -23,9 +23,9 @@ dataset_config:
       - okvqa/defaults/features/features_fc6/COCO_trainval2014.lmdb
     annotations:
       train:
-      - okvqa/defaults/annotations/annotations/imdb_train1.npy
+      - okvqa/defaults/annotations/annotations/imdb_train.npy
       val:
-      - okvqa/defaults/annotations/annotations/imdb_val1.npy
+      - okvqa/defaults/annotations/annotations/imdb_val.npy
       test:
       - okvqa/defaults/annotations/annotations/imdb_test.npy
     max_features: 100
