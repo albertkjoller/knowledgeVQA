@@ -1,5 +1,18 @@
 
+# importing
+import torch
+# All model using MMF need to inherit BaseModel
+from mmf.models.base_model import BaseModel
 
+# registry is need to register the dataset or our new model so as to be MMF discoverable
+from mmf.common.registry import registry
+
+# Builder methods for image encoder and classifier
+from mmf.utils.build import (
+    build_classifier_layer,
+    build_image_encoder,
+    build_text_encoder,
+)
 
 
 # Register the model for MMF, "concat_bert_tutorial" key would be used to find the model
