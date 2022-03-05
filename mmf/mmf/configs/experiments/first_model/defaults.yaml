@@ -7,8 +7,6 @@ model_config:
       type: mlp
       params:
         num_layers: 2
-    losses:
-      - type: cross_entropy
 
 scheduler:
   type: warmup_linear

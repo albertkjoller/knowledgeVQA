@@ -28,8 +28,10 @@ model_config:
         num_attention_heads: 12
         output_attentions: false
         output_hidden_states: false
+
     losses:
-    - cross_entropy
+      type: cross_entropy
+
     classifier:
       type: mlp
       params:
