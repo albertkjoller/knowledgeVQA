@@ -1,18 +1,11 @@
-
-# which dataset, optimizer, scheduler, metrics for evalauation to use
-# overwrites the model config
-
 includes:
   - configs/datasets/okvqa/bert.yaml
 
 model_config:
   first_model:
-    classifier:
-      type: mlp
-      params:
-        num_layers: 2
     losses:
-      - type: cross_entropy
+      #- type: cross_entropy, target dim needs to be adjusted
+      - type: logit_bce
 
 scheduler:
   type: warmup_linear
@@ -33,9 +26,11 @@ evaluation:
     - roc_auc
 
 training:
-  batch_size: 64
+  batch_size: 32 # default: 64
+  max_epochs: 1 # no default specified
   lr_scheduler: true
-  max_updates: 22000
+  max_updates: 100 # default: 22000
   early_stop:
     criteria: okvqa/roc_auc
     minimize: false
+

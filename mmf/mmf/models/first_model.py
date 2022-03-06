@@ -88,6 +88,7 @@ class First_Model(BaseModel):
         """
         self.classifier = build_classifier_layer(self.config.classifier)
 
+
     # Each model in MMF gets a dict called sample_list which contains
     # all of the necessary information returned from the image
     def forward(self, sample_list):
@@ -104,12 +105,11 @@ class First_Model(BaseModel):
         image_features = torch.flatten(image_features, start_dim=1)
         text_features = torch.flatten(text_features, start_dim=1)
 
+
         # Concatenate the features returned from two modality encoders
         combined = torch.cat([text_features, image_features], dim=1)
-
         # Pass final tensor to classifier to get scores
         logits = self.classifier(combined)
-
         # For loss calculations (automatically done by MMF
         # as per the loss defined in the config),
         # we need to return a dict with "scores" key as logits

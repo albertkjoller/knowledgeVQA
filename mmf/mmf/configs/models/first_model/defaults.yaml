@@ -1,5 +1,3 @@
-# the model’s default hyperparameters
-
 model_config:
   first_model:
     # Type of bert model
@@ -31,18 +29,12 @@ model_config:
         output_attentions: false
         output_hidden_states: false
 
-    optimizer:
-      type: adam_w
-      params:
-        lr: 5e-5
-        eps: 1e-8
-
     classifier:
       type: mlp
       params:
         # 2048 + 768 in case of features
         # Modal_Dim * Number of embeddings + Text Dim
         in_dim: 2816
-        out_dim: 10
+        out_dim: 2253 # size of target for okvqa dataset
         hidden_dim: 768
-        num_layers: 2
+        num_layers: 1
