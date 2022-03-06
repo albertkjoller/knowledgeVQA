@@ -19,7 +19,6 @@ from mmf.utils.build import (
 
 # Register the model for MMF, "concat_bert_tutorial" key would be used to find the model
 @registry.register_model("OKVQAbaseline")
-
 class OKVQAbaseline(BaseModel):
     # All models in MMF get first argument as config which contains all
     # of the information you stored in this model's config (hyperparameters)
@@ -120,3 +119,4 @@ class OKVQAbaseline(BaseModel):
 
         # MMF will automatically calculate loss
         return output
+

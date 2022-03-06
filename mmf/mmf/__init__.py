@@ -3,8 +3,6 @@
 # flake8: noqa: F401
 from mmf.utils.patch import patch_transformers
 
-#import mmf.configs.models.OKVQAbaseline
-
 patch_transformers()
 
 from mmf import utils, common, modules, datasets, models
