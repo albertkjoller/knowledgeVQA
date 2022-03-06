@@ -1,3 +1,7 @@
+
+# which dataset, optimizer, scheduler, metrics for evalauation to use
+# overwrites the model config
+
 includes:
   - configs/datasets/okvqa/bert.yaml
 
