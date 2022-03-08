@@ -5,7 +5,6 @@ from mmf.models.first_model import First_Model
 from omegaconf import OmegaConf
 import torch
 import collections
-# from mmf.utils.logger import setup_logger, setup_very_basic_config
 from torch.utils.mobile_optimizer import optimize_for_mobile
 
 def saveModel(loadedModelName, saveModelName, config, savePath = ''):
@@ -23,7 +22,7 @@ def saveModel(loadedModelName, saveModelName, config, savePath = ''):
     model_quantized = torchvision.models.quantization.mobilenet_v2(pretrained=True, quantize=True)
 
     # Trace the model
-    torchscript_model = torch.jit.trace(model_quantized, model)
+    torchscript_model = torch.jit.trace(model)
 
     # Optimizing it for mobile:
     torchscript_model_optimized = optimize_for_mobile(torchscript_model)
@@ -58,8 +57,8 @@ def loadConfig(modelDefaultsPath = '/Users/philliphoejbjerg/Desktop/UNI/6.semest
 
 config = loadConfig()
 
-config = unfoldDict(config)
+#config = unfoldDict(config)
 
-config = OmegaConf.create(config)
+#config = OmegaConf.create(config)
 
 saveModel("first_model_final", "firstModelPhone", config, "/Users/philliphoejbjerg/Desktop/UNI/6.semester/Bachelors_project/Github/explainableVQA/mmf/save/models")
