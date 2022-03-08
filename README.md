@@ -1,6 +1,6 @@
 # Visual Question Answering - top-down attention and explainability
 
-Project repository related to bachelor thesis on DTU in spring 2022. Investigating the role of top-down attention mechanisms, knowledge graphs and how interpretable these are through explainability tools.
+Project repository related to bachelor thesis on Technical University of Denmark (DTU) in spring 2022. Investigating the role of top-down attention mechanisms, knowledge graphs and how interpretable these are through explainability tools.
 
 <p align="center">
   <img src="https://github.com/albertkjoller/explainableVQA/blob/main/imgs/baseline.png" alt="drawing" width="600"/>
