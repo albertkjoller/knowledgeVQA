@@ -4,3 +4,7 @@
 # MacOS
 .DS_Store
 .idea
+
+# Pretrained model files (too large)
+*.pth
+*.ckpt

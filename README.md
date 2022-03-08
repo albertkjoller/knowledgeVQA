@@ -5,3 +5,7 @@ Project repository related to bachelor thesis on DTU in spring 2022. Investigati
 <p align="center">
   <img src="https://github.com/albertkjoller/explainableVQA/blob/main/imgs/baseline.png" alt="drawing" width="600"/>
 </p>
+
+## Pre-trained models
+
+Download pre-trained models [here](https://drive.google.com/drive/folders/17o9YjWwAQ0rtvYC5QKM6TI_0yHcu6iSY?usp=sharing).
