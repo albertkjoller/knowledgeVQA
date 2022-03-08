@@ -1,18 +1,20 @@
-import torchvision
 import os
-import yaml
-from mmf.models.first_model import First_Model
-from omegaconf import OmegaConf
-import torch
 import collections
+from pathlib import Path
+
+import torch, torchvision
 from torch.utils.mobile_optimizer import optimize_for_mobile
 
-def saveModel(loadedModelName, saveModelName, config, savePath = ''):
+from utils.config import loadConfig
+from mmf.models.first_model import First_Model
 
-    loadedModelPath = os.getcwd()+"/save/models/"+loadedModelName+".pth"
+def saveModel(loadedModelName, saveModelName):
+
+    config = loadConfig(loadedModelName)#
 
     model = First_Model(config)
 
+    loadedModelPath = Path(f"{os.path.dirname(os.getcwd())}/mmf/save/models/{('_').join(loadedModelName.split('_')[:-1])}/{loadedModelName}.pth")
     model.load_state_dict(torch.load(loadedModelPath))
 
     #model = torch.load(os.getcwd()+"/save/models/"+modelName+".pth")
@@ -37,28 +39,4 @@ def saveModel(loadedModelName, saveModelName, config, savePath = ''):
     torch.jit.save(torchscript_model_optimized, filePath)
 
 
-def loadConfig(modelDefaultsPath = '/Users/philliphoejbjerg/Desktop/UNI/6.semester/Bachelors_project/Github/explainableVQA/mmf/mmf/configs/models/first_model/defaults.yaml'):
-    """
-    Loads the config yaml file
-    """
-    with open(modelDefaultsPath, 'r') as stream:
-        try:
-            parsed_yaml=yaml.safe_load(stream)
-            print(parsed_yaml)
-        except yaml.YAMLError as exc:
-            print(exc)
-
-    # Extract model name
-    model_name = modelDefaultsPath.split("/")[-2]
-
-    config = OmegaConf.create(parsed_yaml['model_config'][model_name])
-
-    return config
-
-config = loadConfig()
-
-#config = unfoldDict(config)
-
-#config = OmegaConf.create(config)
-
-saveModel("first_model_final", "firstModelPhone", config, "/Users/philliphoejbjerg/Desktop/UNI/6.semester/Bachelors_project/Github/explainableVQA/mmf/save/models")
+saveModel("first_model_final", "firstModelPhone")
