@@ -13,7 +13,6 @@ def saveModel(loadedModelName, saveModelName):
     config = loadConfig(loadedModelName)#
 
     model = First_Model(config)
-
     loadedModelPath = Path(f"{os.path.dirname(os.getcwd())}/mmf/save/models/{('_').join(loadedModelName.split('_')[:-1])}/{loadedModelName}.pth")
     model.load_state_dict(torch.load(loadedModelPath))
 
