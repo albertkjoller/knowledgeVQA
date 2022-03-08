@@ -38,33 +38,23 @@ def saveModel(loadedModelName, saveModelName, config, savePath = ''):
     torch.jit.save(torchscript_model_optimized, filePath)
 
 
-
-def unfoldDict(dict, newDict = {}):
-    """
-    Recursive method in order to make all dicts in a dict accessible through the first key.
-    """
-    for key, value in dict.items():
-        if isinstance(value, collections.Mapping):
-            # Unfold
-            newDict[key] = value
-            unfoldDict(dict[key], newDict)
-        else:
-            newDict[key] = value
-    return newDict
-
-
-def loadConfig(path = '/Users/philliphoejbjerg/Desktop/UNI/6.semester/Bachelors_project/Github/explainableVQA/mmf/mmf/save/models/config.yaml'):
+def loadConfig(modelDefaultsPath = '/Users/philliphoejbjerg/Desktop/UNI/6.semester/Bachelors_project/Github/explainableVQA/mmf/mmf/configs/models/first_model/defaults.yaml'):
     """
     Loads the config yaml file
     """
-    with open(path, 'r') as stream:
+    with open(modelDefaultsPath, 'r') as stream:
         try:
             parsed_yaml=yaml.safe_load(stream)
             print(parsed_yaml)
         except yaml.YAMLError as exc:
             print(exc)
 
-    return parsed_yaml
+    # Extract model name
+    model_name = modelDefaultsPath.split("/")[-2]
+
+    config = OmegaConf.create(parsed_yaml['model_config'][model_name])
+
+    return config
 
 config = loadConfig()
 
