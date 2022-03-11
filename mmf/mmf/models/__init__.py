@@ -20,6 +20,7 @@ from .vilbert import ViLBERT
 from .vilt import ViLT
 from .vinvl import VinVL
 from .visual_bert import VisualBERT
+from .first_model import First_Model
 
 __all__ = [
     "TopDownBottomUp",
@@ -48,4 +49,5 @@ __all__ = [
     "ViLT",
     "UNITER",
     "VinVL",
+    "First_Model",
 ]

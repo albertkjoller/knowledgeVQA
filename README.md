@@ -9,3 +9,4 @@ Project repository related to bachelor thesis on Technical University of Denmark
 ## Pre-trained models
 
 Download pre-trained models [here](https://drive.google.com/drive/folders/17o9YjWwAQ0rtvYC5QKM6TI_0yHcu6iSY?usp=sharing).
+After downloading, create the folder `explainableVQA/mmf/save/` and place the downloaded `models`-folder here.
