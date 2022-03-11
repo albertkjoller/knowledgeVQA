@@ -34,7 +34,7 @@ training:
   max_epochs: 1 # no default specified
   max_updates: 1 # same as epoch, securing overwrite
   lr_scheduler: true
-  max_updates: 100 # default: 22000
+  # max_updates: 100 # default: 22000
   early_stop:
     criteria: okvqa/roc_auc
     minimize: false
