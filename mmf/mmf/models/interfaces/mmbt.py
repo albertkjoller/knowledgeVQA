@@ -16,7 +16,6 @@ from omegaconf import DictConfig
 from PIL import Image
 from torch import nn
 
-
 MMBT_GRID_HM_CONFIG_PATH = Path("projects/hateful_memes/configs/mmbt/defaults.yaml")
 ImageType = Union[Type[Image.Image], str]
 PathType = Union[Type[Path], str]

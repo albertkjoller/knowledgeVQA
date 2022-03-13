@@ -17,7 +17,7 @@ from mmf.utils.build import (
 
 # Register the model for MMF, "concat_bert_tutorial" key would be used to find the model
 @registry.register_model("first_model")
-class First_Model(BaseModel):
+class Baseline(BaseModel):
     # All models in MMF get first argument as config which contains all
     # of the information you stored in this model's config (hyperparameters)
     def __init__(self, config):
@@ -31,7 +31,7 @@ class First_Model(BaseModel):
     @classmethod
     def config_path(cls):
         # Relative to user dir root
-        return "configs/models/first_model/defaults.yaml"
+        return "configs/models/baseline/defaults.yaml"
 
     # Each method need to define a build method where the model's modules
     # are actually build and assigned to the model
