@@ -1,6 +1,6 @@
 
 # importing
-import os, gc
+import os, sys, gc
 import torch
 from pathlib import Path
 
@@ -16,9 +16,9 @@ from mmf.utils.build import (
     build_processors,
 )
 
-from utils.config import loadConfig
-from utils.image import openImage
-from utils.modeling import _multi_gpu_state_to_single
+from model_utils.config import loadConfig
+from model_utils.image import openImage
+from model_utils.modeling import _multi_gpu_state_to_single
 
 
 # define model name

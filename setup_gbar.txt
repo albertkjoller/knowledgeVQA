@@ -28,7 +28,10 @@ bsub < predict_demo.sh
 
 # for training run:
 cd mmf
-mmf_run config="configs/experiments/model_name/defaults.yaml\
-	model=model_name \
-	dataset=okvqa \
+mmf_run config="configs/experiments/model_name/defaults.yaml \
+    model=model_name \
+    dataset=okvqa \
 	run_type=train_val
+
+# or in one line
+mmf_run config="configs/experiments/model_name/defaults.yaml model=model_name dataset=okvqa run_type=train_val
