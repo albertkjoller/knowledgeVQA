@@ -22,6 +22,7 @@ pytest ./tests/
 
 # for running a script create a shell-file for submission and run it, e.g.:
 bsub < predict_demo.sh
+bsub < train.sh
 
 
 # if using pretrained models, download them from link in project readme and place them in the folder explainableVQA/mmf/save/models/...

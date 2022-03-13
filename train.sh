@@ -1,7 +1,7 @@
 #!/bin/sh
-#BSUB -J predict_model_demo
-#BSUB -o predict_demo%J.out
-#BSUB -e predict_demo%J.err
+#BSUB -J predictive_vqa_demo
+#BSUB -o predictive_vqa_demo_%J.out
+#BSUB -e predictive_vqa_demo_%J.err
 #BSUB -q hpc
 #BSUB -n 1
 #BSUB -R "rusage[mem=32G]"
@@ -11,12 +11,8 @@
 #BSUB -N
 
 source vqa/bin/activate
-
-cd utils
-export PYTHONPATH=.
-cd ..
-
 cd mmf
+
 mmf_run config="configs/experiments/predictive_vqa/defaults.yaml" \
 model=predictive_vqa \
 dataset=okvqa \
