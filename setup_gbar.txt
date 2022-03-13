@@ -20,6 +20,9 @@ python3 -m pip install pytest transformers future
 pytest ./tests/
 
 
-
 # for running a script create a shell-file for submission and run it, e.g.:
 bsub < predict_demo.sh
+
+# if import submodule/subdirectory messes with you, e.g. for the utils package, you can do
+cd utils
+export PYTHONPATH=.

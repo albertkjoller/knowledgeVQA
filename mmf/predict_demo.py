@@ -20,7 +20,7 @@ setup_imports()
 
 class PretrainedModel:
     global ROOT_DIR
-    ROOT_DIR = os.path.dirname(os.getcwd())
+    ROOT_DIR = os.getcwd()
 
     def __init__(self, model_filename: str, ModelClass: type(BaseModel), dataset: str):
         self.model_filename = model_filename
@@ -136,9 +136,11 @@ if __name__ == '__main__':
     # input for prediction
     img_path = r'C:\Users\Bruger\Desktop\rain.jpg'
     question = 'How is the weather?'
+    topk = 5
 
     # get predictions
-    outputs = FirstModel.predict(image_path=img_path, question=question)
-    print(outputs)
+    outputs = FirstModel.predict(image_path=img_path, question=question, topk=topk)
+    print("\nPredicted outputs from the model:")
+    for i, (prob, answer) in enumerate(zip(*outputs)):
+        print(f"{i+1}) {answer} \t ({prob})")
 
-    print("breakpoint")

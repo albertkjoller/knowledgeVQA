@@ -6,7 +6,7 @@ def loadConfig(model_name):
     """
     Loads the config yaml file
     """
-    config_path = Path(f"{os.path.dirname(os.getcwd())}/mmf/mmf/configs/models/{('_').join(model_name.split('_')[:-1])}/defaults.yaml")
+    config_path = Path(f"{os.getcwd()}/mmf/mmf/configs/models/{('_').join(model_name.split('_')[:-1])}/defaults.yaml")
     with open(config_path, 'r') as stream:
         try:
             parsed_yaml=yaml.safe_load(stream)
