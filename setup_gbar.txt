@@ -14,7 +14,7 @@ cd mmf
 python3 -m pip install --editable .
 
 # install additional dependencies
-python3 -m pip install pytest transformers future
+python3 -m pip install pytest transformers future tensorboard
 
 # test if everything is good
 pytest ./tests/
@@ -23,6 +23,12 @@ pytest ./tests/
 # for running a script create a shell-file for submission and run it, e.g.:
 bsub < predict_demo.sh
 
-# if import submodule/subdirectory messes with you, e.g. for the utils package, you can do
-cd utils
-export PYTHONPATH=.
+
+# if using pretrained models, download them from link in project readme and place them in the folder explainableVQA/mmf/save/models/...
+
+# for training run:
+cd mmf
+mmf_run config="configs/experiments/model_name/defaults.yaml\
+	model=model_name \
+	dataset=okvqa \
+	run_type=train_val

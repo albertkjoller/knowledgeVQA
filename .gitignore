@@ -1,6 +1,9 @@
 # Jupyter Notebook
 .ipynb_checkpoints
 
+# Pythonpath
+*.pyc
+
 # MacOS
 .DS_Store
 .idea
@@ -8,3 +11,8 @@
 # Pretrained model files (too large)
 *.pth
 *.ckpt
+
+# HPC files to ignore
+vqa/
+*.err
+*.out
