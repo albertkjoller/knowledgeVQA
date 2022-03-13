@@ -1,6 +1,7 @@
 
 # importing
 import torch
+import pickle
 # All model using MMF need to inherit BaseModel
 from mmf.models.base_model import BaseModel
 
@@ -92,6 +93,9 @@ class First_Model(BaseModel):
     # Each model in MMF gets a dict called sample_list which contains
     # all of the necessary information returned from the image
     def forward(self, sample_list):
+
+        #pickle.dump(sample_list, open("Sample_first_model.pkl", "wb"))
+
         # Text input features will be in "input_ids" key
         text = sample_list["input_ids"]
         # Similarly, image input will be in "image" key
