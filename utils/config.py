@@ -18,3 +18,4 @@ def loadConfig(model_name):
     model_name = config_path.as_posix().split("/")[-2]
     config = OmegaConf.create(parsed_yaml['model_config'][model_name])
     return config
+

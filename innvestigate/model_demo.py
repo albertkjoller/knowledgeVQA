@@ -1,58 +1,36 @@
-import os
+import os, gc
 from pathlib import Path
-import yaml
-import cv2
-import torch
-import requests
-import numpy as np
-import gc
-import torch.nn.functional as F
-import pandas as pd
-
-import torchvision.models as models
-import torchvision.transforms as transforms
-
-from PIL import Image
-from IPython.display import display, HTML, clear_output
-from ipywidgets import widgets, Layout
-from io import BytesIO
 from argparse import Namespace
 
-from mmf.datasets.processors.processors import VocabProcessor, VQAAnswerProcessor
-from mmf.models.pythia import Pythia
+import torch
+import torch.nn.functional as F
+
 from mmf.common.registry import registry
 from mmf.common.sample import Sample, SampleList
 from mmf.utils.env import setup_imports
 from mmf.utils.configuration import Configuration
 from mmf.models import *
-from mmf.utils.build import (
-    build_image_encoder,
-    build_text_encoder,
-)
+from mmf.utils.build import build_processors
 
 from utils.config import loadConfig
+from utils.image import openImage
+from utils.modeling import _multi_gpu_state_to_single
 
 setup_imports()
 
-ROOT_DIR = os.path.dirname(os.getcwd())
-
-
 class PretrainedModel:
-    TARGET_IMAGE_SIZE = [448, 448]
-    CHANNEL_MEAN = [0.485, 0.456, 0.406]
-    CHANNEL_STD = [0.229, 0.224, 0.225]
+    global ROOT_DIR
+    ROOT_DIR = os.path.dirname(os.getcwd())
 
-    def __init__(self, model_name: str, ModelClass: type(BaseModel), dataset: str):
-        self.model_name = model_name
-        self.orig_model_name = ('_').join(self.model_name.split('_')[:-1])  # model is saved as "{model_name}_final.pth"
+    def __init__(self, model_filename: str, ModelClass: type(BaseModel), dataset: str):
+        self.model_filename = model_filename
+        self.model_name = ('_').join(self.model_filename.split('_')[:-1])  # model is saved as "model_name_final.pth"
         self.ModelClass = ModelClass
         self.dataset = dataset
 
         self._init_processors()
         self.device = 'cuda' if torch.cuda.is_available() else 'cpu'
         self.vqa_model = self._build_vqa_model()
-        # self.detection_model = self._build_detection_model()
-        self.resnet_model = self._build_resnet_model()
 
     def _init_processors(self):
         # define arguments
@@ -60,7 +38,7 @@ class PretrainedModel:
         args.opts = [
             f"config={Path(f'{ROOT_DIR}/mmf/save/models/first_model/config.yaml')}",
             f"datasets={self.dataset}",
-            f"model={self.orig_model_name}",
+            f"model={self.model_name}",
             "evaluation.predict=True",
         ]
         args.config_override = None
@@ -73,236 +51,94 @@ class PretrainedModel:
         # update .cache paths (different from the computer on which model was trained)
         cache_dir = str(Path.home() / '.cache/torch/mmf')
         data_dir = str(Path(cache_dir + '/data/datasets'))
-        config.env.cache_dir, config.env.data_dir = cache_dir, str(Path(cache_dir + '/data'))
-        dataset_config.data_dir = data_dir
+        config.env.cache_dir, config.env.data_dir, dataset_config.data_dir = cache_dir, \
+                                                                             str(Path(cache_dir + '/data')), \
+                                                                             data_dir
 
-        text_processor_config = dataset_config.processors.text_processor
-        answer_processor_config = dataset_config.processors.answer_processor
+        # update filepaths for dataset configuration processors
+        dcp = dataset_config.processors
+        dcp.text_processor.params.vocab.vocab_file = str(Path(f'{data_dir}/{dcp.text_processor.params.vocab.vocab_file}'))
+        dcp.answer_processor.params.vocab_file = str(Path(f'{data_dir}/{dcp.answer_processor.params.vocab_file}'))
 
-        text_processor_config.params.vocab.vocab_file = str(Path(f'{data_dir}/{text_processor_config.params.vocab.vocab_file}'))
-        answer_processor_config.params.vocab_file = str(Path(f'{data_dir}/{answer_processor_config.params.vocab_file}'))
+        # add processors
+        processors = self.processors = build_processors(dataset_config.processors)
+        self.text_processor = processors['text_processor']
+        self.answer_processor = processors['answer_processor']
+        self.image_processor = processors['image_processor']
 
-        # Add preprocessor as that will needed when we are getting questions from user
-        self.text_processor = VocabProcessor(text_processor_config.params)
-        self.answer_processor = VQAAnswerProcessor(answer_processor_config.params)
-        #TODO: don't know if this is a shot in the dark...
-        self.image_encoder = build_image_encoder(config.model_config[self.orig_model_name].image_encoder)
-        #self.image_encoder.to(self.device) #TODO: broken
-
+        # TODO: check if we have to do this - I don't think it is necessary
         # register processors and
-        registry.register(f"{self.orig_model_name}_text_processor", self.text_processor)
-        registry.register(f"{self.orig_model_name}_answer_processor", self.answer_processor)
-        registry.register(f"{self.orig_model_name}_num_final_outputs",
-                          self.answer_processor.get_vocab_size())
+        #registry.register(f"{self.model_name}_text_processor", self.text_processor)
+        #registry.register(f"{self.model_name}_answer_processor", self.answer_processor)
+        #registry.register(f"{self.model_name}_num_final_outputs",
+        #                  self.answer_processor.get_vocab_size())
 
     def _build_vqa_model(self):
         # load configuration and create model object
-        config = loadConfig(self.model_name)
+        config = loadConfig(self.model_filename)
         model = self.ModelClass(config)
 
         # specify path to saved model
-        model_path = Path(f"{ROOT_DIR}/mmf/save/models/{self.orig_model_name}/{self.model_name}.pth")
+        model_path = Path(f"{ROOT_DIR}/mmf/save/models/{self.model_name}/{self.model_filename}.pth")
 
         # load state dict and eventually convert from multi-gpu to single
         state_dict = torch.load(model_path)
-
         if list(state_dict.keys())[0].startswith('module') and not hasattr(model, 'module'):
-            state_dict = self._multi_gpu_state_to_single(state_dict)
+            state_dict = _multi_gpu_state_to_single(state_dict)
 
+        # load state dict to model
         model.load_state_dict(state_dict)
         model.to(self.device)
         model.eval()
         return model
 
-    def _build_resnet_model(self):
-        #TODO: check that this is the correct way of image encoding in line with our model
-        self.data_transforms = transforms.Compose([
-            transforms.Resize(self.TARGET_IMAGE_SIZE),
-            transforms.ToTensor(),
-            transforms.Normalize(self.CHANNEL_MEAN, self.CHANNEL_STD),
-        ])
-        resnet152 = models.resnet152(pretrained=True)
-        resnet152.eval()
-        modules = list(resnet152.children())[:-2]
-        self.resnet152_model = torch.nn.Sequential(*modules)
-        self.resnet152_model.to(self.device)
-
-    def _multi_gpu_state_to_single(self, state_dict):
-        new_sd = {}
-        for k, v in state_dict.items():
-            if not k.startswith('module.'):
-                raise TypeError("Not a multiple GPU state of dict")
-            k1 = k[7:]
-            new_sd[k1] = v
-        return new_sd
-
-    def predict(self, url, question):
+    def predict(self, image_path, question, topk=5):
         with torch.no_grad():
-            # detectron_features = self.get_detectron_features(url)
-            resnet_features = self.get_resnet_features(url)
-
+            # create sample object - required for model input
             sample = Sample()
 
+            # process text input
             processed_text = self.text_processor({'text': question})
-            #sample.text = processed_text['text']
-            sample.input_ids = processed_text['text']
-            sample.text_len = len(processed_text["tokens"])
+            sample.input_ids = processed_text['input_ids']
+            sample.text_len = len(processed_text['tokens'])
 
-            #sample.image_feature_0 = detectron_features
-            #sample.image_info_0 = Sample({
-            #    "max_features": torch.tensor(100, dtype=torch.long)
-            #})
+            # process image input
+            processed_image = self.image_processor({'image': openImage(image_path)})
+            sample.image = processed_image['image']
 
-            #sample.image_feature_1 = resnet_features
-            sample.image = resnet_features
+            # gather in sample list
+            sample_list = SampleList([sample]).to(self.device)
 
-            sample_list = SampleList([sample])
-            sample_list = sample_list.to(self.device)
-
+            # predict scores with model (multiclass)
             scores = self.vqa_model(sample_list)["scores"]
             scores = torch.nn.functional.softmax(scores, dim=1)
-            actual, indices = scores.topk(5, dim=1)
 
-            top_indices = indices[0]
-            top_scores = actual[0]
+            # extract probabilities and answers for top k predicted answers
+            scores, indices = scores.topk(topk, dim=1)
+            topK = [(score.item(), self.answer_processor.idx2word(indices[0][idx].item())) for (idx, score) in enumerate(scores[0])]
+            probs, answers = list(zip(*topK))
 
-            probs = []
-            answers = []
-
-            for idx, score in enumerate(top_scores):
-                probs.append(score.item())
-                answers.append(
-                    self.answer_processor.idx2word(top_indices[idx].item())
-                )
-
+        # clean - garbage collection :TODO: why is this?
         gc.collect()
         torch.cuda.empty_cache()
 
         return probs, answers
 
-    def get_actual_image(self, image_path):
-        if image_path.startswith('http'):
-            return requests.get(image_path, stream=True).raw
-        else:
-            return image_path
-
-    def get_resnet_features(self, image_path):
-        # TODO: check that this is the correct way to extract features for our model
-        path = self.get_actual_image(image_path)
-        img = Image.open(path).convert("RGB")
-        img_transform = self.data_transforms(img)
-
-        if img_transform.shape[0] == 1:
-            img_transform = img_transform.expand(3, -1, -1)
-        img_transform = img_transform.unsqueeze(0).to(self.device)
-
-        features = self.resnet152_model(img_transform).permute(0, 2, 3, 1)
-        features = features.view(196, 2048)
-        return features
-
-    """
-    def masked_unk_softmax(self, x, dim, mask_idx): # TODO: can't figure out what this is used fo
-    x1 = F.softmax(x, dim=dim)
-    x1[:, mask_idx] = 0
-    x1_sum = torch.sum(x1, dim=1, keepdim=True)
-    y = x1 / x1_sum
-    return y
-    
-    def _build_detection_model(self):
-
-    cfg.merge_from_file('/content/model_data/detectron_model.yaml')
-    cfg.freeze()
-
-    model = build_detection_model(cfg)
-    checkpoint = torch.load('/content/model_data/detectron_model.pth',
-                            map_location=torch.device("cpu"))
-
-    load_state_dict(model, checkpoint.pop("model"))
-
-    model.to(self.device)
-    model.eval()
-    return model
-    
-    
-    def _image_transform(self, image_path):
-    path = self.get_actual_image(image_path)
-
-    img = Image.open(path)
-    im = np.array(img).astype(np.float32)
-    im = im[:, :, ::-1]
-    im -= np.array([102.9801, 115.9465, 122.7717])
-    im_shape = im.shape
-    im_size_min = np.min(im_shape[0:2])
-    im_size_max = np.max(im_shape[0:2])
-    im_scale = float(800) / float(im_size_min)
-    # Prevent the biggest axis from being more than max_size
-    if np.round(im_scale * im_size_max) > 1333:
-        im_scale = float(1333) / float(im_size_max)
-    im = cv2.resize(
-        im,
-        None,
-        None,
-        fx=im_scale,
-        fy=im_scale,
-        interpolation=cv2.INTER_LINEAR
-    )
-    img = torch.from_numpy(im).permute(2, 0, 1)
-    return img, im_scale
-    
-    def _process_feature_extraction(self, output,
-                                im_scales,
-                                feat_name='fc6',
-                                conf_thresh=0.2):
-    batch_size = len(output[0]["proposals"])
-    n_boxes_per_image = [len(_) for _ in output[0]["proposals"]]
-    score_list = output[0]["scores"].split(n_boxes_per_image)
-    score_list = [torch.nn.functional.softmax(x, -1) for x in score_list]
-    feats = output[0][feat_name].split(n_boxes_per_image)
-    cur_device = score_list[0].device
-
-    feat_list = []
-
-    for i in range(batch_size):
-        dets = output[0]["proposals"][i].bbox / im_scales[i]
-        scores = score_list[i]
-
-        max_conf = torch.zeros((scores.shape[0])).to(cur_device)
-
-        for cls_ind in range(1, scores.shape[1]):
-            cls_scores = scores[:, cls_ind]
-            keep = nms(dets, cls_scores, 0.5)
-            max_conf[keep] = torch.where(cls_scores[keep] > max_conf[keep],
-                                         cls_scores[keep],
-                                         max_conf[keep])
-
-        keep_boxes = torch.argsort(max_conf, descending=True)[:100]
-        feat_list.append(feats[i][keep_boxes])
-    return feat_list
-    
-    
-    def get_detectron_features(self, image_path):
-        im, im_scale = self._image_transform(image_path)
-        img_tensor, im_scales = [im], [im_scale]
-        current_img_list = to_image_list(img_tensor, size_divisible=32)
-        current_img_list = current_img_list.to('cuda')
-        with torch.no_grad():
-            output = self.detection_model(current_img_list)
-        feat_list = self._process_feature_extraction(output, im_scales,
-                                                     'fc6', 0.2)
-        return feat_list[0]
-    """
-
 if __name__ == '__main__':
 
-    kwargs = {'model_name': 'first_model_final',
+    # specify model arguments and load model
+    kwargs = {'model_filename': 'first_model_final',
             'ModelClass': First_Model,
             'dataset': 'okvqa',
             }
+    FirstModel = PretrainedModel(**kwargs)
 
+    # input for prediction
     img_path = r'C:\Users\Bruger\Desktop\rain.jpg'
     question = 'How is the weather?'
 
-    FirstModel = PretrainedModel(**kwargs)
-    outputs = FirstModel.predict(url=img_path, question=question)
+    # get predictions
+    outputs = FirstModel.predict(image_path=img_path, question=question)
+    print(outputs)
 
     print("breakpoint")
