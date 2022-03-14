@@ -125,6 +125,7 @@ class PretrainedModel:
         return probs, answers
 
 if __name__ == '__main__':
+    import matplotlib.pyplot as plt
 
     # specify model arguments and load model
     kwargs = {'model_filename': 'first_model_final',
@@ -134,12 +135,16 @@ if __name__ == '__main__':
     FirstModel = PretrainedModel(**kwargs)
 
     # input for prediction
-    img_path = r'C:\Users\Bruger\Desktop\rain.jpg'
+    img_name = 'rain.jpg'
+    img_path = Path(f"{os.getcwd()}/imgs/temp/{img_name}") # r'C:\Users\Bruger\Desktop\rain.jpg'
     question = 'How is the weather?'
     topk = 5
 
-    # get predictions
+    # get predictions and show input
     outputs = FirstModel.predict(image_path=img_path, question=question, topk=topk)
+    plt.imshow(openImage(img_path))
+
+    print(f'\nQuestion: "{question}"')
     print("\nPredicted outputs from the model:")
     for i, (prob, answer) in enumerate(zip(*outputs)):
         print(f"{i+1}) {answer} \t ({prob})")
