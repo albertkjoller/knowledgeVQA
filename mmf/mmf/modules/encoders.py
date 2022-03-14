@@ -196,6 +196,7 @@ class IdentityEncoder(Encoder):
 class ImageEncoderTypes(Enum):
     default = "default"
     identity = "identity"
+    resnet18 = "resnet18"
     torchvision_resnet = "torchvision_resnet"
     resnet152 = "resnet152"
     detectron2_resnet = "detectron2_resnet"
@@ -222,6 +223,8 @@ class ImageEncoderFactory(EncoderFactory):
             self.module = ResNet152ImageEncoder(params)
         elif self._type == "torchvision_resnet":
             self.module = TorchvisionResNetImageEncoder(params)
+        elif self._type == "resnet18":
+            self.module = ResNet18ImageEncoder(params)
         elif self._type == "detectron2_resnet":
             self.module = Detectron2ResnetImageEncoder(params)
         elif self._type == "frcnn":
@@ -354,6 +357,7 @@ class TorchvisionResNetImageEncoder(Encoder):
 
         return pool
 
+
     def forward(self, x):
         # B x 3 x 224 x 224 -> B x out_dim x 7 x 7
         out = self.pool(self.model(x))
@@ -363,6 +367,55 @@ class TorchvisionResNetImageEncoder(Encoder):
         else:
             out = torch.flatten(out, start_dim=1)  # BxN*out_dim
         return out
+
+
+
+#TODO: not working, error message about input and target dimensions (32x1280 mismatc to 2816x768)
+
+@registry.register_encoder("resnet18")
+class ResNet18ImageEncoder(Encoder):
+    @dataclass
+    class Config(Encoder.Config):
+        name: str = "resnet18"
+        pretrained: bool = True
+        # "avg" or "adaptive"
+        pool_type: str = "avg"
+        num_output_features: int = 1
+
+    def __init__(self, config: Config, *args, **kwargs):
+        super().__init__()
+        self.config = config
+        model = torchvision.models.resnet18(pretrained=config.get("pretrained", True))
+        modules = list(model.children())[:-2] # removing last two layers
+        self.model = nn.Sequential(*modules)
+
+        pool_func = (
+            nn.AdaptiveAvgPool2d if config.pool_type == "avg" else nn.AdaptiveMaxPool2d
+        )
+
+        # -1 will keep the original feature size
+        if config.num_output_features == -1:
+            self.pool = nn.Identity()
+        elif config.num_output_features in [1, 2, 3, 5, 7]:
+            self.pool = pool_func((config.num_output_features, 1))
+        elif config.num_output_features == 4:
+            self.pool = pool_func((2, 2))
+        elif config.num_output_features == 6:
+            self.pool = pool_func((3, 2))
+        elif config.num_output_features == 8:
+            self.pool = pool_func((4, 2))
+        elif config.num_output_features == 9:
+            self.pool = pool_func((3, 3))
+
+        self.out_dim = 2048 # default
+
+    def forward(self, x):
+        # Bx3x224x224 -> Bx2048x7x7 -> Bx2048xN -> BxNx2048
+        out = self.pool(self.model(x))
+        out = torch.flatten(out, start_dim=2)
+        out = out.transpose(1, 2).contiguous()
+        return out  # BxNx2048
+
 
 
 @registry.register_encoder("detectron2_resnet")

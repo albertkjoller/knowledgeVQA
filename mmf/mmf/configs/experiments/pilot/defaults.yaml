@@ -1,0 +1,36 @@
+includes:
+  - configs/datasets/okvqa/bert.yaml
+
+model_config:
+  pilot:
+    losses:
+      #- type: cross_entropy, target dim needs to be adjusted
+      - type: logit_bce # binary cross-entropy loss since each question has multiple answers (MGFAN with ref.)
+
+scheduler:
+  type: warmup_linear
+  params:
+    num_warmup_steps: 100 # default: 2000
+    num_training_steps: ${training.max_updates}
+
+optimizer:
+  type: adam_w
+  params:
+    lr: 5e-5
+    eps: 1e-8
+
+evaluation:
+  metrics:
+    - accuracy
+    - binary_f1
+    - roc_auc
+
+training:
+  batch_size: 32 # default: 512, 128 or higher performs better (2017 tips and tricks)
+  max_epochs: 1 # no default specified, 12-18 mentioned by (2017 tips and tricks)
+  lr_scheduler: true
+  max_updates: 100 # default: 22000
+  tensorboard: true
+  early_stop:
+    criteria: okvqa/roc_auc # or criteria: okvqa/vqa_accuracy
+    minimize: false
