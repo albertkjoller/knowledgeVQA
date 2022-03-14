@@ -135,14 +135,14 @@ if __name__ == '__main__':
     FirstModel = PretrainedModel(**kwargs)
 
     # input for prediction
-    img_name = 'rain.jpg'
-    img_path = Path(f"{os.getcwd()}/imgs/temp/{img_name}") # r'C:\Users\Bruger\Desktop\rain.jpg'
-    question = 'How is the weather?'
+    img_name = 'test.jpg'
+    img_path = Path(f"{os.getcwd()}/imgs/temp/{img_name}").as_posix() # r'C:\Users\Bruger\Desktop\rain.jpg'
+    question = 'What the weather?'
     topk = 5
 
     # get predictions and show input
     outputs = FirstModel.predict(image_path=img_path, question=question, topk=topk)
-    plt.imshow(openImage(img_path))
+    openImage(img_path).show()
 
     print(f'\nQuestion: "{question}"')
     print("\nPredicted outputs from the model:")
