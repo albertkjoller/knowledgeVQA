@@ -14,7 +14,7 @@ cd mmf
 python3 -m pip install --editable .
 
 # install additional dependencies
-python3 -m pip install pytest transformers future tensorboard
+python3 -m pip install pytest transformers future tensorboard sox opencv-python
 
 # test if everything is good
 pytest ./tests/

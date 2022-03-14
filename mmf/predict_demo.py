@@ -125,27 +125,66 @@ class PretrainedModel:
         return probs, answers
 
 if __name__ == '__main__':
-    import matplotlib.pyplot as plt
+    import sys
+    import cv2
+    from PIL import Image
+
+    def str_to_class(classname):
+        return getattr(sys.modules['mmf.models'], classname)
+
+    model_filename = input("Enter saved model filename: ")
+    ModelClass = input("Enter model type (e.g. BaseModel): ")
+    dataset = input("Enter name of dataset used for training: ")
+    print("")
 
     # specify model arguments and load model
-    kwargs = {'model_filename': 'first_model_final',
-            'ModelClass': First_Model,
-            'dataset': 'okvqa',
-            }
-    FirstModel = PretrainedModel(**kwargs)
+    kwargs = {'model_filename': model_filename,
+              'ModelClass': str_to_class(ModelClass),
+              'dataset': dataset,
+              }
+    model = PretrainedModel(**kwargs)
 
-    # input for prediction
-    img_name = 'test.jpg'
-    img_path = Path(f"{os.getcwd()}/imgs/temp/{img_name}").as_posix() # r'C:\Users\Bruger\Desktop\rain.jpg'
-    question = 'What the weather?'
-    topk = 5
+    old_img_name = None
 
-    # get predictions and show input
-    outputs = FirstModel.predict(image_path=img_path, question=question, topk=topk)
-    openImage(img_path).show()
+    while True:
+        print(f"\n{'-'*70}\n")
 
-    print(f'\nQuestion: "{question}"')
-    print("\nPredicted outputs from the model:")
-    for i, (prob, answer) in enumerate(zip(*outputs)):
-        print(f"{i+1}) {answer} \t ({prob})")
+        # input image
+        img_name = input("Enter image name from '../imgs/temp' folder (e.g. 'rain.jpg'): ")
+        cv2.namedWindow(f"{img_name}", cv2.WINDOW_NORMAL)
+        if old_img_name != None:
+            cv2.destroyWindow(f"{old_img_name}")
+
+        if img_name == 'quit()':
+            cv2.destroyAllWindows()
+            break
+
+        try:
+            img_path = Path(f"{os.getcwd()}/imgs/temp/{img_name}").as_posix()
+            img = cv2.imread(img_path)  # open from file object
+        except FileNotFoundError:
+            img_name = input("Image doesn't exist in path - enter correct image name: ")
+            img_path = Path(f"{os.getcwd()}/imgs/temp/{img_name}").as_posix()
+            img = cv2.imread(img_path)  # open from file object
+
+        img = cv2.resize(img, (540, 540))
+        cv2.imshow(f"{img_name}", img)
+        cv2.waitKey(1)
+
+        # input question
+        question = input("Enter question: ")
+        if question == 'quit()':
+            cv2.destroyAllWindows()
+            break
+
+        # get predictions and show input
+        topk = 5
+        outputs = model.predict(image_path=img_path, question=question, topk=topk)
+        old_img_name = img_name
+
+        print(f'\nQuestion: "{question}"')
+        print("\nPredicted outputs from the model:")
+        for i, (prob, answer) in enumerate(zip(*outputs)):
+            print(f"{i+1}) {answer} \t ({prob})")
+
 
