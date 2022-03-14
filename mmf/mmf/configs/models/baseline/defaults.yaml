@@ -1,5 +1,5 @@
 model_config:
-  first_model:
+  baseline:
     # Type of bert model
     bert_model_name: bert-base-uncased
     direct_features_input: false
@@ -8,16 +8,29 @@ model_config:
     # Dimension of the embedding finally returned by the text encoder
     text_hidden_size: 768
     # Used when classification head is activated
-    num_labels: 10
+    num_labels: 10 # TODO: ?
     # Number of features extracted out per image
     num_features: 1
 
+
+    # resnet152
     image_encoder:
       type: resnet152
       params:
         pretrained: true
         pool_type: avg
+        num_output_features: 1 # [avaliable, 1 to 9]
+
+
+    # resnet50
+    image_encoder:
+      type: torchvision_resnet
+      params:
+        name: resnet50
+        pretrained: true
+        pool_type: avg
         num_output_features: 1
+        zero_init_residual: false
 
     text_encoder:
       type: transformer
@@ -28,6 +41,7 @@ model_config:
         num_attention_heads: 12
         output_attentions: false
         output_hidden_states: false
+        TOKENIZERS_PARALLELISM: false # TODO: will this work? (to remove output error)
 
     classifier:
       type: mlp
@@ -35,6 +49,6 @@ model_config:
         # 2048 + 768 in case of features
         # Modal_Dim * Number of embeddings + Text Dim
         in_dim: 2816
-        out_dim: 2253 # size of target for okvqa dataset
+        out_dim: 2253 # target size for okvqa
         hidden_dim: 768
         num_layers: 1

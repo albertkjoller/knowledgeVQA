@@ -28,7 +28,7 @@ dataset_config:
       - okvqa/defaults/annotations/annotations/imdb_val.npy
       test:
       - okvqa/defaults/annotations/annotations/imdb_test.npy
-    max_features: 100
+    max_features: 100 # TODO: to be adjusted
     processors:
       text_processor:
         type: vocab
