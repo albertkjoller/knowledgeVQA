@@ -12,7 +12,7 @@ model_config:
     # Number of features extracted out per image
     num_features: 1
 
-'''
+
     # resnet152
     image_encoder:
       type: resnet152
@@ -20,17 +20,6 @@ model_config:
         pretrained: true
         pool_type: avg
         num_output_features: 1
-'''
-
-    # resnet50
-    image_encoder:
-      type: torchvision_resnet
-      params:
-        name: resnet50
-        pretrained: true
-        pool_type: avg
-        num_output_features: 1
-        zero_init_residual: false
 
     text_encoder:
       type: transformer

@@ -16,7 +16,7 @@ from mmf.utils.build import (
 
 
 # Register the model for MMF, "concat_bert_tutorial" key would be used to find the model
-@registry.register_model("first_model")
+@registry.register_model("baseline")
 class Baseline(BaseModel):
     # All models in MMF get first argument as config which contains all
     # of the information you stored in this model's config (hyperparameters)
