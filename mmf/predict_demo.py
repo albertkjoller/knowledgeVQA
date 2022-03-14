@@ -35,8 +35,12 @@ class PretrainedModel:
     def _init_processors(self):
         # define arguments
         args = Namespace()
+        if os.getcwd().split(os.sep)[-1] == 'mmf': # TODO: Remove when not debuggin
+            config_path = Path(f'{ROOT_DIR}/save/models/first_model/config.yaml')
+        else:
+            config_path = Path(f'{ROOT_DIR}/mmf/save/models/first_model/config.yaml')
         args.opts = [
-            f"config={Path(f'{ROOT_DIR}/mmf/save/models/first_model/config.yaml')}",
+            f"config={config_path}",
             f"datasets={self.dataset}",
             f"model={self.model_name}",
             "evaluation.predict=True",
@@ -78,8 +82,11 @@ class PretrainedModel:
         config = loadConfig(self.model_filename)
         model = self.ModelClass(config)
 
-        # specify path to saved model
-        model_path = Path(f"{ROOT_DIR}/mmf/save/models/{self.model_name}/{self.model_filename}.pth")
+        # specify path to saved model (depending on debugging or running from command line)
+        if os.getcwd().split(os.sep)[-1] == 'mmf': #TODO: remove when not debuggin
+            model_path = Path(f"{ROOT_DIR}/save/models/{self.model_name}/{self.model_filename}.pth")
+        else:
+            model_path = Path(f"{ROOT_DIR}/mmf/save/models/{self.model_name}/{self.model_filename}.pth")
 
         # load state dict and eventually convert from multi-gpu to single
         state_dict = torch.load(model_path)
@@ -116,6 +123,7 @@ class PretrainedModel:
             # extract probabilities and answers for top k predicted answers
             scores, indices = scores.topk(topk, dim=1)
             topK = [(score.item(), self.answer_processor.idx2word(indices[0][idx].item())) for (idx, score) in enumerate(scores[0])]
+
             probs, answers = list(zip(*topK))
 
         # clean - garbage collection :TODO: why is this?
@@ -144,14 +152,15 @@ if __name__ == '__main__':
               }
     model = PretrainedModel(**kwargs)
 
-    old_img_name = None
+    if os.getcwd().split(os.sep)[-1] != 'explainableVQA':
+        os.chdir(os.path.dirname(os.getcwd()))
 
+    old_img_name = None
     while True:
         print(f"\n{'-'*70}\n")
 
         # input image
         img_name = input("Enter image name from '../imgs/temp' folder (e.g. 'rain.jpg'): ")
-        cv2.namedWindow(f"{img_name}", cv2.WINDOW_NORMAL)
         if old_img_name != None:
             cv2.destroyWindow(f"{old_img_name}")
 
@@ -167,7 +176,12 @@ if __name__ == '__main__':
             img_path = Path(f"{os.getcwd()}/imgs/temp/{img_name}").as_posix()
             img = cv2.imread(img_path)  # open from file object
 
-        img = cv2.resize(img, (540, 540))
+        # calculate the 50 percent of original dimensions
+        width = int(img.shape[1] * 0.2)
+        height = int(img.shape[0] * 0.2)
+
+        cv2.namedWindow(f"{img_name}", cv2.WINDOW_NORMAL)
+        cv2.resizeWindow(f"{img_name}", width, height)
         cv2.imshow(f"{img_name}", img)
         cv2.waitKey(1)
 
@@ -188,3 +202,4 @@ if __name__ == '__main__':
             print(f"{i+1}) {answer} \t ({prob})")
 
 
+    # python mmf/predict_demo.py \ first_model_final \ First_Model \ okvqa \ lynch.jpg
