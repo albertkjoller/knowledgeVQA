@@ -29,14 +29,12 @@ model_config:
       params:
         #bert_model_name: bert-base-uncased #BertTokenizerFast
         bert_model_name: distilbert-base-uncased
-
-        #hidden_size: 768
         dim: 768
         num_hidden_layers: 12
-        n_heads: 12
-        output_attentions: false
-        output_hidden_states: false
-        #TOKENIZERS_PARALLELISM: true # TODO: will this work? (to remove output error)
+        num_attention_heads: 12
+
+
+
 
     classifier:
       type: mlp

@@ -98,8 +98,14 @@ class Baseline(BaseModel):
         image = sample_list["image"]
 
         # Get the text and image features from the encoders
-        print('HERE!!!!!:     ', text)
-        text_features = self.language_module(text)[1]
+        text_features = self.language_module(text)#[1]
+        #print('here: ', len(text_features[0]))
+        #print('before final : ', text_features[0].shape)
+        #print('final text: ', text_features[0][:, 0, :].shape)
+
+        # https://towardsdatascience.com/hugging-face-transformers-fine-tuning-distilbert-for-binary-classification-tasks-490f1d192379
+        text_features = text_features[0][:, 0, :]
+
         image_features = self.vision_module(image)
 
         # Flatten the embeddings before concatenation
@@ -110,6 +116,10 @@ class Baseline(BaseModel):
 
         # Multiply the final features TODO: (top down bottom up) haardman product
         combined = torch.cat([text_features, image_features], dim=1)
+
+        #print('combined: ', combined.shape)
+
+
         # Pass final tensor to classifier to get scores
         logits = self.classifier(combined)
         # For loss calculations (automatically done by MMF

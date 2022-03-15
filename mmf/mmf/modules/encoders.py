@@ -629,9 +629,14 @@ class TransformerEncoder(Encoder):
 
     def forward(self, *args, return_sequence=False, **kwargs) -> Tensor:
         # Only return pooled output
-        output = self.module(*args, **kwargs)
+        output = self.module.BaseModelOutputWithPooling(*args, **kwargs)
         return output[0] if return_sequence else output[1]
 
+        # TODO will this work?
+        #if self.config.bert_model_name.startswith("distilbert-"):
+        #    return output[0][:,0,:] # TODO: or use the poolers.py module
+        #else:
+            #return output[0][1] if return_sequence else output[1][1]
 
 class MultiModalEncoderBase(Encoder):
     __jit_unused_properties__ = ["encoder_config"]

@@ -103,6 +103,11 @@ class First_Model(BaseModel):
 
         # Get the text and image features from the encoders
         text_features = self.language_module(text)[1]
+
+        print('here: ', len(text_features))
+        print('here: ', text_features.shape)
+
+
         image_features = self.vision_module(image)
 
         # Flatten the embeddings before concatenation
