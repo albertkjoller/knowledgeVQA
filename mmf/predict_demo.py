@@ -200,6 +200,3 @@ if __name__ == '__main__':
         print("\nPredicted outputs from the model:")
         for i, (prob, answer) in enumerate(zip(*outputs)):
             print(f"{i+1}) {answer} \t ({prob})")
-
-
-    # python mmf/predict_demo.py \ first_model_final \ First_Model \ okvqa \ lynch.jpg
