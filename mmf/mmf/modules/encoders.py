@@ -9,6 +9,8 @@ from copy import deepcopy
 from dataclasses import asdict, dataclass
 from enum import Enum
 from typing import Any
+from pathlib import Path
+import yaml
 
 import torch
 import torchvision
@@ -22,15 +24,30 @@ from mmf.utils.download import download_pretrained_model
 from mmf.utils.file_io import PathManager
 from mmf.utils.general import get_absolute_path
 from mmf.utils.logger import log_class_usage
+from model_utils.config import loadConfig
 from omegaconf import MISSING, OmegaConf
 from torch import Tensor, nn
 from transformers.configuration_auto import AutoConfig
 from transformers.modeling_auto import AutoModel
 
+# init file also activated
+from mmf.configs.other import add_attribute_config
+import argparse
+
 try:
-    from detectron2.modeling import ShapeSpec, build_resnet_backbone
+    from detectron2.modeling import ShapeSpec, build_resnet_backbone, build_model
+    from detectron2.config import get_cfg
+    from detectron2.engine import default_setup, default_argument_parser
+    from detectron2.structures.image_list import ImageList
+
 except ImportError:
     pass
+
+
+
+
+
+
 
 
 logger = logging.getLogger()
@@ -200,6 +217,8 @@ class ImageEncoderTypes(Enum):
     torchvision_resnet = "torchvision_resnet"
     resnet152 = "resnet152"
     detectron2_resnet = "detectron2_resnet"
+    frcnn = "frcnn"
+    fgridcnn = "fgridcnn"
 
 
 class ImageEncoderFactory(EncoderFactory):
@@ -229,6 +248,8 @@ class ImageEncoderFactory(EncoderFactory):
             self.module = Detectron2ResnetImageEncoder(params)
         elif self._type == "frcnn":
             self.module = FRCNNImageEncoder(params)
+        elif self._type == "fgridcnn":
+            self.module = FGRIDCNNImageEncoder(params)
         else:
             raise NotImplementedError("Unknown Image Encoder: %s" % self._type)
 
@@ -494,6 +515,63 @@ class FRCNNImageEncoder(Encoder):
         return x
 
 
+@registry.register_encoder("fgridcnn")
+class FGRIDCNNImageEncoder(Encoder):
+    @dataclass
+    class Config(Encoder.Config):
+        name: str = "fgridcnn"
+
+    def __init__(self, config: Config, *args, **kwargs):
+        super().__init__()
+        self.config = config
+
+
+        #args = config.get("pretrained", False)
+
+        args = argparse.ArgumentParser(description="Grid feature extraction")
+        cfg = self.setup(args, self.config)
+        model = build_model(cfg)
+        self.fgridcnn = build_model(cfg)
+
+
+        # ??
+        #if pretrained:
+        #    state_dict = torch.load(pretrained_path)
+        #    self.fgridcnn.load_state_dict(state_dict)
+        #    self.fgridcnn.eval()
+
+    def setup(self, args, config):
+        """
+        Create configs and perform basic setups.
+        """
+
+        cfg = get_cfg()
+        add_attribute_config(cfg)
+
+        model_type = config.get("model_type", False)
+        cfg.merge_from_file(model_type)
+
+        cfg.MODEL.RESNETS.RES5_DILATION = 1 # TODO: what do we choose?
+        #cfg.MODEL.RESNETS.RES2_OUT_CHANNELS = config.get("modal_hidden_size", False)
+        cfg.MODEL.DEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'
+        add_attribute_config(cfg) # for the python file
+        cfg.freeze()
+        default_setup(cfg, args)
+        return cfg
+
+
+    def forward(self, images: torch.Tensor, sizes: torch.Tensor = None):
+
+        # TODO: can this be made more efficient?
+        inputs = [{"image": image} for image in images]
+
+        images = self.fgridcnn.preprocess_image(inputs)
+        features = self.fgridcnn.backbone(images.tensor) # should be 100 according to paper
+        outputs = self.fgridcnn.roi_heads.get_conv5_features(features)
+        return outputs
+
+
+
 class TextEncoderTypes(Enum):
     identity = "identity"
     transformer = "transformer"
@@ -637,6 +715,97 @@ class TransformerEncoder(Encoder):
         #    return output[0][:,0,:] # TODO: or use the poolers.py module
         #else:
             #return output[0][1] if return_sequence else output[1][1]
+
+
+
+
+
+@registry.register_encoder("transformer")
+class TransformerEncoder(Encoder):
+    @dataclass
+    class Config(Encoder.Config):
+        name: str = "transformer"
+        num_segments: int = 2
+        bert_model_name: str = "bert-base-uncased"
+        # Options below can be overridden to update the bert configuration used
+        # to initialize the bert encoder. If some option is missing or
+        # if you are using an encoder different then BERT, add extra parameters
+        # by inheriting and extending this config
+        # Those options will automatically override the options for your transformer
+        # encoder's configuration. For e.g. vocab_size is missing here, just add
+        # vocab_size: x to update the size of the vocabulary with which encoder is
+        # initialized. If you update the default values, the transformer you
+        # will get will be initialized from scratch.
+        hidden_size: int = 768
+        num_hidden_layers: int = 12
+        num_attention_heads: int = 12
+        output_attentions: bool = False
+        output_hidden_states: bool = False
+        random_init: bool = False
+
+    def __init__(self, config: Config, *args, **kwargs):
+        super().__init__()
+        self.config = config
+        hf_params = {"config": self._build_encoder_config(config)}
+        should_random_init = self.config.get("random_init", False)
+
+        # For BERT models, initialize using Jit version
+        if self.config.bert_model_name.startswith("bert-"):
+            if should_random_init:
+                self.module = BertModelJit(**hf_params)
+            else:
+                self.module = BertModelJit.from_pretrained(
+                    self.config.bert_model_name, **hf_params
+                )
+        else:
+            if should_random_init:
+                self.module = AutoModel.from_config(**hf_params)
+            else:
+                self.module = AutoModel.from_pretrained(
+                    self.config.bert_model_name, **hf_params
+                )
+
+        self.embeddings = self.module.embeddings
+        self.original_config = self.config
+        self.config = self.module.config
+        self._init_segment_embeddings()
+
+    def _init_segment_embeddings(self):
+        if self.original_config.get("num_segments", None):
+            num_segments = self.original_config.num_segments
+            if hasattr(self.embeddings, "token_type_embeddings"):
+                new_embeds = nn.Embedding(num_segments, self.config.hidden_size)
+                new_embeds.weight.data[:2].copy_(
+                    self.embeddings.token_type_embeddings.weight
+                )
+                for idx in range(2, num_segments - 1):
+                    new_embeds.weight.data[idx].copy_(
+                        self.embeddings.token_type_embeddings.weight.data.mean(dim=0)
+                    )
+                self.embeddings.token_type_embeddings = new_embeds
+
+    def _build_encoder_config(self, config: Config):
+        return AutoConfig.from_pretrained(
+            config.bert_model_name, **OmegaConf.to_container(config)
+        )
+
+    def forward(self, *args, return_sequence=False, **kwargs) -> Tensor:
+        # Only return pooled output
+        output = self.module.BaseModelOutputWithPooling(*args, **kwargs)
+        return output[0] if return_sequence else output[1]
+
+        # TODO will this work?
+        #if self.config.bert_model_name.startswith("distilbert-"):
+        #    return output[0][:,0,:] # TODO: or use the poolers.py module
+        #else:
+            #return output[0][1] if return_sequence else output[1][1]
+
+
+
+
+
+
+
 
 class MultiModalEncoderBase(Encoder):
     __jit_unused_properties__ = ["encoder_config"]

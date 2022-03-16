@@ -14,6 +14,9 @@ from mmf.utils.build import (
     build_text_encoder,
 )
 
+from mmf.modules.layers import ReLUWithWeightNormFC
+
+
 
 # Register the model for MMF, "concat_bert_tutorial" key would be used to find the model
 @registry.register_model("pilot")
@@ -88,6 +91,10 @@ class Baseline(BaseModel):
         """
         self.classifier = build_classifier_layer(self.config.classifier)
 
+        # TODO: same as top-down but image_feat_dim hardcoded
+        self.non_linear_image = ReLUWithWeightNormFC(self.config.image_feat_dim, self.config.modal_hidden_size)
+
+
 
     # Each model in MMF gets a dict called sample_list which contains
     # all of the necessary information returned from the image
@@ -105,8 +112,17 @@ class Baseline(BaseModel):
 
         # https://towardsdatascience.com/hugging-face-transformers-fine-tuning-distilbert-for-binary-classification-tasks-490f1d192379
         text_features = text_features[0][:, 0, :]
+        # TODO: be of shape (32, 768), other type of fix?
+        # taking last hidden state, the batches and encodings...
+
 
         image_features = self.vision_module(image)
+
+
+        # TODO: average pooling, lots of other options
+        # doing it on dimensions 2 and 3
+        image_features = torch.mean(image_features, dim = (2,3))
+
 
         # Flatten the embeddings before concatenation
         image_features = torch.flatten(image_features, start_dim=1)
@@ -114,7 +130,8 @@ class Baseline(BaseModel):
 
 
 
-        # Multiply the final features TODO: (top down bottom up) haardman product
+        # Multiply the final features
+        # TODO: (top down bottom up) haardman product
         combined = torch.cat([text_features, image_features], dim=1)
 
         #print('combined: ', combined.shape)

@@ -26,11 +26,14 @@ evaluation:
     - roc_auc
 
 training:
-  batch_size: 32 # default: 512, 128 or higher performs better (2017 tips and tricks)
+  batch_size: 16 # default: 512, 128 or higher performs better (2017 tips and tricks)
   max_epochs: 1 # no default specified, 12-18 mentioned by (2017 tips and tricks)
   lr_scheduler: true
-  max_updates: 100 # default: 22000
-  tensorboard: true
+  max_updates: 10 # default: 22000
   early_stop:
     criteria: okvqa/roc_auc # or criteria: okvqa/vqa_accuracy
     minimize: false
+    use_warmup: false
+    tensorboard: true
+    log_interval: 5
+    log_detailed_config: true # TODO: ?
