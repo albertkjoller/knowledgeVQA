@@ -21,7 +21,6 @@ class AttributePredictor(nn.Module):
     """
     Head for attribute prediction, including feature/score computation and
     loss computation.
-
     """
     def __init__(self, cfg, input_dim):
         super().__init__()
@@ -234,4 +233,3 @@ class AttributeStandardROIHeads(AttributeROIHeads, StandardROIHeads):
 
         features = [features[f] for f in self.in_features]
         return features[0]
-

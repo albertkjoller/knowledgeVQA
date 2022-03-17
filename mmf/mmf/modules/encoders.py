@@ -31,7 +31,9 @@ from transformers.configuration_auto import AutoConfig
 from transformers.modeling_auto import AutoModel
 
 # init file also activated
-from mmf.configs.other import add_attribute_config
+from mmf.configs.other.feat_configs.grid_config import add_attribute_config
+from tools.scripts.features.roi_heads import AttributeRes5ROIHeads#, AttributeStandardROIHeads
+
 import argparse
 
 try:
@@ -248,8 +250,8 @@ class ImageEncoderFactory(EncoderFactory):
             self.module = Detectron2ResnetImageEncoder(params)
         elif self._type == "frcnn":
             self.module = FRCNNImageEncoder(params)
-        elif self._type == "fgridcnn":
-            self.module = FGRIDCNNImageEncoder(params)
+        elif self._type == "grid_feats_vqa":
+            self.module = gfvImageEncoder(params)
         else:
             raise NotImplementedError("Unknown Image Encoder: %s" % self._type)
 
@@ -515,59 +517,60 @@ class FRCNNImageEncoder(Encoder):
         return x
 
 
-@registry.register_encoder("fgridcnn")
-class FGRIDCNNImageEncoder(Encoder):
+@registry.register_encoder("grid_feats_vqa")
+class gfvImageEncoder(Encoder):
     @dataclass
     class Config(Encoder.Config):
-        name: str = "fgridcnn"
+        name: str = "grid_feats_vqa"
 
     def __init__(self, config: Config, *args, **kwargs):
         super().__init__()
         self.config = config
 
-
-        #args = config.get("pretrained", False)
-
+        # maybe not necessary
         args = argparse.ArgumentParser(description="Grid feature extraction")
+        # setting up config file for the defined model
         cfg = self.setup(args, self.config)
-        model = build_model(cfg)
-        self.fgridcnn = build_model(cfg)
+        # activating the model
+        self.grid_feats_vqa = build_model(cfg)
 
 
-        # ??
-        #if pretrained:
-        #    state_dict = torch.load(pretrained_path)
-        #    self.fgridcnn.load_state_dict(state_dict)
-        #    self.fgridcnn.eval()
 
     def setup(self, args, config):
         """
         Create configs and perform basic setups.
         """
 
-        cfg = get_cfg()
-        add_attribute_config(cfg)
-
-        model_type = config.get("model_type", False)
-        cfg.merge_from_file(model_type)
-
-        cfg.MODEL.RESNETS.RES5_DILATION = 1 # TODO: what do we choose?
+        cfg = get_cfg() # detectron default config
+        add_attribute_config(cfg) # # grid-feats-vqa default config
+        # getting pretrained model
+        backbone_features = config.get("backbone_features", False)
+        cfg.merge_from_file(backbone_features)
+        # forcing the final residual block to have dilations 1
+        # TODO: what do we choose? this means we don't dilate?
+        cfg.MODEL.RESNETS.RES5_DILATION = 1
         #cfg.MODEL.RESNETS.RES2_OUT_CHANNELS = config.get("modal_hidden_size", False)
         cfg.MODEL.DEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'
-        add_attribute_config(cfg) # for the python file
         cfg.freeze()
-        default_setup(cfg, args)
+
+        # maybe not necessary, but logs
+        #https://github.com/facebookresearch/detectron2/blob/main/detectron2/engine/defaults.py
+        #default_setup(cfg, args)
+
         return cfg
 
 
     def forward(self, images: torch.Tensor, sizes: torch.Tensor = None):
 
-        # TODO: can this be made more efficient?
+        # constructing desired imput
         inputs = [{"image": image} for image in images]
 
-        images = self.fgridcnn.preprocess_image(inputs)
-        features = self.fgridcnn.backbone(images.tensor) # should be 100 according to paper
-        outputs = self.fgridcnn.roi_heads.get_conv5_features(features)
+        images = self.grid_feats_vqa.preprocess_image(inputs) # Normalize, pad and batch the input images.
+        features = self.grid_feats_vqa.backbone(images.tensor) # features from backbone
+
+        outputs = self.grid_feats_vqa.roi_heads.get_conv5_features(features)
+        return outputs
+
         return outputs
 
 
@@ -575,6 +578,7 @@ class FGRIDCNNImageEncoder(Encoder):
 class TextEncoderTypes(Enum):
     identity = "identity"
     transformer = "transformer"
+    any_transformer = "any_transformer"
     embedding = "embedding"
 
 
@@ -596,6 +600,9 @@ class TextEncoderFactory(EncoderFactory):
         elif self._type == "transformer":
             self._module = TransformerEncoder(config.params)
             self.module = self._module.module
+        elif self._type == "any_transformer":
+            # TODO: below modification activated forward function compard to the one above
+            self.module = Any_TransformerEncoder(config.params)
         elif self._type == "embedding":
             self.module = TextEmbeddingEncoder(config.params)
         else:
@@ -706,36 +713,23 @@ class TransformerEncoder(Encoder):
         )
 
     def forward(self, *args, return_sequence=False, **kwargs) -> Tensor:
+        # TODO: not activated, look at encoder factory
         # Only return pooled output
-        output = self.module.BaseModelOutputWithPooling(*args, **kwargs)
+        output = self.module(*args, **kwargs)
         return output[0] if return_sequence else output[1]
 
-        # TODO will this work?
-        #if self.config.bert_model_name.startswith("distilbert-"):
-        #    return output[0][:,0,:] # TODO: or use the poolers.py module
-        #else:
-            #return output[0][1] if return_sequence else output[1][1]
 
 
-
-
-
-@registry.register_encoder("transformer")
-class TransformerEncoder(Encoder):
+@registry.register_encoder("any_transformer")
+class Any_TransformerEncoder(Encoder):
     @dataclass
     class Config(Encoder.Config):
-        name: str = "transformer"
+        name: str = "any_transformer"
         num_segments: int = 2
-        bert_model_name: str = "bert-base-uncased"
-        # Options below can be overridden to update the bert configuration used
-        # to initialize the bert encoder. If some option is missing or
-        # if you are using an encoder different then BERT, add extra parameters
-        # by inheriting and extending this config
-        # Those options will automatically override the options for your transformer
-        # encoder's configuration. For e.g. vocab_size is missing here, just add
-        # vocab_size: x to update the size of the vocabulary with which encoder is
-        # initialized. If you update the default values, the transformer you
-        # will get will be initialized from scratch.
+        name: str = "distilbert-base-uncased"
+        # Options below can be overridden to update the bert configuration used to initialize the bert encoder.
+        # Options will automatically override the options for your transformer encoder's configuration.
+
         hidden_size: int = 768
         num_hidden_layers: int = 12
         num_attention_heads: int = 12
@@ -750,19 +744,19 @@ class TransformerEncoder(Encoder):
         should_random_init = self.config.get("random_init", False)
 
         # For BERT models, initialize using Jit version
-        if self.config.bert_model_name.startswith("bert-"):
+        if self.config.name.startswith("bert-"):
             if should_random_init:
                 self.module = BertModelJit(**hf_params)
             else:
                 self.module = BertModelJit.from_pretrained(
-                    self.config.bert_model_name, **hf_params
+                    self.config.name, **hf_params
                 )
         else:
             if should_random_init:
                 self.module = AutoModel.from_config(**hf_params)
             else:
                 self.module = AutoModel.from_pretrained(
-                    self.config.bert_model_name, **hf_params
+                    self.config.name, **hf_params
                 )
 
         self.embeddings = self.module.embeddings
@@ -786,23 +780,16 @@ class TransformerEncoder(Encoder):
 
     def _build_encoder_config(self, config: Config):
         return AutoConfig.from_pretrained(
-            config.bert_model_name, **OmegaConf.to_container(config)
+            config.name, **OmegaConf.to_container(config)
         )
 
     def forward(self, *args, return_sequence=False, **kwargs) -> Tensor:
         # Only return pooled output
-        output = self.module.BaseModelOutputWithPooling(*args, **kwargs)
-        return output[0] if return_sequence else output[1]
+        output = self.module(*args, **kwargs)
 
-        # TODO will this work?
-        #if self.config.bert_model_name.startswith("distilbert-"):
-        #    return output[0][:,0,:] # TODO: or use the poolers.py module
-        #else:
-            #return output[0][1] if return_sequence else output[1][1]
-
-
-
-
+        # https://towardsdatascience.com/hugging-face-transformers-fine-tuning-distilbert-for-binary-classification-tasks-490f1d192379
+        # only looking at sentence level embedding and not word
+        return output[0][:, 0, :]
 
 
 

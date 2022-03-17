@@ -23,14 +23,15 @@ dataset_config:
 
 model_config:
   pilot:
-    # faster grid cnn
-    image_feat_dim: 101120 # TODO: hardcoded
-
+    # models from grid-feats-vqa
+    # taken from: https://github.com/facebookresearch/grid-feats-vqa
     image_encoder:
-      type: fgridcnn
+      type: grid_feats_vqa
       params:
-        name: fgridcnn
-        model_type: ./configs/other/configs/R-50-grid.yaml
+        name: grid_feats_vqa
+        # specify backbone and type of features
+        # choices: [R-50-(grid or updn), X-101-grid, X-152-(grid or challenge(MoVie+GridFeat))]
+        backbone_features: ./configs/other/feat_configs/R-50-grid.yaml
         pretrained: true
         pool_type: avg
         zero_init_residual: false
