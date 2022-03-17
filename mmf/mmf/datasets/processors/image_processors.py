@@ -44,9 +44,12 @@ class TorchvisionTransforms(BaseProcessor):
                 from mmf.utils.env import setup_torchaudio
 
                 setup_torchaudio()
-                from torchaudio import transforms as torchaudio_transforms
 
-                transform = getattr(torchaudio_transforms, transform_type, None)
+                # TODO: currently not working
+                #from torchaudio import transforms as torchaudio_transforms
+
+                #transform = getattr(torchaudio_transforms, transform_type, None)
+                transform = None
             # If torchvision or torchaudiodoesn't contain this, check our registry
             # if we implemented a custom transform as processor
             if transform is None:

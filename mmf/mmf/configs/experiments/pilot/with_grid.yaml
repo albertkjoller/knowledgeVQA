@@ -1,0 +1,38 @@
+includes:
+- ./defaults.yaml
+
+# this is similar to pythia
+
+dataset_config:
+  okvqa:
+    data_dir: ${env.data_dir}/datasets
+    depth_first: false
+    fast_read: true
+
+    use_images: true
+    use_features: false
+    zoo_requirements:
+    - okvqa.defaults
+    images:
+      train:
+      - okvqa/defaults/images/
+      val:
+      - okvqa/defaults/images/
+      test:
+      - okvqa/defaults/images/
+
+model_config:
+  pilot:
+    # models from grid-feats-vqa
+    # taken from: https://github.com/facebookresearch/grid-feats-vqa
+    image_encoder:
+      type: grid_feats_vqa
+      params:
+        name: grid_feats_vqa
+        # specify backbone and type of features
+        # choices: [R-50-(grid or updn), X-101-grid, X-152-(grid or challenge(MoVie+GridFeat))]
+        backbone_features: ./configs/other/feat_configs/R-50-grid.yaml
+        pretrained: true
+        pool_type: avg
+        zero_init_residual: false
+        num_output_features: 1
