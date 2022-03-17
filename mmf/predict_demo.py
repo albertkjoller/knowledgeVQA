@@ -35,10 +35,13 @@ class PretrainedModel:
     def _init_processors(self):
         # define arguments
         args = Namespace()
+
+        #TODO: change when debugging is not necessary anymore
         if os.getcwd().split(os.sep)[-1] == 'mmf': # TODO: Remove when not debuggin
             config_path = Path(f'{ROOT_DIR}/save/models/first_model/config.yaml')
         else:
             config_path = Path(f'{ROOT_DIR}/mmf/save/models/first_model/config.yaml')
+
         args.opts = [
             f"config={config_path}",
             f"datasets={self.dataset}",
@@ -70,18 +73,12 @@ class PretrainedModel:
         self.answer_processor = processors['answer_processor']
         self.image_processor = processors['image_processor']
 
-        # TODO: check if we have to do this - I don't think it is necessary
-        # register processors and
-        #registry.register(f"{self.model_name}_text_processor", self.text_processor)
-        #registry.register(f"{self.model_name}_answer_processor", self.answer_processor)
-        #registry.register(f"{self.model_name}_num_final_outputs",
-        #                  self.answer_processor.get_vocab_size())
-
     def _build_vqa_model(self):
         # load configuration and create model object
         config = loadConfig(self.model_filename)
         model = self.ModelClass(config)
 
+        #TODO: change when debugging is not necessary anymore
         # specify path to saved model (depending on debugging or running from command line)
         if os.getcwd().split(os.sep)[-1] == 'mmf': #TODO: remove when not debuggin
             model_path = Path(f"{ROOT_DIR}/save/models/{self.model_name}/{self.model_filename}.pth")
@@ -133,13 +130,13 @@ class PretrainedModel:
         return probs, answers
 
 if __name__ == '__main__':
-    import sys
-    import cv2
-    from PIL import Image
+    import sys, cv2
 
+    # helper function for input
     def str_to_class(classname):
         return getattr(sys.modules['mmf.models'], classname)
 
+    # obtain user input
     model_filename = input("Enter saved model filename: ")
     ModelClass = input("Enter model type (e.g. BaseModel): ")
     dataset = input("Enter name of dataset used for training: ")
@@ -148,38 +145,40 @@ if __name__ == '__main__':
     # specify model arguments and load model
     kwargs = {'model_filename': model_filename,
               'ModelClass': str_to_class(ModelClass),
-              'dataset': dataset,
-              }
+              'dataset': dataset}
     model = PretrainedModel(**kwargs)
 
+    # only when debugging - from bash this doesn't matter #TODO: remove in the end
     if os.getcwd().split(os.sep)[-1] != 'explainableVQA':
         os.chdir(os.path.dirname(os.getcwd()))
 
+    # initialize data variables
     old_img_name = None
-    while True:
+    img_name, question = None, None
+
+    # continue until user quits
+    while img_name != 'quit()' or question != 'quit()':
         print(f"\n{'-'*70}\n")
 
         # input image
         img_name = input("Enter image name from '../imgs/temp' folder (e.g. 'rain.jpg'): ")
         if old_img_name != None:
             cv2.destroyWindow(f"{old_img_name}")
-
+        """
         if img_name == 'quit()':
             cv2.destroyAllWindows()
             break
+        """
 
-        try:
-            img_path = Path(f"{os.getcwd()}/imgs/temp/{img_name}").as_posix()
-            img = cv2.imread(img_path)  # open from file object
-        except FileNotFoundError:
-            img_name = input("Image doesn't exist in path - enter correct image name: ")
-            img_path = Path(f"{os.getcwd()}/imgs/temp/{img_name}").as_posix()
-            img = cv2.imread(img_path)  # open from file object
+        # load image
+        img_path = Path(f"{os.getcwd()}/imgs/temp/{img_name}").as_posix()
+        img = cv2.imread(img_path)  # open from file object
 
         # calculate the 50 percent of original dimensions
         width = int(img.shape[1] * 0.2)
         height = int(img.shape[0] * 0.2)
 
+        # show image
         cv2.namedWindow(f"{img_name}", cv2.WINDOW_NORMAL)
         cv2.resizeWindow(f"{img_name}", width, height)
         cv2.imshow(f"{img_name}", img)
@@ -187,16 +186,22 @@ if __name__ == '__main__':
 
         # input question
         question = input("Enter question: ")
+        """
         if question == 'quit()':
             cv2.destroyAllWindows()
             break
+        """
 
         # get predictions and show input
         topk = 5
         outputs = model.predict(image_path=img_path, question=question, topk=topk)
         old_img_name = img_name
 
+        # print answers and probabilities
         print(f'\nQuestion: "{question}"')
         print("\nPredicted outputs from the model:")
         for i, (prob, answer) in enumerate(zip(*outputs)):
             print(f"{i+1}) {answer} \t ({prob})")
+
+    # when loop is ended
+    cv2.destroyAllWindows()
