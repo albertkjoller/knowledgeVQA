@@ -32,7 +32,7 @@ from transformers.modeling_auto import AutoModel
 
 # init file also activated
 from mmf.configs.other.feat_configs.grid_config import add_attribute_config
-from tools.scripts.features.roi_heads import AttributeRes5ROIHeads#, AttributeStandardROIHeads
+#from tools.scripts.features.roi_heads import AttributeRes5ROIHeads#, AttributeStandardROIHeads
 
 import argparse
 

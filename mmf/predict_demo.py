@@ -157,40 +157,34 @@ if __name__ == '__main__':
     img_name, question = None, None
 
     # continue until user quits
-    while img_name != 'quit()' or question != 'quit()':
+    while question != 'quit()':
         print(f"\n{'-'*70}\n")
 
         # input image
         img_name = input("Enter image name from '../imgs/temp' folder (e.g. 'rain.jpg'): ")
         if old_img_name != None:
             cv2.destroyWindow(f"{old_img_name}")
-        """
-        if img_name == 'quit()':
-            cv2.destroyAllWindows()
+
+        if img_name != 'quit()': # continues until user quits
+            # load image
+            img_path = Path(f"{os.getcwd()}/imgs/temp/{img_name}").as_posix()
+            img = cv2.imread(img_path)  # open from file object
+
+            # calculate the 50 percent of original dimensions
+            width = int(img.shape[1] * 0.2)
+            height = int(img.shape[0] * 0.2)
+
+            # show image
+            cv2.namedWindow(f"{img_name}", cv2.WINDOW_NORMAL)
+            cv2.resizeWindow(f"{img_name}", width, height)
+            cv2.imshow(f"{img_name}", img)
+            cv2.waitKey(1)
+        else:
             break
-        """
-
-        # load image
-        img_path = Path(f"{os.getcwd()}/imgs/temp/{img_name}").as_posix()
-        img = cv2.imread(img_path)  # open from file object
-
-        # calculate the 50 percent of original dimensions
-        width = int(img.shape[1] * 0.2)
-        height = int(img.shape[0] * 0.2)
-
-        # show image
-        cv2.namedWindow(f"{img_name}", cv2.WINDOW_NORMAL)
-        cv2.resizeWindow(f"{img_name}", width, height)
-        cv2.imshow(f"{img_name}", img)
-        cv2.waitKey(1)
 
         # input question
         question = input("Enter question: ")
-        """
-        if question == 'quit()':
-            cv2.destroyAllWindows()
-            break
-        """
+
 
         # get predictions and show input
         topk = 5
