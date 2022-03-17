@@ -109,7 +109,7 @@ def plotSunburst(df, N, visualization_depth, width=500, height=500, use_dash=Tru
     fig = go.Figure(
             go.Sunburst(
                 ids=df.ids,
-                labels=df.labels,
+                labels=df.ids.apply(lambda seq: seq.strip("CLS")),
                 parents=df.parents,
                 values=df.occurrences,
                 text=df.occurrences / N * 100,
