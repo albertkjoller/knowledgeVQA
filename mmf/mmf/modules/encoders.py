@@ -9,6 +9,8 @@ from copy import deepcopy
 from dataclasses import asdict, dataclass
 from enum import Enum
 from typing import Any
+from pathlib import Path
+import yaml
 
 import torch
 import torchvision
@@ -22,15 +24,32 @@ from mmf.utils.download import download_pretrained_model
 from mmf.utils.file_io import PathManager
 from mmf.utils.general import get_absolute_path
 from mmf.utils.logger import log_class_usage
+from model_utils.config import loadConfig
 from omegaconf import MISSING, OmegaConf
 from torch import Tensor, nn
 from transformers.configuration_auto import AutoConfig
 from transformers.modeling_auto import AutoModel
 
+# init file also activated
+from mmf.configs.other.feat_configs.grid_config import add_attribute_config
+from tools.scripts.features.roi_heads import AttributeRes5ROIHeads#, AttributeStandardROIHeads
+
+import argparse
+
 try:
-    from detectron2.modeling import ShapeSpec, build_resnet_backbone
+    from detectron2.modeling import ShapeSpec, build_resnet_backbone, build_model
+    from detectron2.config import get_cfg
+    from detectron2.engine import default_setup, default_argument_parser
+    from detectron2.structures.image_list import ImageList
+
 except ImportError:
     pass
+
+
+
+
+
+
 
 
 logger = logging.getLogger()
@@ -196,9 +215,12 @@ class IdentityEncoder(Encoder):
 class ImageEncoderTypes(Enum):
     default = "default"
     identity = "identity"
+    resnet18 = "resnet18"
     torchvision_resnet = "torchvision_resnet"
     resnet152 = "resnet152"
     detectron2_resnet = "detectron2_resnet"
+    frcnn = "frcnn"
+    fgridcnn = "fgridcnn"
 
 
 class ImageEncoderFactory(EncoderFactory):
@@ -222,10 +244,14 @@ class ImageEncoderFactory(EncoderFactory):
             self.module = ResNet152ImageEncoder(params)
         elif self._type == "torchvision_resnet":
             self.module = TorchvisionResNetImageEncoder(params)
+        elif self._type == "resnet18":
+            self.module = ResNet18ImageEncoder(params)
         elif self._type == "detectron2_resnet":
             self.module = Detectron2ResnetImageEncoder(params)
         elif self._type == "frcnn":
             self.module = FRCNNImageEncoder(params)
+        elif self._type == "grid_feats_vqa":
+            self.module = gfvImageEncoder(params)
         else:
             raise NotImplementedError("Unknown Image Encoder: %s" % self._type)
 
@@ -354,6 +380,7 @@ class TorchvisionResNetImageEncoder(Encoder):
 
         return pool
 
+
     def forward(self, x):
         # B x 3 x 224 x 224 -> B x out_dim x 7 x 7
         out = self.pool(self.model(x))
@@ -363,6 +390,55 @@ class TorchvisionResNetImageEncoder(Encoder):
         else:
             out = torch.flatten(out, start_dim=1)  # BxN*out_dim
         return out
+
+
+
+#TODO: not working, error message about input and target dimensions (32x1280 mismatc to 2816x768)
+
+@registry.register_encoder("resnet18")
+class ResNet18ImageEncoder(Encoder):
+    @dataclass
+    class Config(Encoder.Config):
+        name: str = "resnet18"
+        pretrained: bool = True
+        # "avg" or "adaptive"
+        pool_type: str = "avg"
+        num_output_features: int = 1
+
+    def __init__(self, config: Config, *args, **kwargs):
+        super().__init__()
+        self.config = config
+        model = torchvision.models.resnet18(pretrained=config.get("pretrained", True))
+        modules = list(model.children())[:-2] # removing last two layers
+        self.model = nn.Sequential(*modules)
+
+        pool_func = (
+            nn.AdaptiveAvgPool2d if config.pool_type == "avg" else nn.AdaptiveMaxPool2d
+        )
+
+        # -1 will keep the original feature size
+        if config.num_output_features == -1:
+            self.pool = nn.Identity()
+        elif config.num_output_features in [1, 2, 3, 5, 7]:
+            self.pool = pool_func((config.num_output_features, 1))
+        elif config.num_output_features == 4:
+            self.pool = pool_func((2, 2))
+        elif config.num_output_features == 6:
+            self.pool = pool_func((3, 2))
+        elif config.num_output_features == 8:
+            self.pool = pool_func((4, 2))
+        elif config.num_output_features == 9:
+            self.pool = pool_func((3, 3))
+
+        self.out_dim = 2048 # default
+
+    def forward(self, x):
+        # Bx3x224x224 -> Bx2048x7x7 -> Bx2048xN -> BxNx2048
+        out = self.pool(self.model(x))
+        out = torch.flatten(out, start_dim=2)
+        out = out.transpose(1, 2).contiguous()
+        return out  # BxNx2048
+
 
 
 @registry.register_encoder("detectron2_resnet")
@@ -441,9 +517,68 @@ class FRCNNImageEncoder(Encoder):
         return x
 
 
+@registry.register_encoder("grid_feats_vqa")
+class gfvImageEncoder(Encoder):
+    @dataclass
+    class Config(Encoder.Config):
+        name: str = "grid_feats_vqa"
+
+    def __init__(self, config: Config, *args, **kwargs):
+        super().__init__()
+        self.config = config
+
+        # maybe not necessary
+        args = argparse.ArgumentParser(description="Grid feature extraction")
+        # setting up config file for the defined model
+        cfg = self.setup(args, self.config)
+        # activating the model
+        self.grid_feats_vqa = build_model(cfg)
+
+
+
+    def setup(self, args, config):
+        """
+        Create configs and perform basic setups.
+        """
+
+        cfg = get_cfg() # detectron default config
+        add_attribute_config(cfg) # # grid-feats-vqa default config
+        # getting pretrained model
+        backbone_features = config.get("backbone_features", False)
+        cfg.merge_from_file(backbone_features)
+        # forcing the final residual block to have dilations 1
+        # TODO: what do we choose? this means we don't dilate?
+        cfg.MODEL.RESNETS.RES5_DILATION = 1
+        #cfg.MODEL.RESNETS.RES2_OUT_CHANNELS = config.get("modal_hidden_size", False)
+        cfg.MODEL.DEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'
+        cfg.freeze()
+
+        # maybe not necessary, but logs
+        #https://github.com/facebookresearch/detectron2/blob/main/detectron2/engine/defaults.py
+        #default_setup(cfg, args)
+
+        return cfg
+
+
+    def forward(self, images: torch.Tensor, sizes: torch.Tensor = None):
+
+        # constructing desired imput
+        inputs = [{"image": image} for image in images]
+
+        images = self.grid_feats_vqa.preprocess_image(inputs) # Normalize, pad and batch the input images.
+        features = self.grid_feats_vqa.backbone(images.tensor) # features from backbone
+
+        outputs = self.grid_feats_vqa.roi_heads.get_conv5_features(features)
+        return outputs
+
+        return outputs
+
+
+
 class TextEncoderTypes(Enum):
     identity = "identity"
     transformer = "transformer"
+    any_transformer = "any_transformer"
     embedding = "embedding"
 
 
@@ -465,6 +600,9 @@ class TextEncoderFactory(EncoderFactory):
         elif self._type == "transformer":
             self._module = TransformerEncoder(config.params)
             self.module = self._module.module
+        elif self._type == "any_transformer":
+            # TODO: below modification activated forward function compard to the one above
+            self.module = Any_TransformerEncoder(config.params)
         elif self._type == "embedding":
             self.module = TextEmbeddingEncoder(config.params)
         else:
@@ -575,9 +713,85 @@ class TransformerEncoder(Encoder):
         )
 
     def forward(self, *args, return_sequence=False, **kwargs) -> Tensor:
+        # TODO: not activated, look at encoder factory
         # Only return pooled output
         output = self.module(*args, **kwargs)
         return output[0] if return_sequence else output[1]
+
+
+
+@registry.register_encoder("any_transformer")
+class Any_TransformerEncoder(Encoder):
+    @dataclass
+    class Config(Encoder.Config):
+        name: str = "any_transformer"
+        num_segments: int = 2
+        name: str = "distilbert-base-uncased"
+        # Options below can be overridden to update the bert configuration used to initialize the bert encoder.
+        # Options will automatically override the options for your transformer encoder's configuration.
+
+        hidden_size: int = 768
+        num_hidden_layers: int = 12
+        num_attention_heads: int = 12
+        output_attentions: bool = False
+        output_hidden_states: bool = False
+        random_init: bool = False
+
+    def __init__(self, config: Config, *args, **kwargs):
+        super().__init__()
+        self.config = config
+        hf_params = {"config": self._build_encoder_config(config)}
+        should_random_init = self.config.get("random_init", False)
+
+        # For BERT models, initialize using Jit version
+        if self.config.name.startswith("bert-"):
+            if should_random_init:
+                self.module = BertModelJit(**hf_params)
+            else:
+                self.module = BertModelJit.from_pretrained(
+                    self.config.name, **hf_params
+                )
+        else:
+            if should_random_init:
+                self.module = AutoModel.from_config(**hf_params)
+            else:
+                self.module = AutoModel.from_pretrained(
+                    self.config.name, **hf_params
+                )
+
+        self.embeddings = self.module.embeddings
+        self.original_config = self.config
+        self.config = self.module.config
+        self._init_segment_embeddings()
+
+    def _init_segment_embeddings(self):
+        if self.original_config.get("num_segments", None):
+            num_segments = self.original_config.num_segments
+            if hasattr(self.embeddings, "token_type_embeddings"):
+                new_embeds = nn.Embedding(num_segments, self.config.hidden_size)
+                new_embeds.weight.data[:2].copy_(
+                    self.embeddings.token_type_embeddings.weight
+                )
+                for idx in range(2, num_segments - 1):
+                    new_embeds.weight.data[idx].copy_(
+                        self.embeddings.token_type_embeddings.weight.data.mean(dim=0)
+                    )
+                self.embeddings.token_type_embeddings = new_embeds
+
+    def _build_encoder_config(self, config: Config):
+        return AutoConfig.from_pretrained(
+            config.name, **OmegaConf.to_container(config)
+        )
+
+    def forward(self, *args, return_sequence=False, **kwargs) -> Tensor:
+        # Only return pooled output
+        output = self.module(*args, **kwargs)
+
+        # https://towardsdatascience.com/hugging-face-transformers-fine-tuning-distilbert-for-binary-classification-tasks-490f1d192379
+        # only looking at sentence level embedding and not word
+        return output[0][:, 0, :]
+
+
 
 
 class MultiModalEncoderBase(Encoder):
