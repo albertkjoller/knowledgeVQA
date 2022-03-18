@@ -8,6 +8,11 @@ def add_attribute_config(cfg):
     """
     Add config for attribute prediction.
     """
+
+    # saving # TODO: can it be merged with the other config.yaml file?
+    cfg.OUTPUT_DIR = './save/imgencoder'
+
+
     # Whether to have attribute prediction
     cfg.MODEL.ATTRIBUTE_ON = False
     # Maximum number of attributes per foreground instance
@@ -16,7 +21,7 @@ def add_attribute_config(cfg):
     # Attribute Head
     # -----------------------------------------------------------------------  #
     cfg.MODEL.ROI_ATTRIBUTE_HEAD = CN()
-    # Dimension for object class embedding, used in conjunction with 
+    # Dimension for object class embedding, used in conjunction with
     # visual features to predict attributes
     cfg.MODEL.ROI_ATTRIBUTE_HEAD.OBJ_EMBED_DIM = 256
     # Dimension of the hidden fc layer of the input visual features
@@ -33,3 +38,4 @@ def add_attribute_config(cfg):
     cfg.MODEL.RPN.BBOX_LOSS_WEIGHT = 1.0
     # Loss weights for R-CNN box regression
     cfg.MODEL.ROI_BOX_HEAD.BBOX_LOSS_WEIGHT = 1.0
+

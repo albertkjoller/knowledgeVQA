@@ -394,7 +394,7 @@ class TorchvisionResNetImageEncoder(Encoder):
 
 
 #TODO: not working, error message about input and target dimensions (32x1280 mismatc to 2816x768)
-
+#   - should have dimension 2048 and not 1280
 @registry.register_encoder("resnet18")
 class ResNet18ImageEncoder(Encoder):
     @dataclass
@@ -535,7 +535,6 @@ class gfvImageEncoder(Encoder):
         self.grid_feats_vqa = build_model(cfg)
 
 
-
     def setup(self, args, config):
         """
         Create configs and perform basic setups.
@@ -552,11 +551,9 @@ class gfvImageEncoder(Encoder):
         #cfg.MODEL.RESNETS.RES2_OUT_CHANNELS = config.get("modal_hidden_size", False)
         cfg.MODEL.DEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'
         cfg.freeze()
-
-        # maybe not necessary, but logs
+        # maybe not necessary, but logs and configs
         #https://github.com/facebookresearch/detectron2/blob/main/detectron2/engine/defaults.py
-        #default_setup(cfg, args)
-
+        default_setup(cfg, args)
         return cfg
 
 
@@ -567,11 +564,12 @@ class gfvImageEncoder(Encoder):
 
         images = self.grid_feats_vqa.preprocess_image(inputs) # Normalize, pad and batch the input images.
         features = self.grid_feats_vqa.backbone(images.tensor) # features from backbone
-
         outputs = self.grid_feats_vqa.roi_heads.get_conv5_features(features)
-        return outputs
+
+        # TODO: add type of dimension reductions if chosen? concat, sum, multiply etc like text_embedding
 
         return outputs
+
 
 
 

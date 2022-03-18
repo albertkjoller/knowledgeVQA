@@ -10,7 +10,7 @@ model_config:
 scheduler:
   type: warmup_linear
   params:
-    num_warmup_steps: 100 # default: 2000
+    num_warmup_steps: 2000 # default: 2000
     num_training_steps: ${training.max_updates}
 
 optimizer:
@@ -26,10 +26,10 @@ evaluation:
     - roc_auc
 
 training:
-  batch_size: 16 # default: 512, 128 or higher performs better (2017 tips and tricks)
-  max_epochs: 1 # no default specified, 12-18 mentioned by (2017 tips and tricks)
+  batch_size: 128 # default: 512, 128 or higher performs better (2017 tips and tricks)
+  #max_epochs: 1 # no default specified, 12-18 mentioned by (2017 tips and tricks)
   lr_scheduler: true
-  max_updates: 10 # default: 22000
+  max_updates: 20000 # default: 22000
   early_stop:
     criteria: okvqa/roc_auc # or criteria: okvqa/vqa_accuracy
     minimize: false

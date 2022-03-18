@@ -69,7 +69,7 @@ class Baseline(BaseModel):
 
 
         image_features = self.vision_module(image)
-        print(image_features.shape)
+        #print(image_features.shape)
 
         # TODO: average pooling, lots of other options (top-down, sum, multi)
         #   - text-embedding and _operator has good example
