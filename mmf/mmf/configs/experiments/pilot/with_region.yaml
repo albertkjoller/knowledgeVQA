@@ -31,7 +31,7 @@ model_config:
         name: grid_feats_vqa
         # specify backbone and type of features
         # choices: [R-50-(grid or updn), X-101-grid, X-152-(grid or challenge(MoVie+GridFeat))]
-        backbone_features: ./configs/other/feat_configs/R-50-updn.yaml
+        backbone_features: ./mmf/configs/other/feat_configs/R-50-updn.yaml
         pretrained: true
         pool_type: avg
         zero_init_residual: false
