@@ -15,7 +15,7 @@ python3 -m pip install --editable .
 
 # install additional dependencies
 python3 -m pip install pytest transformers future tensorboard sox opencv-python
-
+python3 -m pip install 'git+https://github.com/facebookresearch/detectron2.git@ffff8ac’
 # test if everything is good
 pytest ./tests/
 
@@ -36,3 +36,6 @@ mmf_run config="configs/experiments/model_name/defaults.yaml \
 
 # or in one line
 mmf_run config="configs/experiments/model_name/defaults.yaml model=model_name dataset=okvqa run_type=train_val
+
+#pilot
+mmf_run config="configs/experiments/pilot/with_grid.yaml" model=pilot dataset=okvqa run_type=train
