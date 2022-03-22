@@ -18,10 +18,18 @@ python3.8 -m venv vqa
 # activate it
 source vqa/bin/activate
 
+
+# install torch from here:
+# https://pytorch.org/get-started/previous-versions/
+# preferably torch 1.9.0:
+# pip install torch==1.9.0+cpu torchvision==0.10.0+cpu torchaudio==0.9.0 -f https://download.pytorch.org/whl/torch_stable.html
+
+
 # change directory
 cd mmf
 
 # install dependencies
+# NOTICE: update 'requirements.txt' to match the one given at the end of this document
 python3 -m pip install --editable .
 
 # install additional dependencies
@@ -47,13 +55,9 @@ bsub < train.sh
 cd mmf
 mmf_run config='configs/experiments/model_name/defaults.yaml' model=model_name dataset=okvqa run_type=train_val
 
-
+# ----------------------------------------------------
 # the modified 'requirements.txt' file
-
-torch==1.9.0
-torchvision==0.10.0
-torchaudio==0.9.0
-torchtext==0.5.0
+torchtext==0.10
 numpy
 tqdm>=4.43.0,<4.50.0
 GitPython==3.1.0
