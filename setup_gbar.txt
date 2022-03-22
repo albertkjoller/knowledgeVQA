@@ -19,11 +19,9 @@ python3.8 -m venv vqa
 source vqa/bin/activate
 
 
-# install torch from here:
-# https://pytorch.org/get-started/previous-versions/
-# preferably torch 1.9.0:
+# install torch from here: https://pytorch.org/get-started/previous-versions/
+# preferably torch version 1.9.0 as:
 # pip install torch==1.9.0+cpu torchvision==0.10.0+cpu torchaudio==0.9.0 -f https://download.pytorch.org/whl/torch_stable.html
-
 
 # change directory
 cd mmf
@@ -39,6 +37,10 @@ python3 -m pip install 'git+https://github.com/facebookresearch/detectron2.git@f
 # in vqa/lib64/python3.8/site-packages/detectron2/layers/
 # and files: 'deform_conv.py', 'roi_align.py', 'roi_align_rotated.py', 'rotated_boxes.py'
 # out comment: from detectron2 import _C
+
+# change data directory if needed in the config folder and general 'defaults.yaml', set:
+# data_dir: /work3/s194262/torch/mmf/data
+
 
 # test if everything is good
 pytest ./tests/

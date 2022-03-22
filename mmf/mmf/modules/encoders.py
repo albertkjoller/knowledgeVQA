@@ -543,11 +543,18 @@ class gfvImageEncoder(Encoder):
         cfg = get_cfg() # detectron default config
         add_attribute_config(cfg) # # grid-feats-vqa default config
         # getting pretrained model
-        backbone_features = config.get("backbone_features", False)
-        cfg.merge_from_file(backbone_features)
+        model = config.get("model", False)
+        cfg.merge_from_file('./mmf/configs/other/feat_configs/' + model)
+
         # forcing the final residual block to have dilations 1
         # TODO: what do we choose? this means we don't dilate?
         cfg.MODEL.RESNETS.RES5_DILATION = 1
+
+        # saving # TODO: can it be merged with the other config.yaml file?
+        save = config.get('output_dir')
+        cfg.OUTPUT_DIR = save.save_dir + '/image_encoder'
+
+
         #cfg.MODEL.RESNETS.RES2_OUT_CHANNELS = config.get("modal_hidden_size", False)
         cfg.MODEL.DEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'
         cfg.freeze()

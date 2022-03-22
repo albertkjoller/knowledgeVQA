@@ -9,9 +9,6 @@ def add_attribute_config(cfg):
     Add config for attribute prediction.
     """
 
-    # saving # TODO: can it be merged with the other config.yaml file?
-    cfg.OUTPUT_DIR = './save/imgencoder'
-
 
     # Whether to have attribute prediction
     cfg.MODEL.ATTRIBUTE_ON = False

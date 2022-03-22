@@ -29,6 +29,7 @@ training:
   batch_size: 128 # default: 512, 128 or higher performs better (2017 tips and tricks)
   #max_epochs: 1 # no default specified, 12-18 mentioned by (2017 tips and tricks)
   lr_scheduler: true
+  #max_epochs: 1
   max_updates: 20000 # default: 22000
   early_stop:
     criteria: okvqa/roc_auc # or criteria: okvqa/vqa_accuracy
