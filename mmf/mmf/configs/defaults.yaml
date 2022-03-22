@@ -27,7 +27,7 @@ training:
     # to provide an estimate on validation side
     log_interval: 100
     # Level of logging, only logs which are >= to current level will be logged
-    logger_level: info
+    logger_level: debug
     # Log format: json, simple
     log_format: simple
     # Whether to log detailed final configuration parameters

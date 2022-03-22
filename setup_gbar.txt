@@ -1,21 +1,37 @@
+
+
+# change directory
+cd Desktop
+
 # clone our directory and change to it
 git clone https://github.com/albertkjoller/explainableVQA
+
+# change directory
 cd explainableVQA
 
-# load python 3.7.x from the GBAR server
-module load python3/3.7.11
+# load python 3.8.11 from the GBAR server
+module load python3/3.8.11
 
-# create virtual environment and activate it
-python3.7 -m venv vqa
+# create virtual environment
+python3.8 -m venv vqa
+
+# activate it
 source vqa/bin/activate
 
-# change to mmf directory and install dependencies
+# change directory
 cd mmf
+
+# install dependencies
 python3 -m pip install --editable .
 
 # install additional dependencies
-python3 -m pip install pytest transformers future tensorboard sox opencv-python
 python3 -m pip install 'git+https://github.com/facebookresearch/detectron2.git@ffff8ac’
+
+# debug code:
+# in vqa/lib64/python3.8/site-packages/detectron2/layers/
+# and files: 'deform_conv.py', 'roi_align.py', 'roi_align_rotated.py', 'rotated_boxes.py'
+# out comment: from detectron2 import _C
+
 # test if everything is good
 pytest ./tests/
 
@@ -29,13 +45,39 @@ bsub < train.sh
 
 # for training run:
 cd mmf
-mmf_run config="configs/experiments/model_name/defaults.yaml \
-    model=model_name \
-    dataset=okvqa \
-	run_type=train_val
+mmf_run config='configs/experiments/model_name/defaults.yaml' model=model_name dataset=okvqa run_type=train_val
 
-# or in one line
-mmf_run config="configs/experiments/model_name/defaults.yaml model=model_name dataset=okvqa run_type=train_val
 
-#pilot
-mmf_run config="configs/experiments/pilot/with_grid.yaml" model=pilot dataset=okvqa run_type=train
+# the modified 'requirements.txt' file
+
+torch==1.9.0
+torchvision==0.10.0
+torchaudio==0.9.0
+torchtext==0.5.0
+numpy
+tqdm>=4.43.0,<4.50.0
+GitPython==3.1.0
+requests==2.23.0
+fasttext==0.9.1
+nltk==3.4.5
+editdistance==0.5.3
+transformers>=3.4.0, <=4.10.1
+sklearn==0.0
+omegaconf>=2.0.6, <=2.1
+lmdb==0.98
+termcolor==1.1.0
+iopath==0.1.8
+datasets==1.2.1
+matplotlib==3.3.4
+pycocotools==2.0.2
+ftfy==5.8
+pytorch-lightning @ git+https://github.com/PyTorchLightning/pytorch-lightning@9b011606f
+psutil
+pillow==8.3.1
+sentencepiece==0.1.86
+
+
+
+
+
+

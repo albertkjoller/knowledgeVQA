@@ -709,6 +709,7 @@ class TransformerEncoder(Encoder):
         return AutoConfig.from_pretrained(
             config.bert_model_name, **OmegaConf.to_container(config)
         )
+        # TODO: GBAR want it to be: utoConfig.from_pretrained(config.bert_model_name)
 
     def forward(self, *args, return_sequence=False, **kwargs) -> Tensor:
         # TODO: not activated, look at encoder factory
@@ -754,8 +755,7 @@ class Any_TransformerEncoder(Encoder):
                 self.module = AutoModel.from_config(**hf_params)
             else:
                 self.module = AutoModel.from_pretrained(
-                    self.config.name, **hf_params
-                )
+                    self.config.name)
 
         self.embeddings = self.module.embeddings
         self.original_config = self.config
@@ -777,9 +777,8 @@ class Any_TransformerEncoder(Encoder):
                 self.embeddings.token_type_embeddings = new_embeds
 
     def _build_encoder_config(self, config: Config):
-        return AutoConfig.from_pretrained(
-            config.name, **OmegaConf.to_container(config)
-        )
+        # TODO: debugged in GBAR
+        return AutoConfig.from_pretrained(config.name)#, **OmegaConf.to_container(config))
 
     def forward(self, *args, return_sequence=False, **kwargs) -> Tensor:
         # Only return pooled output
