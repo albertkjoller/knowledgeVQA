@@ -73,6 +73,7 @@ class PredictiveVQA(BaseModel):
         self.loadExperimentConfig()
         model = self(self.experiment_config)
 
+        # TODO: can be more automatic
         # specify path to saved model
         ROOT_DIR = os.getcwd()
         model_path = Path(f"{ROOT_DIR}/mmf/save/models/{model_name}/{model_name}_final.pth")

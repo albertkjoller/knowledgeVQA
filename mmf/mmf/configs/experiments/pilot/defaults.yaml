@@ -10,7 +10,7 @@ model_config:
 scheduler:
   type: warmup_linear
   params:
-    num_warmup_steps: 2000 # default: 2000
+    num_warmup_steps: 500 # default: 2000
     num_training_steps: ${training.max_updates}
 
 optimizer:
@@ -29,11 +29,12 @@ training:
   batch_size: 128 # default: 512, 128 or higher performs better (2017 tips and tricks)
   #max_epochs: 1 # no default specified, 12-18 mentioned by (2017 tips and tricks)
   lr_scheduler: true
-  max_updates: 20000 # default: 22000
+  max_updates: 10000 # default: 22000
+  num_workers: 4 # default is 4, rule of thumb, set to num cpu cores
+  tensorboard: true
+  use_warmup: true
+  log_detailed_config: true
+  # TODO: how to optimize
   early_stop:
     criteria: okvqa/roc_auc # or criteria: okvqa/vqa_accuracy
     minimize: false
-    use_warmup: false
-    tensorboard: true
-    log_interval: 5
-    log_detailed_config: true # TODO: ?
