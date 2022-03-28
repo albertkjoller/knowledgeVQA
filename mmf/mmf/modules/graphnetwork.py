@@ -590,7 +590,8 @@ class GraphNetworkModule(nn.Module):
                 full_node_dim += self.config_extra["q_hid_sz"]
 
         # Set noback_vb
-        self.noback_vb = self.config_extra["noback_vb"]
+        #self.noback_vb = self.config_extra["noback_vb"]
+        self.noback_vb = config.noback_vb_to_graph
 
         # Convert edge_index and edge_type matrices to torch
         # In forward pass, we repeat this by bs and convert to cuda
@@ -735,6 +736,8 @@ class GraphNetworkModule(nn.Module):
         # Get answer info
         # Recreates mmf answer_vocab here essentially
         answer_vocab = VocabDict(mmf_indirect(config.vocab_file))
+        print(len(answer_vocab))
+
         assert len(answer_vocab) == config.num_labels
 
         # If we're in okvqa v1.0, need to do this a bit differently
@@ -1009,6 +1012,8 @@ class GraphNetworkModule(nn.Module):
         self.node_features_forward[:, : self.w2v_offset].zero_()
 
         # If in not using confs mode, just leave these values at zero
+
+        # TODO: all this seems useless?
         if not self.config.use_conf:
             pass
         elif not self.config.use_q:
@@ -1277,7 +1282,7 @@ class GraphNetworkModule(nn.Module):
             assert output.dim() == 3
 
             # If in graph_analysis mode, save the hidden states here
-            if self.config_extra["analysis_mode"]:
+            if self.config.analysis_mode:
                 self.graph_hidden_debug = output
 
             # Reindex to match with self.graph_vocab
@@ -1516,7 +1521,7 @@ class GraphNetwork(nn.Module):
             self.special_bs = None
 
         # Set output network
-        if self.output_type in ["hidden", "hidden_subindex", "hidden_ans"]:
+        if self.output_type in ["hidden", "hidden_ans", "hidden_subindex"]:
             # Don't really need anything here, either passing all of G,
             # or G for particular indices
             pass

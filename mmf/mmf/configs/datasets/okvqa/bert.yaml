@@ -5,7 +5,7 @@ dataset_config:
         type: bert_tokenizer
         params:
           tokenizer_config:
-            type: bert-base-uncased
+            type: bert-base-uncased # TODO: add distilbert also?
             params:
               do_lower_case: true
           mask_probability: 0

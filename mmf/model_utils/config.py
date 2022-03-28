@@ -2,15 +2,15 @@ import os, yaml
 from pathlib import Path
 from omegaconf import OmegaConf
 
-def loadConfig(model_name):
+def loadConfig(model_name, ):
     """
     Loads the config yaml file
     """
     # TODO: remove when not debuggin
     if os.getcwd().split(os.sep)[-1] == 'mmf':
-        config_path = Path(f"{os.getcwd()}/mmf/configs/models/{('_').join(model_name.split('_')[:-1])}/defaults.yaml")
+        config_path = Path(f"{os.getcwd()}/save/models/{('_').join(model_name.split('_')[:-1])}/config.yaml")
     else:
-        config_path = Path(f"{os.getcwd()}/mmf/mmf/configs/models/{('_').join(model_name.split('_')[:-1])}/defaults.yaml")
+        config_path = Path(f"{os.getcwd()}/mmf/save/models/{('_').join(model_name.split('_')[:-1])}/config.yaml")
 
     with open(config_path, 'r') as stream:
         try:
