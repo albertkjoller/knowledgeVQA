@@ -33,14 +33,14 @@ class PretrainedModel:
         self.vqa_model = self._build_vqa_model()
 
     def _init_processors(self):
+        print('here: ', self.model_name)
         # define arguments
         args = Namespace()
-
         #TODO: change when debugging is not necessary anymore
         if os.getcwd().split(os.sep)[-1] == 'mmf': # TODO: Remove when not debuggin
-            config_path = Path(f'{ROOT_DIR}/save/models/first_model/config.yaml')
+            config_path = Path(f'{ROOT_DIR}/save/models/{self.model_name}/config.yaml')
         else:
-            config_path = Path(f'{ROOT_DIR}/mmf/save/models/first_model/config.yaml')
+            config_path = Path(f'{ROOT_DIR}/mmf/save/models/{self.model_name}/config.yaml')
 
         args.opts = [
             f"config={config_path}",

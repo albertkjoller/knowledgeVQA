@@ -31,7 +31,11 @@ cd mmf
 python3 -m pip install --editable .
 
 # install additional dependencies
-python3 -m pip install 'git+https://github.com/facebookresearch/detectron2.git@ffff8ac’
+python3 -m pip install "git+https://github.com/facebookresearch/detectron2.git@ffff8ac"
+
+# pytorch geometric for kg:
+pip install torch-scatter torch-sparse torch-cluster torch-spline-conv torch-geometric -f https://data.pyg.org/whl/torch-1.9.0+cpu.html
+
 
 # debug code:
 # in vqa/lib64/python3.8/site-packages/detectron2/layers/
@@ -50,12 +54,14 @@ pytest ./tests/
 bsub < predict_demo.sh
 bsub < train.sh
 
+# change model name for saving in the experiments config file
 
 # if using pretrained models, download them from link in project readme and place them in the folder explainableVQA/mmf/save/models/...
 
 # for training run:
 cd mmf
 mmf_run config='configs/experiments/model_name/defaults.yaml' model=model_name dataset=okvqa run_type=train_val
+
 
 # ----------------------------------------------------
 # the modified 'requirements.txt' file
@@ -81,7 +87,10 @@ pytorch-lightning @ git+https://github.com/PyTorchLightning/pytorch-lightning@9b
 psutil
 pillow==8.3.1
 sentencepiece==0.1.86
-
+opencv-python
+networkx
+gensim
+psutil
 
 
 

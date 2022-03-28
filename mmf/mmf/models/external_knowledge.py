@@ -17,10 +17,15 @@ from mmf.utils.build import (
 from mmf.modules.layers import ReLUWithWeightNormFC
 
 
+'''
+run command:
+
+mmf_run config='configs/experiments/external_knowledge/with_grid.yaml' model=external_knowledge dataset=okvqa run_type=train_val
+'''
 
 # Register the model for MMF, "concat_bert_tutorial" key would be used to find the model
-@registry.register_model("pilot")
-class Pilot(BaseModel):
+@registry.register_model("external_knowledge")
+class external_knowledge(BaseModel):
     # All models in MMF get first argument as config which contains all
     # of the information you stored in this model's config (hyperparameters)
     def __init__(self, config):
@@ -34,7 +39,7 @@ class Pilot(BaseModel):
     @classmethod
     def config_path(cls):
         # Relative to user dir root
-        return "configs/models/pilot/defaults.yaml"
+        return "configs/models/external_knowledge/defaults.yaml"
 
     # Each method need to define a build method where the model's modules
     # are actually build and assigned to the model
@@ -49,10 +54,26 @@ class Pilot(BaseModel):
 
         self.classifier = build_classifier_layer(self.config.classifier)
 
+        # Import graph network module
+        # Putting in try-catch to avoid adding dependencies to mmf
+        try:
+            from mmf.modules.graphnetwork import GraphNetworkModule
+        except Exception:
+            print(
+                "Import error with KRISP dependencies. Fix dependencies if "
+                + "you want to use KRISP"
+            )
+            raise
+        self.graph_module = GraphNetworkModule(self.config.graph_module)
+
         # TODO: same as top-down but image_feat_dim hardcoded (not used)
         #self.non_linear_image = ReLUWithWeightNormFC(self.config.image_feat_dim, self.config.modal_hidden_size)
 
-
+        #extra_config = {}
+        #...
+        #self.graph_logit_fc = nn.Linear(
+        #    self.config.graph_module.node_hid_dim, self.config.graph_module.num_labels
+        #)
 
     # Each model in MMF gets a dict called sample_list which contains
     # all of the necessary information returned from the image
@@ -64,32 +85,41 @@ class Pilot(BaseModel):
 
         # Get the text and image features from the encoders
         text_features = self.language_module(text)#[1]
-        #print('here: ', len(text_features))
-        #print('here: ', text_features[0].shape)
-
-
-        image_features = self.vision_module(image)
-        #print(image_features.shape)
-
-        # TODO: average pooling, lots of other options (top-down, sum, multi)
-        #   - text-embedding and _operator has good example
-        # doing it on dimensions 2 and 3
-        image_features = torch.mean(image_features, dim = (2,3))
-
-
-        # Flatten the embeddings before concatenation
-        image_features = torch.flatten(image_features, start_dim=1)
         text_features = torch.flatten(text_features, start_dim=1)
 
 
 
-        # Multiply the final features
-        # TODO: (top down bottom up) haardman product
-        combined = torch.cat([text_features, image_features], dim=1)
+        image_features = self.vision_module(image)
+        #print(image_features.shape)
+        # TODO: average pooling, lots of other options (top-down, sum, multi)
+        #   - text-embedding and _operator has good example
+        # doing it on dimensions 2 and 3 and keep 2048
+        image_features = torch.mean(image_features, dim = (2,3))
+        # Flatten the embeddings before concatenation
+        image_features = torch.flatten(image_features, start_dim=1)
 
+        # external knowledge
+        # If we feed seperate Q feats into graph
+        # Now sample_list has all the processed inputs for us
+        # initialize for graph module
+        sample_list["q_encoded"] = text # dim 128
+        # Forward through graph module
+        graph_features = self.graph_module(sample_list) # [128, 1310, 128]
+        # Compute logits from single hidden layer
+        #graph_logits = self.graph_logit_fc(graph_output) # change dimension
+        graph_features = torch.mean(graph_features, dim = 2) # mean pooling hidden dim of 768 so now batch*1310
+
+
+        # Combine logits
+        # TODO: (top down bottom up) haardman product, or bilinear?
+        fusion = torch.cat([text_features, image_features, graph_features], dim=1)
+        # Do zerobias
+        # TODO: where does this come from?
+        #if self.config.zerobias:
+        #    logits -= 6.58
 
         # Pass final tensor to classifier to get scores
-        logits = self.classifier(combined)
+        logits = self.classifier(fusion)
         # For loss calculations (automatically done by MMF
         # as per the loss defined in the config),
         # we need to return a dict with "scores" key as logits

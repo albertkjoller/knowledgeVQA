@@ -1,11 +1,25 @@
 includes:
   - configs/datasets/okvqa/bert.yaml
 
+
+# TODO: how much is necessary here?
+
 model_config:
-  pilot:
+  external_knowledge:
     losses:
       #- type: cross_entropy, target dim needs to be adjusted
       - type: logit_bce # binary cross-entropy loss since each question has multiple answers (MGFAN with ref.)
+
+dataset_config:
+  okvqa:
+    processors:
+      answer_processor:
+        params:
+          # improved answer vocab
+          vocab_file: okvqa/defaults/annotations/annotations/answer_vocab_count10.txt
+
+
+
 
 scheduler:
   type: warmup_linear # krisp uses warmup_cosine

@@ -74,9 +74,12 @@ class PredictiveVQA(BaseModel):
         model = self(self.experiment_config)
 
         # TODO: can be more automatic
+        # TODO: not in models?
         # specify path to saved model
         ROOT_DIR = os.getcwd()
         model_path = Path(f"{ROOT_DIR}/mmf/save/models/{model_name}/{model_name}_final.pth")
+        #{self.experiment_config.env.save_dir} = save_dir: ./save/pilot_grid
+
 
         # load state dict and convert from multi-gpu to single (in case)
         state_dict = torch.load(model_path)
