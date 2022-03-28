@@ -14,6 +14,30 @@ from dash import dcc
 from dash import html
 
 
+def print_top(df, attribute: str, n: int):
+    print("-"*80)
+    print(f"Top {n} ({attribute}) QA-pairs:")
+
+    for row in df.sort_values(by=attribute, ascending=False)[:n].iterrows():
+        subframe = pd.DataFrame(row[1:])
+
+        print("-"*80)
+        print(f"Question:\n {subframe.question_str.iloc[0]}\n")
+        print(f"Answer:\n {set(subframe.answers.iloc[0])}\n")
+        print(f"{attribute}: {subframe[attribute].iloc[0]}")
+
+def print_bottom(df, attribute: str, n: int):
+    print("-"*80)
+    print(f"Bottom {n} ({attribute}) QA-pairs:")
+
+    for row in df.sort_values(by=attribute, ascending=True)[:n].iterrows():
+        subframe = pd.DataFrame(row[1:])
+
+        print("-"*80)
+        print(f"Question:\n {subframe.question_str.iloc[0]}\n")
+        print(f"Answer:\n {set(subframe.answers.iloc[0])}\n")
+        print(f"{attribute}: {subframe[attribute].iloc[0]}")
+
 
 # define plotting function
 def LogAndLinearHist(data, xlabel='', figsize=((8,3)), dpi=100):
