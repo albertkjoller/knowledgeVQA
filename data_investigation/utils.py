@@ -2,10 +2,12 @@ import os
 import numpy as np 
 import pandas as pd
 import matplotlib.pyplot as plt
+import json
 
 from pathlib import Path
 from tqdm.notebook import tqdm
 from itertools import accumulate
+from collections import Counter
 
 import plotly.graph_objects as go
 
@@ -13,6 +15,56 @@ import dash
 from dash import dcc
 from dash import html
 
+
+# data load function
+def loadData(filename, data_path):
+    filetype = filename.split(".")[-1]
+    if filetype == 'npy':
+        data = np.load(data_path / filename, allow_pickle=True)
+        dataset_specs = data[0]
+        data = data[1:]
+        q_type = None
+        
+    elif filetype == 'json':
+        data = json.load(open(data_path/filename))
+        keys = set(data.keys())
+        keys.discard('annotations')
+        q_type = data['question_types']
+        dataset_specs = {key: data[key] for key in keys}    
+        data = pd.DataFrame(data['annotations'])
+        
+    
+    print("Dataset specs:")
+    for key, value in dataset_specs.items():
+        print(f"{key}: {value}")
+    
+    return pd.DataFrame.from_records(data), q_type
+
+
+def plot_PCA(fig, PCA_df, attribute, subplot=111, chosen_PCs=(1,2)):
+    # create subplot
+    ax = fig.add_subplot(subplot) 
+
+    # add labels
+    ax.set_xlabel(f'Principal Component {chosen_PCs[0]}', fontsize = 15)
+    ax.set_ylabel(f'Principal Component {chosen_PCs[1]}', fontsize = 15)
+    ax.set_title(f'PCA ({attribute})', fontsize = 20)
+
+    # specify colors and targets
+    targets = sorted(list(PCA_df[attribute].unique()))
+    colors = [f'C{i}' for i in range(1, 1+targets.__len__())]
+
+    # scatter plot colored by the answer_variability
+    for target, color in zip(targets, colors):
+        idxs = PCA_df[attribute] == target
+        ax.scatter(PCA_df.loc[idxs, f'PC{chosen_PCs[0]}'],
+                   PCA_df.loc[idxs, f'PC{chosen_PCs[1]}'],
+                   c = color,s = 50, alpha=0.45)
+
+    # add legend
+    ax.legend(targets)
+    ax.grid()
+    return ax, targets
 
 def print_top(df, attribute: str, n: int):
     print("-"*80)
@@ -23,7 +75,7 @@ def print_top(df, attribute: str, n: int):
 
         print("-"*80)
         print(f"Question:\n {subframe.question_str.iloc[0]}\n")
-        print(f"Answer:\n {set(subframe.answers.iloc[0])}\n")
+        print(f"Answer:\n {Counter(subframe.answers.iloc[0])}\n")
         print(f"{attribute}: {subframe[attribute].iloc[0]}")
 
 def print_bottom(df, attribute: str, n: int):
@@ -35,7 +87,7 @@ def print_bottom(df, attribute: str, n: int):
 
         print("-"*80)
         print(f"Question:\n {subframe.question_str.iloc[0]}\n")
-        print(f"Answer:\n {set(subframe.answers.iloc[0])}\n")
+        print(f"Answer:\n {Counter(subframe.answers.iloc[0])}\n")
         print(f"{attribute}: {subframe[attribute].iloc[0]}")
 
 
