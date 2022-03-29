@@ -59,6 +59,7 @@ from sklearn.metrics import (
     precision_recall_fscore_support,
     roc_auc_score,
 )
+from sklearn.preprocessing import MultiLabelBinarizer
 from torch import Tensor
 
 
@@ -971,6 +972,7 @@ class ROC_AUC(BaseMetric):
     def __init__(self, *args, **kwargs):
         super().__init__("roc_auc")
         self._sk_kwargs = kwargs
+        self.mlb = MultiLabelBinarizer()
 
     def calculate(self, sample_list, model_output, *args, **kwargs):
         """Calculate ROC_AUC and returns it back. The function performs softmax
@@ -989,6 +991,7 @@ class ROC_AUC(BaseMetric):
 
         output = torch.nn.functional.softmax(model_output["scores"], dim=-1)
         expected = sample_list["targets"]
+        expected = self.mlb.fit_transform(expected) # TODO: working for okvqa now
         expected = _convert_to_one_hot(expected, output)
         value = roc_auc_score(expected.cpu(), output.cpu(), **self._sk_kwargs)
         return expected.new_tensor(value, dtype=torch.float)

@@ -4,6 +4,10 @@ includes:
 
 # TODO: how much is necessary here?
 
+env:
+  save_dir: ./save/ek_default
+
+
 model_config:
   external_knowledge:
     losses:

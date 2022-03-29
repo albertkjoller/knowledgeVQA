@@ -551,8 +551,8 @@ class gfvImageEncoder(Encoder):
         cfg.MODEL.RESNETS.RES5_DILATION = 1
 
         # saving # TODO: can it be merged with the other config.yaml file?
-        #cfg.OUTPUT_DIR = config.get('output_dir')
-        cfg.OUTPUT_DIR = config.get('output_dir.save_dir')
+        cfg.OUTPUT_DIR = config.get('output_dir')
+        #cfg.OUTPUT_DIR = config.get('output_dir.save_dir')
 
 
         #cfg.MODEL.RESNETS.RES2_OUT_CHANNELS = config.get("modal_hidden_size", False)

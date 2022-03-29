@@ -43,6 +43,7 @@ model_config:
       use_w2v: true
       # what type of inputs
       node_inputs:
+        # numbers are not used in module
         question: 1
         #classifiers: 4 # 4 probabilities whether the node/word/concept is in the image
         w2v: 300 # GloVe representation of the concept

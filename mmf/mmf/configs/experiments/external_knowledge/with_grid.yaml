@@ -4,7 +4,7 @@ includes:
 # this is similar to pythia
 
 env:
-  save_dir: ./save/ek_with_grid
+  save_dir: ./save/ek_grid
 
 
 dataset_config:
