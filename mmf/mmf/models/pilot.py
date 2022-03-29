@@ -14,9 +14,17 @@ from mmf.utils.build import (
     build_text_encoder,
 )
 
-from mmf.modules.layers import ReLUWithWeightNormFC
 
+'''
+fast run:
+mmf_run config='configs/experiments/pilot/grids.yaml' \
+    datasets=okvqa \
+    model=pilot \
+    run_type=train_val \
+    training.batch_size=32 \
+    training.max_updates=1 \
 
+'''
 
 # Register the model for MMF, "concat_bert_tutorial" key would be used to find the model
 @registry.register_model("pilot")
@@ -40,59 +48,42 @@ class Pilot(BaseModel):
     # are actually build and assigned to the model
     def build(self):
 
-
         self.vision_module = build_image_encoder(self.config.image_encoder)
-
 
         self.language_module = build_text_encoder(self.config.text_encoder)
 
-
         self.classifier = build_classifier_layer(self.config.classifier)
 
-        # TODO: same as top-down but image_feat_dim hardcoded (not used)
-        #self.non_linear_image = ReLUWithWeightNormFC(self.config.image_feat_dim, self.config.modal_hidden_size)
 
 
-
-    # Each model in MMF gets a dict called sample_list which contains
-    # all of the necessary information returned from the image
     def forward(self, sample_list):
+        # Each model in MMF gets a dict called sample_list which contains
+        # all of the necessary information returned from the image
+
         # Text input features will be in "input_ids" key
         text = sample_list["input_ids"]
         # Similarly, image input will be in "image" key
         image = sample_list["image"]
 
         # Get the text and image features from the encoders
-        text_features = self.language_module(text)#[1]
-        #print('here: ', len(text_features))
-        #print('here: ', text_features[0].shape)
-
-
+        text_features = self.language_module(text) #TODO: with [1] if bert uncased
         image_features = self.vision_module(image)
-        #print(image_features.shape)
 
         # TODO: average pooling, lots of other options (top-down, sum, multi)
         #   - text-embedding and _operator has good example
-        # doing it on dimensions 2 and 3
+        # grids: [batch_size, 2048, 7, 7] (7*7=49 grids)
+        #   - img: [224, 224] in which (224*224)/1024 = 49
         image_features = torch.mean(image_features, dim = (2,3))
-
 
         # Flatten the embeddings before concatenation
         image_features = torch.flatten(image_features, start_dim=1)
         text_features = torch.flatten(text_features, start_dim=1)
 
-
-
-        # Multiply the final features
-        # TODO: (top down bottom up) haardman product
-        combined = torch.cat([text_features, image_features], dim=1)
-
+        # Concatenate final features
+        combined = torch.cat([text_features, image_features], dim=1) # TODO: (top down bottom up) haardman product
 
         # Pass final tensor to classifier to get scores
         logits = self.classifier(combined)
-        # For loss calculations (automatically done by MMF
-        # as per the loss defined in the config),
-        # we need to return a dict with "scores" key as logits
         output = {"scores": logits}
 
         # MMF will automatically calculate loss

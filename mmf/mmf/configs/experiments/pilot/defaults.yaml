@@ -1,16 +1,34 @@
 includes:
   - configs/datasets/okvqa/bert.yaml
 
+
+env:
+  save_dir: ./save/models/pilot_default
+
 model_config:
   pilot:
     losses:
       #- type: cross_entropy, target dim needs to be adjusted
-      - type: logit_bce # binary cross-entropy loss since each question has multiple answers (MGFAN with ref.)
+      # MGFAN with ref.: binary cross-entropy loss since each question has multiple answers
+      - type: logit_bce # logit_bce, cross_entropy, caption_cross_entropy
+        # TODO: what about contrastive loss?
+
+
+
+dataset_config:
+  okvqa:
+    processors:
+      answer_processor:
+        params:
+          # improved answer vocabulary by okvqa (v1.1) TODO: or not
+          vocab_file: okvqa/defaults/annotations/annotations/answer_vocab_count10.txt
+
+
 
 scheduler:
   type: warmup_linear # krisp uses warmup_cosine
   params:
-    num_warmup_steps: 500 # default: 2000
+    num_warmup_steps: 2000 # default: 2000
     num_training_steps: ${training.max_updates}
 
 
@@ -21,26 +39,29 @@ optimizer:
     eps: 1e-8
 
 evaluation:
+  predict: true # Generate predictions in a file
   metrics:
     - accuracy
-    - vqa_accuracy
+    - vqa_accuracy # or vqa_evalai_accuracy
+    - roc_auc # some note in metrics.py about labels
+    #- f1 # takes multilabel
 
-    # TODO: metrics dont work with multilabel (loss function?)
-    #- binary_f1
-    #- roc_auc
 
 training:
   batch_size: 128 # default: 512, 128 or higher performs better (2017 tips and tricks)
   #max_epochs: 1 # no default specified, 12-18 mentioned by (2017 tips and tricks)
   lr_scheduler: true   # Don't forget to update schedule_attributes if you update this
-  max_updates: 10000 # default: 22000, krisp uses 88000
+  max_updates: 22000 # default: 22000, krisp uses 88000
   num_workers: 4 # default is 4, rule of thumb, set to num cpu cores
   tensorboard: true
-  use_warmup: true
-  #log_detailed_config: true
-  # TODO: how to optimize
-  early_stop:
-    # Criteria can also be an evaluation metric in this format `dataset/metric`
-    # for e.g. vqa2/vqa_accuracy
-    criteria: okvqa/vqa_accuracy # val/okvqa/roc_auc)
-    minimize: false
+  use_warmup: false
+  evaluate_metrics: true # enable evaluation every log_interval number of updates
+  evaluation_interval: 1000
+
+
+trainer:
+  params:
+    gpus: 1 #
+    logger: true
+    progress_bar_refresh_rate: 0.1
+    val_check_interval: 1000

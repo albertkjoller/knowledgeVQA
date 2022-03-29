@@ -1,4 +1,5 @@
 import os, gc
+import pickle
 from pathlib import Path
 from argparse import Namespace
 
@@ -112,6 +113,9 @@ class PretrainedModel:
 
             # gather in sample list
             sample_list = SampleList([sample]).to(self.device)
+
+            with open('filename.pickle','wb') as handle:
+                pickle.dump(sample_list, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
             # predict scores with model (multiclass)
             scores = self.vqa_model(sample_list)["scores"]

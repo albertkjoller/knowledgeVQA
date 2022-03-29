@@ -1,12 +1,10 @@
 includes:
 - ./defaults.yaml
 
-# this is similar to pythia
+env:
+  save_dir: ./save/models/pilot_grids
 
-env: &id001
-  save_dir: ./save/pilot_grid
-
-
+# only use the images
 dataset_config:
   okvqa:
     depth_first: false
@@ -25,8 +23,7 @@ dataset_config:
 
 model_config:
   pilot:
-    # models from grid-feats-vqa
-    # taken from: https://github.com/facebookresearch/grid-feats-vqa
+    # models from grid-feats-vqa < https://github.com/facebookresearch/grid-feats-vqa >
     image_encoder:
       type: grid_feats_vqa
       params:
@@ -36,6 +33,5 @@ model_config:
         model: R-50-grid.yaml
         output_dir: ${env.save_dir}
         pretrained: true
-        pool_type: avg
         zero_init_residual: false
-        num_output_features: 1
+        num_output_features: 1 # per grid?

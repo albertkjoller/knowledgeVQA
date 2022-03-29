@@ -3,6 +3,9 @@ includes:
 
 # this is similar to pythia
 
+env:
+  save_dir: ./save/ek_region
+
 dataset_config:
   okvqa:
     data_dir: ${env.data_dir}/datasets

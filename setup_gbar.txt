@@ -62,6 +62,7 @@ bsub < train.sh
 cd mmf
 mmf_run config='configs/experiments/model_name/defaults.yaml' model=model_name dataset=okvqa run_type=train_val
 
+# for fast run, add argument fx training.max_updates=2
 
 # ----------------------------------------------------
 # the modified 'requirements.txt' file
