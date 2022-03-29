@@ -10,10 +10,15 @@
 #BSUB -B
 #BSUB -N
 
-source vqa/bin/activate
+source vqa_cuda/bin/activate
 cd mmf
 
-mmf_run config="configs/experiments/pilot/with_grid.yaml" \
-model=pilot \
-dataset=okvqa \
-run_type=train_val
+module load cuda/10.2
+/appl/cuda/10.2/samples/NVIDIA_CUDA-10.2_Samples/bin/x86_64/linux/release/deviceQuery
+
+mmf_run config='configs/experiments/pilot/grids.yaml' \
+    datasets=okvqa \
+    model=pilot \
+    run_type=train_val \
+    training.max_updates=1 \
+    env.data_dir=/work3/s194262/torch/mmf/data \

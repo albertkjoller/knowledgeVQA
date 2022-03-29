@@ -22,6 +22,8 @@ source vqa/bin/activate
 # install torch from here: https://pytorch.org/get-started/previous-versions/
 # preferably torch version 1.9.0 as:
 # pip install torch==1.9.0+cpu torchvision==0.10.0+cpu torchaudio==0.9.0 -f https://download.pytorch.org/whl/torch_stable.html
+# or
+#pip install torch==1.9.0+cu102 torchvision==0.10.0+cu102 torchaudio==0.9.0 -f https://download.pytorch.org/whl/torch_stable.html
 
 # change directory
 cd mmf
@@ -34,7 +36,7 @@ python3 -m pip install --editable .
 python3 -m pip install "git+https://github.com/facebookresearch/detectron2.git@ffff8ac"
 
 # pytorch geometric for kg:
-pip install torch-scatter torch-sparse torch-cluster torch-spline-conv torch-geometric -f https://data.pyg.org/whl/torch-1.9.0+cpu.html
+pip install torch-scatter torch-sparse torch-cluster torch-spline-conv torch-geometric -f https://data.pyg.org/whl/torch-1.9.0+cu102.html
 
 
 # debug code:
@@ -42,8 +44,6 @@ pip install torch-scatter torch-sparse torch-cluster torch-spline-conv torch-geo
 # and files: 'deform_conv.py', 'roi_align.py', 'roi_align_rotated.py', 'rotated_boxes.py'
 # out comment: from detectron2 import _C
 
-# change data directory if needed in the config folder and general 'defaults.yaml', set:
-# data_dir: /work3/s194262/torch/mmf/data
 
 
 # test if everything is good
@@ -58,14 +58,36 @@ bsub < train.sh
 
 # if using pretrained models, download them from link in project readme and place them in the folder explainableVQA/mmf/save/models/...
 
-# for training run:
-cd mmf
-mmf_run config='configs/experiments/model_name/defaults.yaml' model=model_name dataset=okvqa run_type=train_val
+# ----------------------------------------------------#
+Command for training:
 
-# for fast run, add argument fx training.max_updates=2
+cd <to explainableVQA/mmf>
+
+mmf_run config='configs/experiments/model_name/run_type.yaml' \
+    datasets=dataset_name \
+    model=model_name \
+    run_type=train_val \
+    env.data_dir=/work3/s******/torch/mmf/data
+
+mmf_run config='configs/experiments/pilot/grids.yaml' \
+    datasets=okvqa \
+    model=pilot \
+    run_type=train_val \
+    training.max_updates=1 \
+    env.data_dir=/work3/s194262/torch/mmf/data \
+
+
+# for fast run:
+mmf_run config='configs/experiments/model_name/run_type.yaml' \
+    datasets=dataset_name \
+    model=model_name \
+    run_type=train_val \
+    training.max_updates=1 \
+
 
 # ----------------------------------------------------
-# the modified 'requirements.txt' file
+# the modified 'requirements.txt' file:
+
 torchtext==0.10
 numpy
 tqdm>=4.43.0,<4.50.0
@@ -85,6 +107,7 @@ matplotlib==3.3.4
 pycocotools==2.0.2
 ftfy==5.8
 pytorch-lightning @ git+https://github.com/PyTorchLightning/pytorch-lightning@9b011606f
+detectron2 @ git+https://github.com/facebookresearch/detectron2.git@ffff8ac
 psutil
 pillow==8.3.1
 sentencepiece==0.1.86
@@ -92,6 +115,122 @@ opencv-python
 networkx
 gensim
 psutil
+
+
+
+#---------
+
+
+# change directory
+cd Desktop
+
+# clone our directory and change to it
+git clone https://github.com/albertkjoller/explainableVQA
+
+# change directory
+cd explainableVQA
+
+# load python 3.8.11 from the GBAR server
+module load python3/3.8.11
+
+# create virtual environment
+python3.8 -m venv vqa
+
+# activate it
+source vqa/bin/activate
+
+
+# install torch from here: https://pytorch.org/get-started/previous-versions/
+# preferably torch version 1.9.0 as:
+python3 -m pip install torch==1.9.0+cu102 torchvision==0.10.0+cu102 torchaudio==0.9.0 -f https://download.pytorch.org/whl/torch_stable.html
+#and
+python3 -m pip install torch-scatter torch-sparse torch-cluster torch-spline-conv torch-geometric -f https://data.pyg.org/whl/torch-1.9.0+cu102.html
+
+
+# change directory
+cd mmf
+
+# install dependencies
+# NOTICE: update 'requirements.txt' to match the one given at the end of this document
+python3 -m pip install --editable .
+
+# install additional dependencies
+python3 -m pip install "git+https://github.com/facebookresearch/detectron2.git@ffff8ac"
+
+# debug code:
+# in vqa/lib64/python3.8/site-packages/detectron2/layers/
+# and files: 'deform_conv.py', 'roi_align.py', 'roi_align_rotated.py', 'rotated_boxes.py'
+# out comment: from detectron2 import _C
+
+
+
+# test if everything is good
+pytest ./tests/
+
+
+# for running a script create a shell-file for submission and run it, e.g.:
+bsub < predict_demo.sh
+bsub < train.sh
+
+# change model name for saving in the experiments config file
+
+# if using pretrained models, download them from link in project readme and place them in the folder explainableVQA/mmf/save/models/...
+
+# ----------------------------------------------------#
+Command for training:
+
+cd <to explainableVQA/mmf>
+
+mmf_run config='configs/experiments/model_name/run_type.yaml' \
+    datasets=dataset_name \
+    model=model_name \
+    run_type=train_val \
+    env.data_dir=/work3/s******/torch/mmf/data
+
+# for fast run:
+mmf_run config='configs/experiments/model_name/run_type.yaml' \
+    datasets=dataset_name \
+    model=model_name \
+    run_type=train_val \
+    training.max_updates=1 \
+
+
+# ----------------------------------------------------
+# the modified 'requirements.txt' file:
+
+torchtext==0.10
+numpy
+tqdm>=4.43.0,<4.50.0
+GitPython==3.1.0
+requests==2.23.0
+fasttext==0.9.1
+nltk==3.4.5
+editdistance==0.5.3
+transformers>=3.4.0, <=4.10.1
+sklearn==0.0
+omegaconf>=2.0.6, <=2.1
+lmdb==0.98
+termcolor==1.1.0
+iopath==0.1.8
+datasets==1.2.1
+matplotlib==3.3.4
+pycocotools==2.0.2
+ftfy==5.8
+pytorch-lightning @ git+https://github.com/PyTorchLightning/pytorch-lightning@9b011606f
+detectron2 @ git+https://github.com/facebookresearch/detectron2.git@ffff8ac
+psutil
+pillow==8.3.1
+sentencepiece==0.1.86
+opencv-python
+networkx
+gensim
+psutil
+
+
+
+
+
+
 
 
 

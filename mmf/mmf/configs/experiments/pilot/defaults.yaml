@@ -43,7 +43,7 @@ evaluation:
   metrics:
     - accuracy
     - vqa_accuracy # or vqa_evalai_accuracy
-    - roc_auc # some note in metrics.py about labels
+    #- roc_auc # some note in metrics.py about labels
     #- f1 # takes multilabel
 
 
@@ -61,7 +61,7 @@ training:
 
 trainer:
   params:
-    gpus: 1 #
+    gpus: 1
     logger: true
     progress_bar_refresh_rate: 0.1
     val_check_interval: 1000

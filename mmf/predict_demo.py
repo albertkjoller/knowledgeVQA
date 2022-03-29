@@ -23,25 +23,25 @@ class PretrainedModel:
     global ROOT_DIR
     ROOT_DIR = os.getcwd()
 
-    def __init__(self, model_filename: str, ModelClass: type(BaseModel), dataset: str):
+    def __init__(self, model_filename: str, ModelClass: type(BaseModel), dataset: str, experiment_name: str):
         self.model_filename = model_filename
         self.model_name = ('_').join(self.model_filename.split('_')[:-1])  # model is saved as "model_name_final.pth"
         self.ModelClass = ModelClass
         self.dataset = dataset
+        self.experiment_name = experiment_name
 
         self._init_processors()
         self.device = 'cuda' if torch.cuda.is_available() else 'cpu'
         self.vqa_model = self._build_vqa_model()
 
     def _init_processors(self):
-        print('here: ', self.model_name)
         # define arguments
         args = Namespace()
         #TODO: change when debugging is not necessary anymore
         if os.getcwd().split(os.sep)[-1] == 'mmf': # TODO: Remove when not debuggin
-            config_path = Path(f'{ROOT_DIR}/save/models/{self.model_name}/config.yaml')
+            config_path = Path(f'{ROOT_DIR}/save/models/{self.experiment_name}/config.yaml')
         else:
-            config_path = Path(f'{ROOT_DIR}/mmf/save/models/{self.model_name}/config.yaml')
+            config_path = Path(f'{ROOT_DIR}/mmf/save/models/{self.experiment_name}/config.yaml')
 
         args.opts = [
             f"config={config_path}",
@@ -82,9 +82,9 @@ class PretrainedModel:
         #TODO: change when debugging is not necessary anymore
         # specify path to saved model (depending on debugging or running from command line)
         if os.getcwd().split(os.sep)[-1] == 'mmf': #TODO: remove when not debuggin
-            model_path = Path(f"{ROOT_DIR}/save/models/{self.model_name}/{self.model_filename}.pth")
+            model_path = Path(f"{ROOT_DIR}/save/models/{self.experiment_name}/{self.model_filename}.pth")
         else:
-            model_path = Path(f"{ROOT_DIR}/mmf/save/models/{self.model_name}/{self.model_filename}.pth")
+            model_path = Path(f"{ROOT_DIR}/mmf/save/models/{self.experiment_name}/{self.model_filename}.pth")
 
         # load state dict and eventually convert from multi-gpu to single
         state_dict = torch.load(model_path)
@@ -142,14 +142,16 @@ if __name__ == '__main__':
 
     # obtain user input
     model_filename = input("Enter saved model filename: ")
+    experiment_name = input("Experiment name folder: ")
     ModelClass = input("Enter model type (e.g. BaseModel): ")
     dataset = input("Enter name of dataset used for training: ")
     print("")
 
     # specify model arguments and load model
-    kwargs = {'model_filename': model_filename,
-              'ModelClass': str_to_class(ModelClass),
-              'dataset': dataset}
+    kwargs = {'saved model filename': model_filename,
+              'experiment folder name': experiment_name,
+              'ModelClass name': str_to_class(ModelClass),
+              'dataset name': dataset}
     model = PretrainedModel(**kwargs)
 
     # only when debugging - from bash this doesn't matter #TODO: remove in the end
