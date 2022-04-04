@@ -89,7 +89,7 @@ class Pilot(BaseModel):
         # MMF will automatically calculate loss
         return output
 
-
+'''
     def load(self):
         self.device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
@@ -169,7 +169,7 @@ class Pilot(BaseModel):
 
         return probs, answers
 
-
+'''
 
 
 

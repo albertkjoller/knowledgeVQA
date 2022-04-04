@@ -2,9 +2,6 @@ includes:
   - configs/datasets/okvqa/bert.yaml
 
 
-env:
-  save_dir: ./save/models/pilot_default
-
 model_config:
   pilot:
     losses:
@@ -35,7 +32,7 @@ scheduler:
 optimizer:
   type: adam_w
   params:
-    lr: 5e-5
+    lr: 0.001 #5e-5
     eps: 1e-8
 
 evaluation:
@@ -56,12 +53,12 @@ training:
   tensorboard: true
   use_warmup: false
   evaluate_metrics: true # enable evaluation every log_interval number of updates
-  evaluation_interval: 1000
+  evaluation_interval: 100
 
 
 trainer:
   params:
-    gpus: 1
+    gpus: 1 # TODO: what works best
     logger: true
     progress_bar_refresh_rate: 0.1
     val_check_interval: 1000

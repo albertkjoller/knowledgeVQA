@@ -21,11 +21,12 @@ source vqa/bin/activate
 # TODO: can this be done in requirements?
 # install torch from here: <https://pytorch.org/get-started/previous-versions/>, preferably torch version 1.9.0.
 # cpu
-# pip install torch==1.9.0+cpu torchvision==0.10.0+cpu torchaudio==0.9.0 -f https://download.pytorch.org/whl/torch_stable.html
-pip install torch-scatter torch-sparse torch-cluster torch-spline-conv torch-geometric -f https://data.pyg.org/whl/torch-1.9.0+cpu.html
+python3 -m pip install torch==1.9.0+cpu torchvision==0.10.0+cpu torchaudio==0.9.0 -f https://download.pytorch.org/whl/torch_stable.html
+python3 -m pip install torch-scatter torch-sparse torch-cluster torch-spline-conv torch-geometric -f https://data.pyg.org/whl/torch-1.9.0+cpu.html
+
 # cuda
-#pip install torch==1.9.0+cu102 torchvision==0.10.0+cu102 torchaudio==0.9.0 -f https://download.pytorch.org/whl/torch_stable.html
-pip install torch-scatter torch-sparse torch-cluster torch-spline-conv torch-geometric -f https://data.pyg.org/whl/torch-1.9.0+cu102.html
+python3 -m pip install torch==1.9.0+cu102 torchvision==0.10.0+cu102 torchaudio==0.9.0 -f https://download.pytorch.org/whl/torch_stable.html
+python3 -m pip install torch-scatter torch-sparse torch-cluster torch-spline-conv torch-geometric -f https://data.pyg.org/whl/torch-1.9.0+cu102.html
 
 
 # change directory
@@ -66,16 +67,25 @@ mmf_run config='configs/experiments/model_name/run_type.yaml' \
     model=model_name \
     run_type=train_val \
     env.data_dir=/work3/s******/torch/mmf/data
-    training.evaluation_interval: 100 \
-    trainer.params.gpus=1 \
+
 
 # fast run command:
 mmf_run config='configs/experiments/model_name/run_type.yaml' \
     datasets=dataset_name \
     model=model_name \
     run_type=train_val \
+    env.data_dir=/work3/s******/torch/mmf/data
     training.max_updates=1 \
-    trainer.params.gpus=1 \
+
+e.g.
+# fast run command:
+mmf_run config='configs/experiments/pilot/grids.yaml' \
+    datasets=okvqa \
+    model=pilot \
+    run_type=train_val \
+    training.max_updates=1 \
+    env.data_dir=/work3/s******/torch/mmf/data
+
 
 # ----------------------------------------------------
 # the modified 'requirements.txt' file:
