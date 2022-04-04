@@ -2,15 +2,15 @@ import os, yaml
 from pathlib import Path
 from omegaconf import OmegaConf
 
-def loadConfig(model_name, ):
+def loadConfig(experiment_name, model_name):
     """
     Loads the config yaml file
     """
     # TODO: remove when not debuggin
     if os.getcwd().split(os.sep)[-1] == 'mmf':
-        config_path = Path(f"{os.getcwd()}/save/models/{('_').join(model_name.split('_')[:-1])}/config.yaml")
+        config_path = Path(f"{os.getcwd()}/save/models/{experiment_name}/config.yaml")
     else:
-        config_path = Path(f"{os.getcwd()}/mmf/save/models/{('_').join(model_name.split('_')[:-1])}/config.yaml")
+        config_path = Path(f"{os.getcwd()}/mmf/save/models/{experiment_name}/config.yaml")
 
     with open(config_path, 'r') as stream:
         try:
@@ -20,7 +20,7 @@ def loadConfig(model_name, ):
             print(exc)
 
     # Extract model name
-    model_name = config_path.as_posix().split("/")[-2]
+    #model_name = config_path.as_posix().split("/")[-2]
     config = OmegaConf.create(parsed_yaml['model_config'][model_name])
     return config
 

@@ -559,7 +559,7 @@ class gfvImageEncoder(Encoder):
         cfg.freeze()
         # maybe not necessary, but logs and configs
         #https://github.com/facebookresearch/detectron2/blob/main/detectron2/engine/defaults.py
-        default_setup(cfg, args)
+        #default_setup(cfg, args)
         return cfg
 
 

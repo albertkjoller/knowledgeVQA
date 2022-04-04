@@ -77,7 +77,7 @@ class PretrainedModel:
 
     def _build_vqa_model(self):
         # load configuration and create model object
-        config = loadConfig(self.model_filename)
+        config = loadConfig(self.experiment_name, self.model_name)
         model = self.ModelClass(config)
 
         #TODO: change when debugging is not necessary anymore
