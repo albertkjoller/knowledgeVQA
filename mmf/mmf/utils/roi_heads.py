@@ -1,8 +1,8 @@
 # Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved
 
 '''
-Originally from grid feats:
-modified by:
+Originally from grid feats: https://github.com/facebookresearch/grid-feats-vqa
+modified by: https://github.com/facebookresearch/grid-feats-vqa/blob/d9a14fbb7580fb377353d8b397c5a8e5443b4117/grid_feats/roi_heads.py
 '''
 import inspect
 from typing import List, Optional
