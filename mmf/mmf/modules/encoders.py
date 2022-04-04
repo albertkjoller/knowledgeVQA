@@ -9,7 +9,6 @@ from copy import deepcopy
 from dataclasses import asdict, dataclass
 from enum import Enum
 from typing import Any
-from pathlib import Path
 import yaml
 
 import torch
@@ -32,7 +31,6 @@ from transformers.modeling_auto import AutoModel
 
 # init file also activated
 from mmf.configs.other.feat_configs.grid_config import add_attribute_config
-from tools.scripts.features.roi_heads import AttributeRes5ROIHeads, AttributeStandardROIHeads
 
 import argparse
 
@@ -551,7 +549,8 @@ class gfvImageEncoder(Encoder):
         cfg.MODEL.RESNETS.RES5_DILATION = 1
 
         # saving # TODO: can it be merged with the other config.yaml file?
-        cfg.OUTPUT_DIR = config.get('output_dir')
+        cfg.OUTPUT_DIR = config.get('output_dir')+'/image_encoder' # avoid overwriting other config.yaml file
+
         #cfg.OUTPUT_DIR = config.get('output_dir.save_dir')
 
 
@@ -560,7 +559,7 @@ class gfvImageEncoder(Encoder):
         cfg.freeze()
         # maybe not necessary, but logs and configs
         #https://github.com/facebookresearch/detectron2/blob/main/detectron2/engine/defaults.py
-        default_setup(cfg, args)
+        #default_setup(cfg, args)
         return cfg
 
 

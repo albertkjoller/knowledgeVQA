@@ -23,12 +23,13 @@ class PretrainedModel:
     global ROOT_DIR
     ROOT_DIR = os.getcwd()
 
-    def __init__(self, model_filename: str, ModelClass: type(BaseModel), dataset: str, experiment_name: str):
+    def __init__(self, experiment_name: str, model_filename: str, ModelClass: type(BaseModel), dataset: str):
+
+        self.experiment_name = experiment_name
         self.model_filename = model_filename
         self.model_name = ('_').join(self.model_filename.split('_')[:-1])  # model is saved as "model_name_final.pth"
         self.ModelClass = ModelClass
         self.dataset = dataset
-        self.experiment_name = experiment_name
 
         self._init_processors()
         self.device = 'cuda' if torch.cuda.is_available() else 'cpu'
@@ -76,7 +77,7 @@ class PretrainedModel:
 
     def _build_vqa_model(self):
         # load configuration and create model object
-        config = loadConfig(self.model_filename)
+        config = loadConfig(self.experiment_name, self.model_name)
         model = self.ModelClass(config)
 
         #TODO: change when debugging is not necessary anymore
@@ -87,7 +88,11 @@ class PretrainedModel:
             model_path = Path(f"{ROOT_DIR}/mmf/save/models/{self.experiment_name}/{self.model_filename}.pth")
 
         # load state dict and eventually convert from multi-gpu to single
-        state_dict = torch.load(model_path)
+        if self.device == 'cpu':
+            state_dict = torch.load(model_path, map_location=torch.device('cpu'))
+        else:
+            state_dict = torch.load(model_path)
+
         if list(state_dict.keys())[0].startswith('module') and not hasattr(model, 'module'):
             state_dict = _multi_gpu_state_to_single(state_dict)
 
@@ -141,17 +146,18 @@ if __name__ == '__main__':
         return getattr(sys.modules['mmf.models'], classname)
 
     # obtain user input
+    experiment_name = input("Enter experiment folder name: ")
     model_filename = input("Enter saved model filename: ")
-    experiment_name = input("Experiment name folder: ")
     ModelClass = input("Enter model type (e.g. BaseModel): ")
     dataset = input("Enter name of dataset used for training: ")
     print("")
 
     # specify model arguments and load model
-    kwargs = {'saved model filename': model_filename,
-              'experiment folder name': experiment_name,
-              'ModelClass name': str_to_class(ModelClass),
-              'dataset name': dataset}
+    kwargs = {'experiment_name': experiment_name,
+              'model_filename': model_filename,
+              'ModelClass': str_to_class(ModelClass),
+              'dataset': dataset}
+
     model = PretrainedModel(**kwargs)
 
     # only when debugging - from bash this doesn't matter #TODO: remove in the end

@@ -1,9 +1,6 @@
 includes:
 - ./defaults.yaml
 
-env:
-  save_dir: ./save/models/pilot_grids
-
 # only use the images
 dataset_config:
   okvqa:
