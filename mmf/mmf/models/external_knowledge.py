@@ -76,9 +76,7 @@ class external_knowledge(BaseModel):
 
         elif self.config.graph_logit_mode == "logit_fc":
             # Compute logits from single hidden layer
-            self.graph_logit_fc = nn.Linear(
-                self.config.graph_module.node_hid_dim, self.config.num_labels
-            )
+            self.graph_logit_fc = nn.Linear(self.config.graph_module.node_hid_dim, self.config.num_labels)
 
         # whether to add or concat features (where 'add' meaning we want the num_labels size from answer vocab)
         # Answer indices not in graph if we are adding features
@@ -109,7 +107,7 @@ class external_knowledge(BaseModel):
 
         image_features = self.vision_module(image)
 
-        print('img: ', image_features.shape)
+        #print('img: ', image_features.shape)
 
         # TODO: average pooling, lots of other options (top-down, sum, multi)
         #   - text-embedding and _operator has good example
@@ -139,7 +137,7 @@ class external_knowledge(BaseModel):
         if self.config.output_combine == "concat":
             # Combine both logits
             #logits = torch.cat([vb_logits, graph_logits], dim=1)
-            print('graph', graph_logits.shape)
+            #print('graph', graph_logits.shape)
 
             fusion = torch.cat([text_features, image_features, graph_logits], dim=1)
             # TODO: ?

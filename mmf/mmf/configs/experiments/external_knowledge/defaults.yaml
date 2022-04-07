@@ -4,10 +4,6 @@ includes:
 
 # TODO: how much is necessary here?
 
-env:
-  save_dir: ./save/ek_default
-
-
 model_config:
   external_knowledge:
     losses:
@@ -46,10 +42,10 @@ evaluation:
     #- roc_auc
 
 training:
-  batch_size: 16 # default: 512, 128 or higher performs better (2017 tips and tricks)
+  batch_size: 128 # default: 512, 128 or higher performs better (2017 tips and tricks)
   #max_epochs: 1 # no default specified, 12-18 mentioned by (2017 tips and tricks)
   lr_scheduler: true   # Don't forget to update schedule_attributes if you update this
-  max_updates: 10000 # default: 22000, krisp uses 88000
+  max_updates: 66000 # default: 22000, krisp uses 88000
   num_workers: 4 # default is 4, rule of thumb, set to num cpu cores
   tensorboard: true
   use_warmup: true

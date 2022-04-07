@@ -50,14 +50,14 @@ model_config:
         question: 1
         #classifiers: 4 # 4 probabilities whether the node/word/concept is in the image
         w2v: 300 # GloVe representation of the concept
-      output_type: hidden_ans
-      gcn_type: RGCN # # Relational Graph Convolution Network
+      output_type: graph_prediction # [output_type]
+      output_order: alpha # alphabetic, same as answer vocab
+      output_special_node: false
+      gcn_type: RGCN # Relational Graph Convolution Network
       num_gcn_conv: 2
       use_batch_norm: true
       use_dropout: false
       dropout_p: 0
-      output_order: alpha # # alphabetic, same as answer vocab
-      output_special_node: false
       add_ans_nodes: false
       feed_special_node: false
       num_labels: 2250
