@@ -40,7 +40,7 @@ evaluation:
   metrics:
     - accuracy
     - vqa_accuracy # or vqa_evalai_accuracy
-    #- roc_auc # some note in metrics.py about labels
+    #- roc_auc # some note in metrics.py about labels TODO: not working on GPU
     #- f1 # takes multilabel
 
 
