@@ -20,7 +20,7 @@ from mmf.modules.layers import ReLUWithWeightNormFC
 '''
 run command:
 
-mmf_run config='configs/experiments/external_knowledge/with_grid.yaml' model=external_knowledge dataset=okvqa run_type=train_val
+mmf_run config='configs/experiments/external_knowledge/grids.yaml' model=external_knowledge dataset=okvqa run_type=train_val
 '''
 
 # Register the model for MMF, "concat_bert_tutorial" key would be used to find the model
@@ -64,20 +64,38 @@ class external_knowledge(BaseModel):
                 + "you want to use KRISP"
             )
             raise
+
+
         self.graph_module = GraphNetworkModule(self.config.graph_module)
 
-        # TODO: same as top-down but image_feat_dim hardcoded (not used)
-        #self.non_linear_image = ReLUWithWeightNormFC(self.config.image_feat_dim, self.config.modal_hidden_size)
 
-        #extra_config = {}
-        #...
-        #self.graph_logit_fc = nn.Linear(
-        #    self.config.graph_module.node_hid_dim, self.config.graph_module.num_labels
-        #)
+        # graph logits
+        if self.config.graph_logit_mode == "in_graph":
+            # Logits is already computed
+            assert self.config.graph_module.output_type == "graph_prediction"
 
-    # Each model in MMF gets a dict called sample_list which contains
-    # all of the necessary information returned from the image
+        elif self.config.graph_logit_mode == "logit_fc":
+            # Compute logits from single hidden layer
+            self.graph_logit_fc = nn.Linear(
+                self.config.graph_module.node_hid_dim, self.config.num_labels
+            )
+
+        # whether to add or concat features (where 'add' meaning we want the num_labels size from answer vocab)
+        # Answer indices not in graph if we are adding features
+        if self.config.output_combine == "add":
+            # Output order should be ans
+            assert self.config.graph_module.output_order == "ans"
+            self.missing_ans_inds = torch.LongTensor(self.config.num_labels).fill_(1)
+            # Now any index stil set to 1 is missing from graph
+            self.missing_ans_inds[self.graph_module.index_in_ans ] = 0
+
+        # 'concat' not necessary to have answer_vocab dimension
+        elif self.config.output_combine == "concat":
+            # Output order should be alphabetical
+            assert self.config.graph_module.output_order == "alpha"
+
     def forward(self, sample_list):
+
         # Text input features will be in "input_ids" key
         text = sample_list["input_ids"]
         # Similarly, image input will be in "image" key
@@ -90,29 +108,52 @@ class external_knowledge(BaseModel):
 
 
         image_features = self.vision_module(image)
-        #print(image_features.shape)
+
         # TODO: average pooling, lots of other options (top-down, sum, multi)
         #   - text-embedding and _operator has good example
         # doing it on dimensions 2 and 3 and keep 2048
-        image_features = torch.mean(image_features, dim = (2,3))
+        image_features = torch.mean(image_features, dim = (2,3)) # to add average pooling based on attention
         # Flatten the embeddings before concatenation
         image_features = torch.flatten(image_features, start_dim=1)
 
-        # external knowledge
-        # If we feed seperate Q feats into graph
-        # Now sample_list has all the processed inputs for us
+        # External knowledge
         # initialize for graph module
         sample_list["q_encoded"] = text # dim 128
         # Forward through graph module
-        graph_features = self.graph_module(sample_list) # [128, 1310, 128]
-        # Compute logits from single hidden layer
-        #graph_logits = self.graph_logit_fc(graph_output) # change dimension
-        graph_features = torch.mean(graph_features, dim = 2) # mean pooling hidden dim of 768 so now batch*1310
+        graph_output = self.graph_module(sample_list) # [128, 1310, 128]
 
+        # logits from the  the output of the network
+        if self.config.graph_logit_mode == "in_graph":
+            # Logits is already computed
+            graph_logits = graph_output
+
+        elif self.config.graph_logit_mode == "logit_fc":
+            # Compute logits from single hidden layer
+            graph_logits = self.graph_logit_fc(graph_output)
+
+
+        # combining features
+        if self.config.output_combine == "concat":
+            # Combine both logits
+            #logits = torch.cat([vb_logits, graph_logits], dim=1)
+            print('here', graph_logits.shape)
+
+            fusion = torch.cat([text_features, image_features, graph_logits], dim=1)
+            # TODO: ?
+
+        elif self.config.output_combine == "add":
+            # Set invalid inds to zero here
+            assert graph_logits.size(1) == self.config.num_labels
+            graph_logits[:, self.missing_ans_inds] = 0
+            # TODO: ?
+
+        # Now combine hidden dims
+        #graph_output = torch.mean(graph_output, dim = 2) # mean pooling hidden dim of 768 so now batch*1310
 
         # Combine logits
         # TODO: (top down bottom up) haardman product, or bilinear?
-        fusion = torch.cat([text_features, image_features, graph_features], dim=1)
+
+
         # Do zerobias
         # TODO: where does this come from?
         #if self.config.zerobias:

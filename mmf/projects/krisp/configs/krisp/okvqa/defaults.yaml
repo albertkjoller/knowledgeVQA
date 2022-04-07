@@ -23,7 +23,7 @@ model_config:
       use_batch_norm: true
       use_dropout: false
       dropout_p: 0
-      output_type: hidden_ans
+      output_type: graph_prediction # [hidden_ans] look in graphnetwork.py
       gcn_type: RGCN
       num_labels: 2250
       output_order: alpha

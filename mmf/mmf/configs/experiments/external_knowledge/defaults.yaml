@@ -42,8 +42,6 @@ evaluation:
   metrics:
     - accuracy
     - vqa_accuracy
-
-    # TODO: metrics dont work with multilabel (loss function?)
     #- binary_f1
     #- roc_auc
 
