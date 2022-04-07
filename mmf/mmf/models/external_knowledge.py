@@ -169,7 +169,7 @@ class external_knowledge(BaseModel):
         # MMF will automatically calculate loss
         return output
 
-
+"""
     def load(self):
         self.device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
@@ -249,7 +249,7 @@ class external_knowledge(BaseModel):
 
         return probs, answers
 
-
+"""
 
 
 
