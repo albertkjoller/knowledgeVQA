@@ -24,6 +24,3 @@ gensim
 psutil
 filelock
 six
-torch==1.8.0+cu111 torchvision torchaudio torchtext -f https://download.pytorch.org/whl/torch_stable.html
-torch-scatter==2.0.8 torch-sparse torch-cluster torch-spline-conv torch-geometric -f https://data.pyg.org/whl/torch-1.8.0+cu111.html
-detectron2 -f https://dl.fbaipublicfiles.com/detectron2/wheels/cu111/torch1.8/index.html

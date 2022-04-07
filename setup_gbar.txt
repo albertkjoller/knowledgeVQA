@@ -16,7 +16,14 @@ python3.8 -m venv vqa
 # activate it
 source vqa/bin/activate
 
-# TODO: can this be done in requirements?
+# ----------------------------------------------------#
+
+# change directory
+cd mmf
+
+# install dependencies
+python3 -m pip install --editable .
+
 # install torch <https://pytorch.org/get-started/previous-versions/>
 python3 -m pip install torch==1.8.0+cu111 torchvision torchaudio torchtext -f https://download.pytorch.org/whl/torch_stable.html
 
@@ -27,12 +34,7 @@ python3 -m pip install torch-scatter==2.0.8 torch-sparse torch-cluster torch-spl
 # install detectron2 <https://github.com/facebookresearch/detectron2/blob/main/INSTALL.md#common-installation-issues>
 python3 -m pip install detectron2 -f https://dl.fbaipublicfiles.com/detectron2/wheels/cu111/torch1.8/index.html
 
-# change directory
-cd mmf
-
-# install dependencies
-# NOTICE: update 'requirements.txt' to match the one given at the end of this document
-python3 -m pip install --editable .
+# ----------------------------------------------------#
 
 # for running a script create a shell-file for submission and run it, e.g.:
 bsub < predict_demo.sh
@@ -66,158 +68,4 @@ mmf_run config='configs/experiments/pilot/test.yaml' \
     env.data_dir=/work3/s194262/torch/mmf/data \
     env.save_dir=/work3/s194262/save/models/pilot_grids \
     trainer.params.gpus=1 \
-
-
-# ----------------------------------------------------
-# the modified 'requirements.txt' file:
-
-numpy
-tqdm>=4.43.0,<4.50.0
-GitPython==3.1.0
-requests==2.23.0
-fasttext==0.9.1
-nltk==3.4.5
-editdistance==0.5.3
-transformers>=3.4.0, <=4.10.1
-sklearn==0.0
-omegaconf>=2.0.6, <=2.1
-lmdb==0.98
-termcolor==1.1.0
-iopath==0.1.8
-datasets==1.2.1
-matplotlib==3.3.4
-pycocotools==2.0.2
-ftfy==5.8
-pytorch-lightning @ git+https://github.com/PyTorchLightning/pytorch-lightning@9b011606f
-pillow==8.3.1
-sentencepiece==0.1.86
-opencv-python
-networkx
-gensim
-psutil
-filelock
-six
-
-
-
-# ----------------------------------------------------
-# example pip list:
-absl-py                 1.0.0
-aiohttp                 3.8.1
-aiosignal               1.2.0
-antlr4-python3-runtime  4.8
-appdirs                 1.4.4
-async-timeout           4.0.2
-attrs                   21.4.0
-black                   21.4b2
-cachetools              5.0.0
-certifi                 2021.10.8
-chardet                 3.0.4
-charset-normalizer      2.0.12
-click                   8.1.2
-cloudpickle             2.0.0
-cycler                  0.11.0
-Cython                  0.29.28
-datasets                1.2.1
-detectron2              0.6+cu111
-dill                    0.3.4
-editdistance            0.5.3
-fasttext                0.9.1
-filelock                3.6.0
-frozenlist              1.3.0
-fsspec                  2022.3.0
-ftfy                    5.8
-future                  0.18.2
-fvcore                  0.1.5.post20220305
-gensim                  4.1.2
-gitdb                   4.0.9
-GitPython               3.1.0
-google-auth             2.6.2
-google-auth-oauthlib    0.4.6
-grpcio                  1.44.0
-huggingface-hub         0.4.0
-hydra-core              1.1.1
-idna                    2.10
-importlib-metadata      4.11.3
-importlib-resources     5.6.0
-iopath                  0.1.8
-Jinja2                  3.1.1
-joblib                  1.1.0
-kiwisolver              1.4.2
-lmdb                    0.98
-Markdown                3.3.6
-MarkupSafe              2.1.1
-matplotlib              3.3.4
-mmf                     1.0.0rc12          /zhome/96/8/147177/Desktop/explainableVQA/mmf
-multidict               6.0.2
-multiprocess            0.70.12.2
-mypy-extensions         0.4.3
-networkx                2.7.1
-nltk                    3.4.5
-numpy                   1.22.3
-oauthlib                3.2.0
-omegaconf               2.1.0
-opencv-python           4.5.5.64
-packaging               21.3
-pandas                  1.4.1
-pathspec                0.9.0
-Pillow                  8.3.1
-pip                     21.1.1
-portalocker             2.4.0
-protobuf                3.19.4
-psutil                  5.9.0
-pyarrow                 7.0.0
-pyasn1                  0.4.8
-pyasn1-modules          0.2.8
-pybind11                2.9.2
-pycocotools             2.0.2
-pyDeprecate             0.3.2
-pydot                   1.4.2
-pyparsing               3.0.7
-python-dateutil         2.8.2
-pytorch-lightning       1.6.0.dev0
-pytz                    2022.1
-PyYAML                  6.0
-regex                   2022.3.15
-requests                2.23.0
-requests-oauthlib       1.3.1
-rsa                     4.8
-sacremoses              0.0.49
-scikit-learn            1.0.2
-scipy                   1.8.0
-sentencepiece           0.1.86
-setuptools              61.3.0
-six                     1.16.0
-sklearn                 0.0
-smart-open              5.2.1
-smmap                   5.0.0
-tabulate                0.8.9
-tensorboard             2.8.0
-tensorboard-data-server 0.6.1
-tensorboard-plugin-wit  1.8.1
-termcolor               1.1.0
-threadpoolctl           3.1.0
-tokenizers              0.10.3
-toml                    0.10.2
-torch                   1.8.0+cu111
-torch-cluster           1.6.0
-torch-geometric         2.0.4
-torch-scatter           2.0.8
-torch-sparse            0.6.13
-torch-spline-conv       1.2.1
-torchaudio              0.8.0
-torchmetrics            0.7.3
-torchtext               0.9.0
-torchvision             0.9.0+cu111
-tqdm                    4.49.0
-transformers            4.10.1
-typing-extensions       4.1.1
-urllib3                 1.25.11
-wcwidth                 0.2.5
-Werkzeug                2.1.1
-wheel                   0.37.1
-xxhash                  3.0.0
-yacs                    0.1.8
-yarl                    1.7.2
-zipp                    3.7.0
 
