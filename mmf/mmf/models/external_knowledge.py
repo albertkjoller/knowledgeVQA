@@ -109,10 +109,13 @@ class external_knowledge(BaseModel):
 
         image_features = self.vision_module(image)
 
+        print('img: ', image_features.shape)
+
         # TODO: average pooling, lots of other options (top-down, sum, multi)
         #   - text-embedding and _operator has good example
         # doing it on dimensions 2 and 3 and keep 2048
         image_features = torch.mean(image_features, dim = (2,3)) # to add average pooling based on attention
+
         # Flatten the embeddings before concatenation
         image_features = torch.flatten(image_features, start_dim=1)
 
@@ -136,7 +139,7 @@ class external_knowledge(BaseModel):
         if self.config.output_combine == "concat":
             # Combine both logits
             #logits = torch.cat([vb_logits, graph_logits], dim=1)
-            print('here', graph_logits.shape)
+            print('graph', graph_logits.shape)
 
             fusion = torch.cat([text_features, image_features, graph_logits], dim=1)
             # TODO: ?
