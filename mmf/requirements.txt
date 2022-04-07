@@ -5,6 +5,7 @@ requests==2.23.0
 fasttext==0.9.1
 nltk==3.4.5
 editdistance==0.5.3
+transformers>=3.4.0, <=4.10.1
 sklearn==0.0
 omegaconf>=2.0.6, <=2.1
 lmdb==0.98
@@ -14,9 +15,12 @@ datasets==1.2.1
 matplotlib==3.3.4
 pycocotools==2.0.2
 ftfy==5.8
+pytorch-lightning @ git+https://github.com/PyTorchLightning/pytorch-lightning@9b011606f
+pillow==8.3.1
+sentencepiece==0.1.86
 opencv-python
-psutil
-sentencepiece
-transformers
 networkx
 gensim
+psutil
+filelock
+six
