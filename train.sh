@@ -16,9 +16,10 @@ cd mmf
 module load cuda/10.2
 /appl/cuda/10.2/samples/NVIDIA_CUDA-10.2_Samples/bin/x86_64/linux/release/deviceQuery
 
-mmf_run config='configs/experiments/pilot/grids.yaml' \
+mmf_run config='configs/experiments/pilot/test.yaml' \
     datasets=okvqa \
     model=pilot \
     run_type=train_val \
-    training.max_updates=1 \
     env.data_dir=/work3/s194262/torch/mmf/data \
+    env.save_dir=/work3/s194262/save/models/pilot_grids \
+    trainer.params.gpus=1 \
