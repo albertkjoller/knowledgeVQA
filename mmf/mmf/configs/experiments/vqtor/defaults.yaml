@@ -5,7 +5,7 @@ includes:
 # TODO: how much is necessary here?
 
 model_config:
-  external_knowledge:
+  vqtor:
     losses:
       #- type: cross_entropy, target dim needs to be adjusted
       - type: logit_bce # binary cross-entropy loss since each question has multiple answers (MGFAN with ref.)
@@ -24,7 +24,7 @@ dataset_config:
 scheduler:
   type: warmup_linear # krisp uses warmup_cosine
   params:
-    num_warmup_steps: 500 # default: 2000
+    num_warmup_steps: 2000 # default: 2000
     num_training_steps: ${training.max_updates}
 
 
@@ -49,10 +49,14 @@ training:
   num_workers: 4 # default is 4, rule of thumb, set to num cpu cores
   tensorboard: true
   use_warmup: true
-  #log_detailed_config: true
-  # TODO: how to optimize
-  early_stop:
-    # Criteria can also be an evaluation metric in this format `dataset/metric`
-    # for e.g. vqa2/vqa_accuracy
-    criteria: okvqa/vqa_accuracy # val/okvqa/roc_auc)
-    minimize: false
+  evaluate_metrics: true # enable evaluation every log_interval number of updates
+  evaluation_interval: 1000
+
+
+trainer:
+  params:
+    gpus: 1 # TODO: what works best
+    logger: true
+    progress_bar_refresh_rate: 0.1
+    val_check_interval: 5000 # checkpointing
+

@@ -61,4 +61,4 @@ trainer:
     gpus: 1 # TODO: what works best
     logger: true
     progress_bar_refresh_rate: 0.1
-    val_check_interval: 1000 # checkpointing
+    val_check_interval: 5000 # checkpointing

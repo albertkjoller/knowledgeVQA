@@ -1,5 +1,5 @@
 model_config:
-  external_knowledge:
+  vqtor:
     # Type of bert model
     #bert_model_name: bert-base-uncased
     direct_features_input: false

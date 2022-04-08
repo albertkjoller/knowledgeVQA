@@ -24,8 +24,8 @@ mmf_run config='configs/experiments/external_knowledge/grids.yaml' model=externa
 '''
 
 # Register the model for MMF, "concat_bert_tutorial" key would be used to find the model
-@registry.register_model("external_knowledge")
-class external_knowledge(BaseModel):
+@registry.register_model("vqtor")
+class Vqtor(BaseModel):
     # All models in MMF get first argument as config which contains all
     # of the information you stored in this model's config (hyperparameters)
     def __init__(self, config):

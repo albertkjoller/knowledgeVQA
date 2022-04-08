@@ -22,6 +22,7 @@ from .vinvl import VinVL
 from .visual_bert import VisualBERT
 from .first_model import First_Model
 from .pilot import Pilot
+from .vqtor import Vqtor
 
 __all__ = [
     "TopDownBottomUp",
@@ -51,5 +52,6 @@ __all__ = [
     "UNITER",
     "VinVL",
     "First_Model",
-    "Pilot"
+    "Pilot",
+    "Vqtor"
 ]

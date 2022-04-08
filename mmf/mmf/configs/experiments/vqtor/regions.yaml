@@ -6,8 +6,10 @@ includes:
 
 dataset_config:
   okvqa:
+    data_dir: ${env.data_dir}/datasets
     depth_first: false
     fast_read: true
+
     use_images: true
     use_features: false
     zoo_requirements:
@@ -21,7 +23,7 @@ dataset_config:
       - okvqa/defaults/images/
 
 model_config:
-  external_knowledge:
+  vqtor:
     # models from grid-feats-vqa
     # taken from: https://github.com/facebookresearch/grid-feats-vqa
     image_encoder:
@@ -30,8 +32,7 @@ model_config:
         name: grid_feats_vqa
         # specify backbone and type of features
         # choices: [R-50-(grid or updn), X-101-grid, X-152-(grid or challenge(MoVie+GridFeat))]
-        model: R-50-grid.yaml
-        output_dir: ${env.save_dir}
+        backbone_features: ./mmf/configs/other/feat_configs/R-50-updn.yaml
         pretrained: true
         pool_type: avg
         zero_init_residual: false
