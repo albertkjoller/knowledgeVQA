@@ -39,7 +39,7 @@ class Vqtor(BaseModel):
     @classmethod
     def config_path(cls):
         # Relative to user dir root
-        return "configs/models/external_knowledge/defaults.yaml"
+        return "configs/models/vqtor/defaults.yaml"
 
     # Each method need to define a build method where the model's modules
     # are actually build and assigned to the model
