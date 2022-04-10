@@ -24,3 +24,7 @@ mmf/requirements.txt
 
 # Data from data investigation
 datainvestigation/data/
+*.json
+*.tar
+*.gz
+*.npy
