@@ -68,10 +68,10 @@ model_config:
       # TODO: useless?
       noback_vb_to_graph: false
       use_conf: false # ?
-    graph_logit_mode: in_graph # [in_graph, logit_fc]
-    output_combine: concat # [add, concat]
-    feed_q_to_graph: false # not to be inputted, only if concept is or isn't in q
-    num_labels: 2250 # if inputted in fc
+      graph_logit_mode: in_graph # [in_graph, logit_fc]
+      output_combine: concat # [add, concat]
+      feed_q_to_graph: false # not to be inputted, only if concept is or isn't in q
+      num_labels: 2250 # if inputted in fc
 
 
 

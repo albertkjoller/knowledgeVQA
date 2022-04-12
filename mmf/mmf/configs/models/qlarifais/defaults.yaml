@@ -1,0 +1,61 @@
+model_config:
+  qlarifais:
+    direct_features_input: false
+    # Dimension of the embedding finally returned by the modal encoder
+    modal_hidden_size: 2048
+    # Dimension of the embedding finally returned by the text encoder
+    text_hidden_size: 768
+
+    # Number of features extracted out per image
+    num_features: 1
+
+    img_dim: 2048
+    ques_dim: 768
+    kg_dim: false # ?
+
+    losses:
+      #- type: cross_entropy, target dim needs to be adjusted
+      - type: logit_bce # binary cross-entropy loss since each question has multiple answers (MGFAN with ref.)
+
+    text_encoder:
+      type: any_transformer
+      params:
+        name: distilbert-base-uncased
+        dim: 768
+        num_hidden_layers: 12
+        num_attention_heads: 12
+
+    image_encoder:
+      type: torchvision_resnet
+      params:
+        name: resnet50
+        pretrained: true
+        pool_type: avg
+        num_output_features: 1
+        zero_init_residual: false
+      # how to resize features
+      resize: none # choices [none, average_pooling]
+
+
+    # not using attention as default
+    attention:
+      use: false
+    # not using external knowledge as default
+    graph_module:
+      use: false
+
+
+    classifier:
+      type: mlp
+      params:
+        # 2048 + 768 + 1310 in case of features
+        in_dim: 2816 # TODO: more auto?
+        out_dim: 2250 # target size for okvqa (okvqa v1.1 has 2250) todo: autoindex_in_node
+        hidden_dim: 2533 # mean of input and output
+        num_layers: 2 # ?
+      prior: false # initalize weight matrix for each answer vocabulary object
+      prior_path: ${env.data_dir}/prior
+
+
+
+

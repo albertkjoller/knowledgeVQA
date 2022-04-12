@@ -1,0 +1,8 @@
+
+# include running experiment configs
+includes:
+  - configs/experiments/defaults.yaml
+
+# overwrite
+
+# default image encoder is resnet50

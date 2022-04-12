@@ -1,0 +1,20 @@
+includes:
+- ./defaults.yaml
+
+env:
+  save_dir: ${env.part_save_dir}/prior_sigmoid
+
+
+model_config:
+  qlarifais:
+    classifier:
+      type: mlp
+      params:
+        # 2048 + 768 + 1310 in case of features
+        in_dim: 2816 # TODO: more auto?
+        out_dim: 2250 # target size for okvqa (okvqa v1.1 has 2250) todo: autoindex_in_node
+        hidden_dim: 2533 # mean of input and output
+        num_layers: 2 # ?
+
+
+

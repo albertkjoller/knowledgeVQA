@@ -1,15 +1,11 @@
 includes:
   - configs/datasets/okvqa/bert.yaml
 
+# --- define default for all models ---
 
-model_config:
-  pilot:
-    losses:
-      #- type: cross_entropy, target dim needs to be adjusted
-      # MGFAN with ref.: binary cross-entropy loss since each question has multiple answers
-      - type: logit_bce # logit_bce, cross_entropy, caption_cross_entropy
-        # TODO: what about contrastive loss?
-
+env:
+  part_save_dir: ./save/models
+  save_dir: ${env.part_save_dir}/default
 
 
 dataset_config:
@@ -17,22 +13,19 @@ dataset_config:
     processors:
       answer_processor:
         params:
-          # improved answer vocabulary by okvqa (v1.1) TODO: or not
+          # overwrite vocabulary, improved answer vocab based on krisp
           vocab_file: okvqa/defaults/annotations/annotations/answer_vocab_count10.txt
     dump_output_dir: ${env.save_dir}
     dump_pred_info: false
 
-
 scheduler:
   #type: warmup_linear
-  type: warmup_cosine # varying
+  type: warmup_cosine # more varying
   params:
-    num_warmup_steps: 2000 # default: 2000
+    num_warmup_steps: 2000
     num_training_steps: ${training.max_updates}
 
-
-
-# similare to pythia, (Adamax better at embeddings)
+# Adamax better at embeddings
 optimizer:
   type: Adamax
   params:
@@ -41,19 +34,17 @@ optimizer:
     weight_decay: 0
 
 evaluation:
-  predict: true # Generate predictions in a file
   metrics:
     - accuracy
-    - vqa_accuracy # or vqa_evalai_accuracy
-    #- roc_auc # some note in metrics.py about labels TODO: not working on GPU
-    #- f1 # takes multilabel
-
+    - vqa_accuracy
+    #- binary_f1
+    #- roc_auc
 
 training:
   batch_size: 128 # default: 512, 128 or higher performs better (2017 tips and tricks)
-  #max_epochs: 1 # no default specified, 12-18 mentioned by (2017 tips and tricks)
   lr_scheduler: true   # Don't forget to update schedule_attributes if you update this
-  max_updates: 22000 # default: 22000, krisp uses 88000
+  max_updates: null # default: 22000, krisp uses 88000
+  max_epochs: 20 # tips and tricks 12-18
   num_workers: 4 # default is 4, rule of thumb, set to num cpu cores
   tensorboard: true
   use_warmup: true
@@ -64,9 +55,23 @@ training:
     criteria: okvqa/vqa_accuracy
     minimize: false
 
+checkpoint:
+  # Will save only the last max_to_keep; if -1, saves all eligible checkpoints
+  max_to_keep: 1
+  # "current.ckpt" from env.save_dir
+  resume: false
+  # `checkpoint.resume_file` load a specific checkpoint from a file
+  resume_file: null
+  # `checkpoint.resume_best` will load the best checkpoint according to
+  # training.early_stop.criteria instead of the last saved ckpt
+  resume_best: false
+
 trainer:
   params:
     gpus: 1 # TODO: what works best
     logger: true
     progress_bar_refresh_rate: 0.1
     val_check_interval: 5000 # checkpointing
+
+
+

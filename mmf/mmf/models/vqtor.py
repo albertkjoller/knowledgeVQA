@@ -1,21 +1,17 @@
 
-# importing
+
 import torch
 # All model using MMF need to inherit BaseModel
 from mmf.models.base_model import BaseModel
-
 # registry is need to register the dataset or our new model so as to be MMF discoverable
 from mmf.common.registry import registry
-
 # Builder methods for image encoder and classifier
 from mmf.utils.build import (
     build_classifier_layer,
     build_image_encoder,
     build_text_encoder,
 )
-
 from mmf.modules.layers import ReLUWithWeightNormFC
-
 
 '''
 run command:
@@ -56,14 +52,6 @@ class Vqtor(BaseModel):
 
         # Import graph network module
         # Putting in try-catch to avoid adding dependencies to mmf
-        try:
-            from mmf.modules.graphnetwork import GraphNetworkModule
-        except Exception:
-            print(
-                "Import error with KRISP dependencies. Fix dependencies if "
-                + "you want to use KRISP"
-            )
-            raise
 
 
         self.graph_module = GraphNetworkModule(self.config.graph_module)
@@ -94,21 +82,17 @@ class Vqtor(BaseModel):
 
     def forward(self, sample_list):
 
-        # Text input features will be in "input_ids" key
+        # question input
         text = sample_list["input_ids"]
-        # Similarly, image input will be in "image" key
-        image = sample_list["image"]
-
-        # Get the text and image features from the encoders
+        # generate question embeddings
         text_features = self.language_module(text)#[1]
         text_features = torch.flatten(text_features, start_dim=1)
 
-
-
+        # image input
+        image = sample_list["image"]
+        # extract image features from encoder
         image_features = self.vision_module(image)
-
         #print('img: ', image_features.shape)
-
         # TODO: average pooling, lots of other options (top-down, sum, multi)
         #   - text-embedding and _operator has good example
         # doing it on dimensions 2 and 3 and keep 2048
