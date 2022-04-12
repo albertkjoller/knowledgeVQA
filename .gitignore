@@ -23,5 +23,8 @@ mmf/requirements.txt
 mmf/requirements.txt
 
 # Data from data investigation
-datainvestigation/data/mmf/
-datainvestigation/data/okvqa_official/
+datainvestigation/data/
+*.json
+*.tar
+*.gz
+*.npy
