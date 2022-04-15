@@ -261,13 +261,15 @@ class Qlarifais(BaseModel):
 
         # classifying
         if self.config.classifier.prior:
+            print('prior shape: ', self.priors.shape)
 
             # concatinating features
             combined = torch.cat([question_features, image_features], dim=1)
-            # multiplying features on priors per answer/candidate in vocab
-            combind_with_priors = torch.mul(self.priors, combined)
-            print('prior shape: ', self.priors.shape)
             print('concat ques and img: ', combined.shape)
+
+            # multiplying features on priors per answer/candidate in vocab
+            combind_with_priors = torch.mul(combined, self.priors)
+
             print('all combined: ', combind_with_priors.shape)
 
             # predictions scores for each candidate answer in vocab
