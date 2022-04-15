@@ -8,6 +8,7 @@ import numpy as np
 from mmf.utils.model_utils.image import openImage
 from mmf.utils.build import build_processors
 from mmf.common.sample import Sample, SampleList
+from mmf.utils.text import VocabDict
 
 
 
@@ -26,11 +27,17 @@ def download_from_drive(save_dir):
         print("Download %d%%." % int(status.progress() * 100))
 
 
-def load_priors(prior_path, data_dir, processors_config):
+def load_priors(cache_dir, data_dir, processors_config):
+
+    device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
     try:
-        file = open(Path(f'{prior_path}/priors.pkl'), "rb")
-        priors = pickle.load(file)
+        #file = open(Path(f'{cache_dir}/priors.pkl'), "rb")
+        #priors = pickle.load(file)
+        file = open(Path(f'{cache_dir}/priors.pt'), "rb")
+        priors = torch.load(file)
+
+        return priors
 
     except (OSError, IOError) as e:
 
@@ -42,17 +49,19 @@ def load_priors(prior_path, data_dir, processors_config):
 
         # extracting answer vocabulary file for current experiement
         vocab_path = processors_config.answer_processor.params.vocab_file
-        with open(Path(f'{data_dir}/{vocab_path}')) as f:
-            answer_vocab = f.read().splitlines()
+        #with open(Path(f'{data_dir}/{vocab_path}')) as f:
+        #    answer_vocab = f.read().splitlines()
+        answer_vocab = VocabDict(Path(f'{data_dir}/{vocab_path}'))
 
         # defining random image for candidate answers without image priors
-        imarray = np.random.rand(100, 100, 3) * 255
-        img = Image.fromarray(imarray.astype('uint8')).convert('RGBA')
+        img_array = np.random.rand(224, 224, 3) * 255
+        random_img = Image.fromarray(img_array.astype('uint8')).convert('RGB')
+
+
         # initializing dict based on answer vocabulary and witrh random priors
         #priors = dict.fromkeys(answer_vocab, img)
 
-        priors = dict.fromkeys(answer_vocab, dict())
-
+        priors = dict.fromkeys(list(answer_vocab.word2idx_dict.keys()), dict())
 
         # counting avaliable image priors
         num_priors = 0
@@ -60,16 +69,19 @@ def load_priors(prior_path, data_dir, processors_config):
         num_images = []
 
         # looping each folder in priors, i.e. answer candidates
-        folders = Path(prior_path).glob('*')
-        for ans_cand_path in folders:
+        folders = Path(f'{cache_dir}/priors').glob('*')
+        for ans_cand in answer_vocab.word2idx_dict:
+            # if path to current answer exists
+            if Path(f'{cache_dir}/priors/{ans_cand}').is_file():
+
+        #for ans_cand_path in folders:
             # getting folder name, i.e. answer candidate
-            ans_cand = ans_cand_path.name
+            #ans_cand = ans_cand_path.name
             #images = Path(prior_path).glob(folder+'/*.jpg')
             #img_paths = Path(f'prior_path/{ans_cand}').glob('*.jpg')
             #print('img paths:', img_paths)
 
-            # saving each image in current folder if folder is there
-            if ans_cand in priors.keys():
+            #if ans_cand in priors.keys():
                 # process answer candidate as text input for prior
                 priors[ans_cand]['input_ids'] = text_processor({'text': ans_cand})['input_ids']
                 # initializing
@@ -78,7 +90,8 @@ def load_priors(prior_path, data_dir, processors_config):
                 num_priors += 1
                 # counting number of images per prior
                 j = 0
-                for img_path in Path(f'{prior_path}/{ans_cand}').glob('*.jpg'):
+                for img_path in Path(f'{cache_dir}/priors/{ans_cand}').glob('*.jpg'):
+                    print('here!!!!!!')
                     #img = Image.open(img_path)
                     #img = openImage(img_path)
                     # process image input
@@ -103,7 +116,14 @@ def load_priors(prior_path, data_dir, processors_config):
 
             # not folder for current answer and picture is random as initialized
             else:
-                pass
+                # process answer candidate as text input for prior
+                priors[ans_cand]['input_ids'] = text_processor({'text': ans_cand})['input_ids']
+
+                processed_image = image_processor({'image': random_img})
+                processed_image = processed_image['image']
+                priors[ans_cand]['images'] = processed_image
+
+
 
         print('\n')
         print('number of avaliable priors: {} out of {} candidate answers'.format(num_priors, len(priors)))
@@ -120,12 +140,14 @@ def load_priors(prior_path, data_dir, processors_config):
                 priors[subdir].append(img)
         '''
 
-        file = open(Path(f'{prior_path}/priors.pkl'), "wb")
-        pickle.dump(priors, file)
-        file.close()
+        #file = open(Path(f'{cache_dir}/priors.pkl'), "wb")
+        #pickle.dump(priors, file)
+        #file.close()
+        file = Path(f'{cache_dir}/priors.pt')
+        torch.save(priors, file)
 
 
-    return priors
+        return priors
 
-
+    raise NotImplementedError
 

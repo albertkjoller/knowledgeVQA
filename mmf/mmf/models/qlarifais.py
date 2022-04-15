@@ -1,6 +1,8 @@
 
 
 import torch
+from pathlib import Path
+
 # All model using MMF need to inherit BaseModel
 from mmf.models.base_model import BaseModel
 # registry is need to register the dataset or our new model so as to be MMF discoverable
@@ -11,7 +13,7 @@ from mmf.utils.build import (
     build_image_encoder,
     build_text_encoder,
 )
-
+from mmf.utils.text import VocabDict
 from mmf.modules.prior import load_priors
 
 from mmf.modules.attention import AttentionLayer
@@ -47,6 +49,12 @@ class Qlarifais(BaseModel):
         # with same parameters. But to explain how config is initialized we
         # have kept this
         super().__init__(config)
+
+        self.vocab_path = self.config.classifier.processors.answer_processor.params.vocab_file
+        self.data_dir = self.config.classifier.data_dir
+        self.out_dim = self.config.classifier.params.out_dim
+        self.in_dim = self.config.classifier.params.in_dim
+
         self.build()
 
     # This classmethod tells MMF where to look for default config of this model
@@ -58,7 +66,6 @@ class Qlarifais(BaseModel):
     # Each method need to define a build method where the model's modules
     # are actually build and assigned to the model
     def build(self):
-
 
         self.vision_module = build_image_encoder(self.config.image_encoder)
 
@@ -98,32 +105,38 @@ class Qlarifais(BaseModel):
 
         # if model uses prior based on answer vocabulary
         if self.config.classifier.prior:
+            # initializing list of empty priors
+            self.priors = torch.empty(self.out_dim, self.in_dim)
 
-            self.priors = torch.empty(self.config.classifier.params.out_dim, self.config.classifier.params.in_dim)
+            answer_vocab = VocabDict(Path(f'{self.data_dir}/{self.vocab_path}'))
+
             # loading pre-extracted priors from the web per answer candidate
             #unprocessed_priors = load_priors(self.config.classifier.prior_path, self.config.classifier.vocab_path)
-            processed_priors = load_priors(self.config.classifier.prior_path,
-                                           self.config.classifier.data_dir,
+            processed_priors = load_priors(self.config.classifier.cache_dir,
+                                           self.data_dir,
                                            self.config.classifier.processors
                                            )
 
             # priors have same size as answer_vocab
-            assert len(processed_priors) == self.config.classifier.params.out_dim
+            assert len(processed_priors) == self.out_dim
             # classifier is sigmoid (binary per candidate answer)
             assert 'sigmoid' == self.config.classifier.type
 
-
+            # TODO: iterate thorough answer vocab
             # iterate through each answer provided by the priors (e.g. '<unk>' and '' have random priors)
-            for idx, (ans, ans_prior) in enumerate(processed_priors.items()):
+            #for idx, (ans, ans_prior) in enumerate(processed_priors.items()):
+            for ans_cand, idx in answer_vocab.word2idx_dict.items():
+                # idx should be incremental
+                ans_prior = processed_priors[ans_cand]
                 # generating text priors
-                text_features = self.language_module(ans_prior['input_ids'].unsqueeze(0))
+                text_features = self.language_module(ans_prior['input_ids'].unsqueeze(0).to(self.device))
 
                 #ans_text_prior = torch.flatten(text_features, start_dim=1).squeeze()
                 ans_text_prior = text_features.squeeze()
 
                 # calculating image priors
                 # get features from image priors
-                image_features = self.vision_module(ans_prior['images'])
+                image_features = self.vision_module(ans_prior['images'].to(self.device))
                 # average pool K features of size 2048
                 # doing it on batches, and the grids e.g. 7x7 to get dim 2048
                 ans_image_prior = torch.mean(image_features, dim=(0, 2, 3))
@@ -134,6 +147,8 @@ class Qlarifais(BaseModel):
                 #self.priors = torch.cat([self.priors, combined.unsqueeze(0)])
                 self.priors[idx] = combined#.unsqueeze(0)
                 #priors.append(tuple(ans_image_prior, ans_text_prior))
+
+
 
         if self.config.attention.use:
             # image dim is 2048
@@ -244,8 +259,9 @@ class Qlarifais(BaseModel):
             combined = torch.cat([question_features, image_features], dim=1)
             # multiplying features on priors per answer/candidate in vocab
             combind_with_priors = torch.mul(self.priors, combined)
-            print('prior: ', self.priors.shape)
-            print('pred: ', combined.shape)
+            print('prior shape: ', self.priors.shape)
+            print('concat ques and img: ', combined.shape)
+            print('all combined: ', combind_with_priors.shape)
 
             # predictions scores for each candidate answer in vocab
             logits = self.classifier(combind_with_priors)
