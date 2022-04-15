@@ -14,6 +14,7 @@ from mmf.utils.build import (
     build_image_encoder,
     build_text_encoder,
 )
+from mmf.modules.layers import GatedTanh
 from mmf.utils.text import VocabDict
 from mmf.modules.prior import load_priors
 
@@ -55,7 +56,8 @@ class Qlarifais(BaseModel):
         self.data_dir = self.config.classifier.data_dir
         self.out_dim = self.config.classifier.params.out_dim
         self.in_dim = self.config.classifier.params.in_dim
-
+        # recommended by tips and tricks 2017
+        self.non_linear = GatedTanh(self.in_dim, self.in_dim)
         self.build()
 
     # This classmethod tells MMF where to look for default config of this model
@@ -146,6 +148,8 @@ class Qlarifais(BaseModel):
                     #ans_image_prior = torch.flatten(ans_image_prior, start_dim=1)
 
                     combined = torch.cat([ans_text_prior.to(self.device), ans_image_prior.to(self.device)], dim=0)
+
+
                     # append row-wise to priors
                     #self.priors = torch.cat([self.priors, combined.unsqueeze(0)])
                     self.priors[idx] = combined#.unsqueeze(0)
@@ -154,7 +158,7 @@ class Qlarifais(BaseModel):
                     #gc.collect()
                     #torch.cuda.empty_cache()
 
-
+            self.priors = self.priors.to(self.device)
 
         if self.config.attention.use:
             # image dim is 2048
@@ -263,18 +267,21 @@ class Qlarifais(BaseModel):
             print('prior shape: ', self.priors.shape)
 
             # concatinating features
-            combined = torch.cat([question_features, image_features], dim=1)
-            print('concat ques and img: ', combined.shape)
+            fused = torch.cat([question_features, image_features], dim=1)
+
+            fused = self.non_linear(fused)
+
+            print('concat ques and img: ', fused.shape)
 
             # multiplying features on priors per answer/candidate in vocab
-            combind_with_priors = torch.mul(combined.unsqueeze(dim=1), self.priors)
+            fused_with_priors = torch.mul(fused.unsqueeze(dim=1), self.priors)
             # added features (single number remaining per candidate)
-            print('all combined: ', combind_with_priors.shape)
+            print('all combined: ', fused_with_priors.shape)
 
-            fused = torch.sum(combind_with_priors, dim=2)
+            fused_with_priors = torch.sum(fused_with_priors, dim=2)
 
             # predictions scores for each candidate answer in vocab
-            logits = self.classifier(fused)
+            logits = self.classifier(fused_with_priors)
             logits = logits.max(dim=1)
 
         # mlp
