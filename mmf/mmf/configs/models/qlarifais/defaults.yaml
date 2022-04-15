@@ -54,7 +54,6 @@ model_config:
         hidden_dim: 2533 # mean of input and output
         num_layers: 2 # ?
       prior: false # initalize weight matrix for each answer vocabulary object
-      prior_path: ${env.data_dir}/prior
 
 
 

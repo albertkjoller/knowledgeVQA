@@ -8,13 +8,20 @@ env:
 model_config:
   qlarifais:
     classifier:
-      type: mlp
+      type: sigmoid
       params:
         # 2048 + 768 + 1310 in case of features
         in_dim: 2816 # TODO: more auto?
         out_dim: 2250 # target size for okvqa (okvqa v1.1 has 2250) todo: autoindex_in_node
-        hidden_dim: 2533 # mean of input and output
-        num_layers: 2 # ?
+      prior: true # initalize weight matrix for each answer vocabulary object
+      # path to prior images per answer in answer vocabulary
+      prior_path: ${env.cache_dir}/prior
+      # path to dataset for answer vocabulary and building processors
+      data_dir: ${dataset_config.${datasets}.data_dir}
+      # path to answer vocabulary file
+      processors: ${dataset_config.${datasets}.processors}
+      #vocab_path: ${dataset_config.okvqa.data_dir}/${dataset_config.okvqa.processors.answer_processor.params.vocab_file}
+
 
 
 

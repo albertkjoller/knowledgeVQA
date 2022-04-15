@@ -23,7 +23,9 @@ from mmf.utils.download import download_pretrained_model
 from mmf.utils.file_io import PathManager
 from mmf.utils.general import get_absolute_path
 from mmf.utils.logger import log_class_usage
-from model_utils.config import loadConfig
+#from model_utils.config import loadConfig
+from mmf.utils.model_utils.config import loadConfig
+
 from omegaconf import MISSING, OmegaConf
 from torch import Tensor, nn
 from transformers.configuration_auto import AutoConfig
