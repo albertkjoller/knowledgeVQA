@@ -2,6 +2,7 @@
 
 import torch
 from pathlib import Path
+import gc
 
 # All model using MMF need to inherit BaseModel
 from mmf.models.base_model import BaseModel
@@ -149,6 +150,8 @@ class Qlarifais(BaseModel):
                 #self.priors = torch.cat([self.priors, combined.unsqueeze(0)])
                 self.priors[idx] = combined#.unsqueeze(0)
                 #priors.append(tuple(ans_image_prior, ans_text_prior))
+                gc.collect()
+                torch.cuda.empty_cache()
 
 
 
