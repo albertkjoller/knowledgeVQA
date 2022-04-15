@@ -128,7 +128,6 @@ class Qlarifais(BaseModel):
             # iterate through each answer provided by the priors (e.g. '<unk>' and '' have random priors)
             #for idx, (ans, ans_prior) in enumerate(processed_priors.items()):
             for ans_cand, idx in answer_vocab.word2idx_dict.items():
-                print('number of image:', idx)
                 with torch.no_grad():
                     # idx should be incremental
                     ans_prior = processed_priors[ans_cand]
@@ -268,12 +267,15 @@ class Qlarifais(BaseModel):
             print('concat ques and img: ', combined.shape)
 
             # multiplying features on priors per answer/candidate in vocab
-            combind_with_priors = torch.mul(combined, self.priors)
-
+            combind_with_priors = torch.mul(combined.unsqueeze(dim=1), self.priors)
+            # added features (single number remaining per candidate)
             print('all combined: ', combind_with_priors.shape)
 
+            fused = torch.sum(combind_with_priors, dim=2)
+
             # predictions scores for each candidate answer in vocab
-            logits = self.classifier(combind_with_priors)
+            logits = self.classifier(fused)
+            logits = logits.max(dim=1)
 
         # mlp
         else:
