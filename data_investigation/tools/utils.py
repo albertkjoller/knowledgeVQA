@@ -96,8 +96,8 @@ def LogAndLinearHist(data, xlabel='', figsize=((8,3)), dpi=100):
     min_val, max_val = (min(data), max(data))
     
     # compute bins
-    log_bins = np.logspace(min_val if min_val == 0 else np.log10(min_val), np.log10(max_val), 30)
-    lin_bins = np.linspace(min_val, max_val, 30)
+    log_bins = np.logspace(min_val if min_val == 0 else np.log10(min_val), np.log10(max_val), 101)
+    lin_bins = np.linspace(min_val, max_val, 101)
 
     # create histogram values
     hist_log, edges_log = np.histogram(data.values, log_bins, density=True)

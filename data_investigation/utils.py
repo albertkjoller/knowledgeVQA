@@ -96,8 +96,8 @@ def LogAndLinearHist(data, xlabel='', figsize=((8,3)), dpi=100):
     min_val, max_val = (min(data), max(data))
     
     # compute bins
-    log_bins = np.logspace(min_val if min_val == 0 else np.log10(min_val), np.log10(max_val), 30)
-    lin_bins = np.linspace(min_val, max_val, 30)
+    log_bins = np.logspace(min_val if min_val == 0 else np.log10(min_val), np.log10(max_val), 101)
+    lin_bins = np.linspace(min_val, max_val, 101)
 
     # create histogram values
     hist_log, edges_log = np.histogram(data.values, log_bins, density=True)
@@ -144,9 +144,10 @@ def createSunburstVariables(dataset, N, shuffle=True, seed=42):
     parents, labels, ids = [''], [''], ['CLS']
     occurrence_labels, occurrence_dict = [], {}
 
+    token_dataset = dataset.sample(frac=1, random_state=seed)[:N].question_tokens
     
     # loop through token lists from questions
-    for token_list in tqdm(dataset.sample(frac=1, random_state=seed)[:N].question_tokens):
+    for token_list in tqdm(token_dataset):
         # create lists of accumulated strings
         accum = list(accumulate(['CLS']+token_list, func=accum_operator))
         accum_labels = list(accumulate(token_list, func=accum_operator))
@@ -178,10 +179,11 @@ def createSunburstVariables(dataset, N, shuffle=True, seed=42):
     
     df = pd.DataFrame({'ids':ids, 'labels':labels, 'parents':parents, 'occurrences':occurrences})
     df.occurrences.astype(int)
-
+    df['start_words'] = df.ids.apply(lambda seq: seq.strip("CLS").split(" ")[1:]).apply(lambda x: x[0] if len(x) > 0 else "")
     return df
 
 def plotSunburst(df, N, visualization_depth, width=500, height=500, use_dash=True):
+    
     fig = go.Figure(
             go.Sunburst(
                 ids=df.ids,
@@ -193,10 +195,9 @@ def plotSunburst(df, N, visualization_depth, width=500, height=500, use_dash=Tru
                 hovertemplate='<b>%{label} </b> <br> Percentage: %{text:.2f}%',
                 domain=dict(column=1),
                 maxdepth=visualization_depth,
-                insidetextorientation='radial',
+                insidetextorientation='radial',              
             ))
 
-    
     #fig.update_traces(hovertemplate=hovertemplate)
     fig.update_layout(autosize=False, 
                       width=width, height=height, 
