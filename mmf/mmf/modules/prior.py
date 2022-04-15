@@ -72,7 +72,7 @@ def load_priors(cache_dir, data_dir, processors_config):
         folders = Path(f'{cache_dir}/priors').glob('*')
         for ans_cand in answer_vocab.word2idx_dict:
             # if path to current answer exists
-            if Path(f'{cache_dir}/priors/{ans_cand}').is_file():
+            if Path(f'{cache_dir}/priors/{ans_cand}').is_dir():
 
         #for ans_cand_path in folders:
             # getting folder name, i.e. answer candidate
@@ -91,7 +91,6 @@ def load_priors(cache_dir, data_dir, processors_config):
                 # counting number of images per prior
                 j = 0
                 for img_path in Path(f'{cache_dir}/priors/{ans_cand}').glob('*.jpg'):
-                    print('here!!!!!!')
                     #img = Image.open(img_path)
                     #img = openImage(img_path)
                     # process image input
@@ -108,7 +107,7 @@ def load_priors(cache_dir, data_dir, processors_config):
                     priors[ans_cand]['images'].append(processed_image) #.unsqueeze(0)])
                     j += 1
 
-                #priors[ans_cand]['images'] = torch.tensor(priors[ans_cand]['images'])
+            #priors[ans_cand]['images'] = torch.tensor(priors[ans_cand]['images'])
                 #priors[ans_cand]['images'] = torch.cat(priors[ans_cand]['images'])
 
                 num_images.append(j)
@@ -122,7 +121,6 @@ def load_priors(cache_dir, data_dir, processors_config):
                 processed_image = image_processor({'image': random_img})
                 processed_image = processed_image['image']
                 priors[ans_cand]['images'] = processed_image
-
 
 
         print('\n')

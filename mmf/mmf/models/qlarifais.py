@@ -105,6 +105,10 @@ class Qlarifais(BaseModel):
 
         # if model uses prior based on answer vocabulary
         if self.config.classifier.prior:
+
+            # classifier is sigmoid (binary per candidate answer)
+            assert 'sigmoid' == self.config.classifier.type
+
             # initializing list of empty priors
             self.priors = torch.empty(self.out_dim, self.in_dim)
 
@@ -116,16 +120,14 @@ class Qlarifais(BaseModel):
                                            self.data_dir,
                                            self.config.classifier.processors
                                            )
-
             # priors have same size as answer_vocab
             assert len(processed_priors) == self.out_dim
-            # classifier is sigmoid (binary per candidate answer)
-            assert 'sigmoid' == self.config.classifier.type
 
             # TODO: iterate thorough answer vocab
             # iterate through each answer provided by the priors (e.g. '<unk>' and '' have random priors)
             #for idx, (ans, ans_prior) in enumerate(processed_priors.items()):
             for ans_cand, idx in answer_vocab.word2idx_dict.items():
+                print('number of image:', idx)
                 # idx should be incremental
                 ans_prior = processed_priors[ans_cand]
                 # generating text priors
