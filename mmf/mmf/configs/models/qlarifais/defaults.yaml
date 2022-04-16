@@ -46,6 +46,10 @@ model_config:
 
     fusion:
       type: concat
+      params:
+        # e.g. non-linear
+        layer: none
+
 
     classifier:
       type: mlp

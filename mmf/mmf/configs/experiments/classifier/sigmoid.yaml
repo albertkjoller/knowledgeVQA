@@ -7,6 +7,13 @@ env:
 
 model_config:
   qlarifais:
+
+    fusion:
+      type: concat
+      params:
+        layer: non-linear
+
+
     classifier:
       type: sigmoid
       params:
@@ -20,7 +27,6 @@ model_config:
       data_dir: ${dataset_config.${datasets}.data_dir}
       # path to answer vocabulary file
       processors: ${dataset_config.${datasets}.processors}
-      #vocab_path: ${dataset_config.okvqa.data_dir}/${dataset_config.okvqa.processors.answer_processor.params.vocab_file}
 
 
 

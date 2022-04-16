@@ -57,8 +57,6 @@ class Qlarifais(BaseModel):
         self.data_dir = self.config.classifier.data_dir
         self.out_dim = self.config.classifier.params.out_dim
         self.in_dim = self.config.classifier.params.in_dim
-        # recommended by tips and tricks 2017
-        self.non_linear = GatedTanh(self.in_dim, self.in_dim)
         self.build()
 
     # This classmethod tells MMF where to look for default config of this model
@@ -72,11 +70,14 @@ class Qlarifais(BaseModel):
     def build(self):
 
         self.vision_module = build_image_encoder(self.config.image_encoder)
-
         self.language_module = build_text_encoder(self.config.text_encoder)
-
         self.classifier = build_classifier_layer(self.config.classifier)
 
+        # fusion
+        if self.config.fusion.type == 'concat':
+            if self.config.fusion.params.layer == 'non-linear':
+                # after concat, recommended by tips and tricks 2017
+                self.non_linear_fused = GatedTanh(self.in_dim, self.in_dim)
 
         # if model uses external knowledge
         if self.config.graph_module.use:
@@ -265,13 +266,21 @@ class Qlarifais(BaseModel):
             # concatinating features
             fused = torch.cat([question_features, image_features], dim=1)
 
+            if self.config.fusion.params.layers == 'non-linear':
+                # passing through GatedTanh layer as recommended by tips and tricks 2017
+                fused = self.non_linear_fused(fused)
+
+        elif self.config.fusion.type == 'hadamard':
+            # concatinating features
+            #question_features =
+            fused = torch.cat([question_features, image_features], dim=1)
+
+
 
         # classifying
         if self.config.classifier.prior:
             #print('prior shape: ', self.priors.shape)
 
-            # passing through GatedTanh layer as recommended by tips and tricks 2017
-            fused = self.non_linear(fused)
             #print('concat ques and img: ', fused.shape)
             # fused with priors
             # multiplying features onto priors (each answer candidate) per batch
