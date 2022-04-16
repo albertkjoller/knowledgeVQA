@@ -130,7 +130,8 @@ class Qlarifais(BaseModel):
             # TODO: iterate thorough answer vocab
             # iterate through each answer provided by the priors (e.g. '<unk>' and '' have random priors)
             #for idx, (ans, ans_prior) in enumerate(processed_priors.items()):
-            for ans_cand, idx in tqdm(answer_vocab.word2idx_dict.items()):
+            # tqdm
+            for ans_cand, idx in answer_vocab.word2idx_dict.items():
                 with torch.no_grad():
                     # idx should be incremental
                     ans_prior = processed_priors[ans_cand]
@@ -282,7 +283,9 @@ class Qlarifais(BaseModel):
 
             # predictions scores for each candidate answer in vocab
             logits = self.classifier(fused_with_priors)
-            logits = logits.max(dim=1)[0]
+            logits = logits.max(dim=1)#[0]
+            print('final logit: ', logits.shape)
+
 
         # mlp
         else:
