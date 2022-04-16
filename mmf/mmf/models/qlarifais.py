@@ -283,7 +283,7 @@ class Qlarifais(BaseModel):
 
             # predictions scores for each candidate answer in vocab
             logits = self.classifier(fused_with_priors)
-            logits = logits.max(dim=1)#[0]
+            #logits = logits.max(dim=1)#[0]
             #print('final logit: ', logits.shape)
 
 
