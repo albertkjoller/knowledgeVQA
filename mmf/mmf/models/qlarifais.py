@@ -3,6 +3,7 @@
 import torch
 from pathlib import Path
 import gc
+from tqdm import tqdm
 
 # All model using MMF need to inherit BaseModel
 from mmf.models.base_model import BaseModel
@@ -129,7 +130,7 @@ class Qlarifais(BaseModel):
             # TODO: iterate thorough answer vocab
             # iterate through each answer provided by the priors (e.g. '<unk>' and '' have random priors)
             #for idx, (ans, ans_prior) in enumerate(processed_priors.items()):
-            for ans_cand, idx in answer_vocab.word2idx_dict.items():
+            for ans_cand, idx in tqdm(answer_vocab.word2idx_dict.items()):
                 with torch.no_grad():
                     # idx should be incremental
                     ans_prior = processed_priors[ans_cand]
@@ -269,19 +270,19 @@ class Qlarifais(BaseModel):
             fused = torch.cat([question_features, image_features], dim=1)
 
             fused = self.non_linear(fused)
-            print('passed through non linear')
             print('concat ques and img: ', fused.shape)
-            fused = fused.to(self.device)
             # multiplying features on priors per answer/candidate in vocab
-            fused_with_priors = torch.mul(fused.unsqueeze(dim=1), self.priors)
+            fused_with_priors = torch.mul(fused.unsqueeze(dim=1).to(self.device), self.priors.to(self.device))
             # added features (single number remaining per candidate)
             print('all combined: ', fused_with_priors.shape)
 
             fused_with_priors = torch.sum(fused_with_priors, dim=2)
 
+            print('all summed: ', fused_with_priors.shape)
+
             # predictions scores for each candidate answer in vocab
             logits = self.classifier(fused_with_priors)
-            logits = logits.max(dim=1)
+            logits = logits.max(dim=1)[0]
 
         # mlp
         else:

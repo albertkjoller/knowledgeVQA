@@ -73,7 +73,6 @@ def load_priors(cache_dir, data_dir, processors_config):
         for ans_cand in answer_vocab.word2idx_dict:
             # if path to current answer exists
             if Path(f'{cache_dir}/priors/{ans_cand}').is_dir():
-
         #for ans_cand_path in folders:
             # getting folder name, i.e. answer candidate
             #ans_cand = ans_cand_path.name
