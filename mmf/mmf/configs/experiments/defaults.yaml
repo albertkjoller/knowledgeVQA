@@ -23,7 +23,8 @@ scheduler:
   type: warmup_cosine # more varying
   params:
     num_warmup_steps: 2000
-    num_training_steps: ${training.max_updates}
+    # i.e. number of iterations/updates
+    num_training_steps: ${training.max_epochs} * ${training.batch_size}
 
 # Adamax better at embeddings
 optimizer:
@@ -42,7 +43,7 @@ evaluation:
 
 training:
   batch_size: 128 # default: 512, 128 or higher performs better (2017 tips and tricks)
-  #lr_scheduler: true   # Don't forget to update schedule_attributes if you update this
+  lr_scheduler: true   # Don't forget to update schedule_attributes if you update this
   max_updates: null # default: 22000, krisp uses 88000
   max_epochs: 20 # tips and tricks 12-18
   num_workers: 4 # default is 4, rule of thumb, set to num cpu cores
