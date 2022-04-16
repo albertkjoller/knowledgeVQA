@@ -110,9 +110,8 @@ class Qlarifais(BaseModel):
         # if model uses prior based on answer vocabulary
         if self.config.classifier.prior:
 
-            # classifier is sigmoid (binary per candidate answer)
-            assert 'sigmoid' == self.config.classifier.type
-
+            # final feature must be concatenated to match dimension of priors
+            assert self.config.fusion.type == 'concat'
             # initializing list of empty priors
             self.priors = torch.empty(self.out_dim, self.in_dim)
 
@@ -260,39 +259,36 @@ class Qlarifais(BaseModel):
             #    logits -= 6.58
 
 
-        # GatedTanh(in_dim, out_dim)
+
+        # fusion
+        if self.config.fusion.type == 'concat':
+            # concatinating features
+            fused = torch.cat([question_features, image_features], dim=1)
 
 
         # classifying
         if self.config.classifier.prior:
-            print('prior shape: ', self.priors.shape)
+            #print('prior shape: ', self.priors.shape)
 
-            # concatinating features
-            fused = torch.cat([question_features, image_features], dim=1)
-
+            # passing through GatedTanh layer as recommended by tips and tricks 2017
             fused = self.non_linear(fused)
-            print('concat ques and img: ', fused.shape)
-            # multiplying features on priors per answer/candidate in vocab
+            #print('concat ques and img: ', fused.shape)
+            # fused with priors
+            # multiplying features onto priors (each answer candidate) per batch
             fused_with_priors = torch.mul(fused.unsqueeze(dim=1).to(self.device), self.priors.to(self.device))
-            # added features (single number remaining per candidate)
-            print('all combined: ', fused_with_priors.shape)
+            #print('all combined: ', fused_with_priors.shape)
 
-            fused_with_priors = torch.sum(fused_with_priors, dim=2)
+            # added features per answer candidate (only scalar remaining)
+            fused = torch.sum(fused_with_priors, dim=2)
 
-            print('all summed: ', fused_with_priors.shape)
+            #print('all summed: ', fused_with_priors.shape)
 
             # predictions scores for each candidate answer in vocab
-            logits = self.classifier(fused_with_priors)
-            #logits = logits.max(dim=1)#[0]
-            #print('final logit: ', logits.shape)
 
 
-        # mlp
-        else:
-            # Concatenate final features
-            fused = torch.cat([question_features, image_features], dim=1)
-            logits = self.classifier(fused)
 
+
+        logits = self.classifier(fused)
 
         output = {"scores": logits}
         # MMF will automatically calculate loss

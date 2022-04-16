@@ -44,6 +44,8 @@ model_config:
     graph_module:
       use: false
 
+    fusion:
+      type: concat
 
     classifier:
       type: mlp
