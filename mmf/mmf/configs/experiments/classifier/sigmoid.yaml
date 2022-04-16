@@ -12,6 +12,8 @@ model_config:
       type: concat
       params:
         layer: non-linear
+        # to match classifier
+        out_dim: ${model_config.qlarifais.classifier.params.in_dim}
 
 
     classifier:

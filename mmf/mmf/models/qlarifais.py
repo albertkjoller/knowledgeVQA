@@ -56,7 +56,8 @@ class Qlarifais(BaseModel):
         self.vocab_path = self.config.classifier.processors.answer_processor.params.vocab_file
         self.data_dir = self.config.classifier.data_dir
         self.out_dim = self.config.classifier.params.out_dim
-        self.in_dim = self.config.classifier.params.in_dim
+        # in_dim for classifier should match fused dim
+        self.fused_dim = self.config.classifier.params.in_dim
         self.build()
 
     # This classmethod tells MMF where to look for default config of this model
@@ -69,15 +70,19 @@ class Qlarifais(BaseModel):
     # are actually build and assigned to the model
     def build(self):
 
+        # building general modules
         self.vision_module = build_image_encoder(self.config.image_encoder)
         self.language_module = build_text_encoder(self.config.text_encoder)
         self.classifier = build_classifier_layer(self.config.classifier)
+
 
         # fusion
         if self.config.fusion.type == 'concat':
             if self.config.fusion.params.layer == 'non-linear':
                 # after concat, recommended by tips and tricks 2017
-                self.non_linear_fused = GatedTanh(self.in_dim, self.in_dim)
+                self.non_linear_fused = GatedTanh(self.fused_dim, self.fused_dim)
+
+
 
         # if model uses external knowledge
         if self.config.graph_module.use:
@@ -114,7 +119,7 @@ class Qlarifais(BaseModel):
             # final feature must be concatenated to match dimension of priors
             assert self.config.fusion.type == 'concat'
             # initializing list of empty priors
-            self.priors = torch.empty(self.out_dim, self.in_dim)
+            self.priors = torch.empty(self.out_dim, self.fused_dim)
 
             answer_vocab = VocabDict(Path(f'{self.data_dir}/{self.vocab_path}'))
 
@@ -158,6 +163,9 @@ class Qlarifais(BaseModel):
 
                     #gc.collect()
                     #torch.cuda.empty_cache()
+
+            # prior features are concatinated, should be similare for current model
+            assert self.priors.size(dim=1) == self.fused_dim
 
             self.priors = self.priors.to(self.device)
 
@@ -266,7 +274,7 @@ class Qlarifais(BaseModel):
             # concatinating features
             fused = torch.cat([question_features, image_features], dim=1)
 
-            if self.config.fusion.params.layers == 'non-linear':
+            if self.config.fusion.params.layer == 'non-linear':
                 # passing through GatedTanh layer as recommended by tips and tricks 2017
                 fused = self.non_linear_fused(fused)
 
