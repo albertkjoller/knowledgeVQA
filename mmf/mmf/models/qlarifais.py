@@ -149,7 +149,6 @@ class Qlarifais(BaseModel):
 
                     combined = torch.cat([ans_text_prior.to(self.device), ans_image_prior.to(self.device)], dim=0)
 
-
                     # append row-wise to priors
                     #self.priors = torch.cat([self.priors, combined.unsqueeze(0)])
                     self.priors[idx] = combined#.unsqueeze(0)
@@ -270,9 +269,9 @@ class Qlarifais(BaseModel):
             fused = torch.cat([question_features, image_features], dim=1)
 
             fused = self.non_linear(fused)
-
+            print('passed through non linear')
             print('concat ques and img: ', fused.shape)
-
+            fused = fused.to(self.device)
             # multiplying features on priors per answer/candidate in vocab
             fused_with_priors = torch.mul(fused.unsqueeze(dim=1), self.priors)
             # added features (single number remaining per candidate)
