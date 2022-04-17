@@ -468,7 +468,6 @@ def build_lightning_optimizers(model, config):
 
 def build_scheduler(optimizer, config):
     scheduler_config = config.get("scheduler", {})
-
     if "type" not in scheduler_config:
         warnings.warn(
             "No type for scheduler specified even though lr_scheduler is True, "
@@ -479,6 +478,8 @@ def build_scheduler(optimizer, config):
     if "params" not in scheduler_config:
         warnings.warn("scheduler attributes has no params defined, defaulting to {}.")
     params = scheduler_config.get("params", {})
+    if params.num_training_steps == None:
+        params.num_training_steps = config.training.batch_size * config.training.max_epochs
     scheduler_class = registry.get_scheduler_class(scheduler_type)
     scheduler = scheduler_class(optimizer, **params)
 
