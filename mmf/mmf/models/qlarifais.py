@@ -167,7 +167,6 @@ class Qlarifais(BaseModel):
                     #self.priors[idx] = weight_norm(combined, dim=None)#.unsqueeze(0)
                     normalized = normalize(combined.unsqueeze(0), p=2, dim=1)
 
-                    print(normalized.unsqueeze(0))
                     self.priors[idx] = normalized.unsqueeze(0)
                     #priors.append(tuple(ans_image_prior, ans_text_prior))
 
