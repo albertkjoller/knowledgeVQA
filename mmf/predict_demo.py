@@ -23,7 +23,7 @@ class PretrainedModel:
     global ROOT_DIR
     ROOT_DIR = os.getcwd()
 
-    def __init__(self, experiment_name: str, model_filename: str, ModelClass: type(BaseModel), dataset: str, GBAR: bool, studynumber=None):
+    def __init__(self, experiment_name: str, model_filename: str, ModelClass: type(BaseModel), dataset: str, GBAR=bool, studynumber=None):
 
         self.experiment_name = experiment_name
         self.model_filename = model_filename
@@ -40,7 +40,10 @@ class PretrainedModel:
     def _init_processors(self):
         # define arguments
         args = Namespace()
-        config_path = Path(f'{ROOT_DIR}/mmf/save/models/{self.experiment_name}/config.yaml')
+        if self.GBAR:
+            config_path = Path(f'/work3/{self.studynumber}/Bachelor/save/models/{self.experiment_name}/config.yaml')
+        else:
+            config_path = Path(f'{ROOT_DIR}/mmf/save/models/{self.experiment_name}/config.yaml')
 
         args.opts = [
             f"config={config_path}",
@@ -78,9 +81,12 @@ class PretrainedModel:
 
     def _build_vqa_model(self):
         # load configuration and create model object
-        config = loadConfig(self.experiment_name, self.model_name)
+        config = loadConfig(self.experiment_name, self.model_name, studynumber=studynumber)
         model = self.ModelClass(config)
-        model_path = Path(f"{ROOT_DIR}/mmf/save/models/{self.experiment_name}/{self.model_filename}.pth")
+        if self.GBAR:
+            model_path = Path(f"/work3/{self.studynumber}/Bachelor/save/models/{self.experiment_name}/{self.model_filename}.pth")
+        else:
+            model_path = Path(f"{ROOT_DIR}/mmf/save/models/{self.experiment_name}/{self.model_filename}.pth")
 
         # load state dict and eventually convert from multi-gpu to single
         if self.device == 'cpu':
@@ -115,9 +121,6 @@ class PretrainedModel:
             # gather in sample list
             sample_list = SampleList([sample]).to(self.device)
             
-            with open('filename.pickle','wb') as handle:
-                pickle.dump(sample_list, handle, protocol=pickle.HIGHEST_PROTOCOL)
-
             # predict scores with model (multiclass)
             scores = self.vqa_model(sample_list)["scores"]
             scores = torch.nn.functional.softmax(scores, dim=1)
