@@ -25,7 +25,7 @@ model_config:
         img_hidden_dim: 5000
         text_hidden_dim: 300
 
-      prior: true # initalize weight matrix for each answer vocabulary object
+      prior: false # initalize weight matrix for each answer vocabulary object
       # path to prior images per answer in answer vocabulary
       cache_dir: ${env.cache_dir}
       # path to dataset for answer vocabulary and building processors
