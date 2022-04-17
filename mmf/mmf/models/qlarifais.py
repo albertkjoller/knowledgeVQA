@@ -224,6 +224,7 @@ class Qlarifais(BaseModel):
                 # average pool K features of size 2048
                 # doing it on dimensions 2 and 3 and keep 2048
                 image_features = torch.mean(image_features, dim = (2,3))
+                print('image features: ', image_features)
 
             # only one image feature from e.g. resnet50
             elif self.config.image_encoder.resize == 'none':
@@ -308,11 +309,10 @@ class Qlarifais(BaseModel):
 
         #print('fused shape: ', fused.shape)
 
-        print('before', fused.shape)
+        #print('before', fused.shape)
         logits = self.classifier(fused)
-        print('after', logits.shape)
+        print('final logits: ', logits)
 
-        raise NotImplementedError
         output = {"scores": logits}
         # MMF will automatically calculate loss
         return output
