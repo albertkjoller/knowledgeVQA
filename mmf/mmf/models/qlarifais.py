@@ -166,7 +166,10 @@ class Qlarifais(BaseModel):
                     #self.priors = torch.cat([self.priors, combined.unsqueeze(0)])
                     # TODO: does this reduce computation complex?
                     #self.priors[idx] = weight_norm(combined, dim=None)#.unsqueeze(0)
-                    self.priors[idx] = normalize(combined.unsqueeze(0), p=2, dim=1)
+                    normalized = normalize(combined.unsqueeze(0), p=2, dim=1).squeeze()
+                    self.priors[idx] = normalized
+
+                    raise NotImplementedError
                     #priors.append(tuple(ans_image_prior, ans_text_prior))
 
                     #gc.collect()
