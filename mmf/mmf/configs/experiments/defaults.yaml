@@ -24,7 +24,7 @@ scheduler:
   params:
     num_warmup_steps: 2000
     # i.e. number of iterations/updates
-    num_training_steps: ${training.max_epochs} * ${training.batch_size}
+    num_training_steps: 1000 #${training.max_epochs} * ${training.batch_size}
 
 # Adamax better at embeddings
 optimizer:
@@ -59,13 +59,6 @@ training:
 checkpoint:
   # Will save only the last max_to_keep; if -1, saves all eligible checkpoints
   max_to_keep: 1
-  # "current.ckpt" from env.save_dir
-  resume: false
-  # `checkpoint.resume_file` load a specific checkpoint from a file
-  resume_file: null
-  # `checkpoint.resume_best` will load the best checkpoint according to
-  # training.early_stop.criteria instead of the last saved ckpt
-  resume_best: false
 
 trainer:
   params:
