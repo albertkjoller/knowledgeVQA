@@ -2,13 +2,12 @@ import os, yaml
 from pathlib import Path
 from omegaconf import OmegaConf
 
-def loadConfig(experiment_name, model_name):
+def loadConfig(experiment_name, model_name, studynumber=None):
     """
     Loads the config yaml file
     """
-    # TODO: remove when not debuggin
-    if os.getcwd().split(os.sep)[-1] == 'mmf':
-        config_path = Path(f"{os.getcwd()}/save/models/{experiment_name}/config.yaml")
+    if studynumber!= None:
+        config_path = Path(f"/work3/{studynumber}/Bachelor/save/models/{experiment_name}/config.yaml")
     else:
         config_path = Path(f"{os.getcwd()}/mmf/save/models/{experiment_name}/config.yaml")
 

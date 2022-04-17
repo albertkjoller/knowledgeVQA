@@ -13,10 +13,9 @@ from mmf.utils.configuration import Configuration
 from mmf.models import *
 from mmf.utils.build import build_processors
 
-#from model_utils.config import loadConfig
-#from model_utils.image import openImage
-from mmf.utils.model_utils import *
-#from model_utils.modeling import _multi_gpu_state_to_single
+from mmf.utils.model_utils.config import loadConfig
+from mmf.utils.model_utils.image import openImage
+from mmf.utils.model_utils.modeling import _multi_gpu_state_to_single
 
 setup_imports()
 
@@ -24,13 +23,15 @@ class PretrainedModel:
     global ROOT_DIR
     ROOT_DIR = os.getcwd()
 
-    def __init__(self, experiment_name: str, model_filename: str, ModelClass: type(BaseModel), dataset: str):
+    def __init__(self, experiment_name: str, model_filename: str, ModelClass: type(BaseModel), dataset: str, GBAR=bool, studynumber=None):
 
         self.experiment_name = experiment_name
         self.model_filename = model_filename
         self.model_name = ('_').join(self.model_filename.split('_')[:-1])  # model is saved as "model_name_final.pth"
         self.ModelClass = ModelClass
         self.dataset = dataset
+        self.GBAR = GBAR
+        self.studynumber = studynumber
 
         self._init_processors()
         self.device = 'cuda' if torch.cuda.is_available() else 'cpu'
@@ -39,9 +40,8 @@ class PretrainedModel:
     def _init_processors(self):
         # define arguments
         args = Namespace()
-        #TODO: change when debugging is not necessary anymore
-        if os.getcwd().split(os.sep)[-1] == 'mmf': # TODO: Remove when not debuggin
-            config_path = Path(f'{ROOT_DIR}/save/models/{self.experiment_name}/config.yaml')
+        if self.GBAR:
+            config_path = Path(f'/work3/{self.studynumber}/Bachelor/save/models/{self.experiment_name}/config.yaml')
         else:
             config_path = Path(f'{ROOT_DIR}/mmf/save/models/{self.experiment_name}/config.yaml')
 
@@ -60,11 +60,14 @@ class PretrainedModel:
 
         # update .cache paths (different from the computer on which model was trained)
         cache_dir = str(Path.home() / '.cache/torch/mmf')
-        data_dir = str(Path(cache_dir + '/data/datasets'))
+        
+        if self.GBAR:
+            data_dir = '/work3/{:s}'.format(self.studynumber)
+        else:
+            data_dir = str(Path(cache_dir + '/data/datasets'))
         config.env.cache_dir, config.env.data_dir, dataset_config.data_dir = cache_dir, \
                                                                              str(Path(cache_dir + '/data')), \
                                                                              data_dir
-
         # update filepaths for dataset configuration processors
         dcp = dataset_config.processors
         dcp.text_processor.params.vocab.vocab_file = str(Path(f'{data_dir}/{dcp.text_processor.params.vocab.vocab_file}'))
@@ -78,13 +81,10 @@ class PretrainedModel:
 
     def _build_vqa_model(self):
         # load configuration and create model object
-        config = loadConfig(self.experiment_name, self.model_name)
+        config = loadConfig(self.experiment_name, self.model_name, studynumber=studynumber)
         model = self.ModelClass(config)
-
-        #TODO: change when debugging is not necessary anymore
-        # specify path to saved model (depending on debugging or running from command line)
-        if os.getcwd().split(os.sep)[-1] == 'mmf': #TODO: remove when not debuggin
-            model_path = Path(f"{ROOT_DIR}/save/models/{self.experiment_name}/{self.model_filename}.pth")
+        if self.GBAR:
+            model_path = Path(f"/work3/{self.studynumber}/Bachelor/save/models/{self.experiment_name}/{self.model_filename}.pth")
         else:
             model_path = Path(f"{ROOT_DIR}/mmf/save/models/{self.experiment_name}/{self.model_filename}.pth")
 
@@ -112,17 +112,15 @@ class PretrainedModel:
             processed_text = self.text_processor({'text': question})
             sample.input_ids = processed_text['input_ids']
             sample.text_len = len(processed_text['tokens'])
-
+            sample.tokens = processed_text['tokens']
+                        
             # process image input
             processed_image = self.image_processor({'image': openImage(image_path)})
             sample.image = processed_image['image']
 
             # gather in sample list
             sample_list = SampleList([sample]).to(self.device)
-
-            with open('filename.pickle','wb') as handle:
-                pickle.dump(sample_list, handle, protocol=pickle.HIGHEST_PROTOCOL)
-
+            
             # predict scores with model (multiclass)
             scores = self.vqa_model(sample_list)["scores"]
             scores = torch.nn.functional.softmax(scores, dim=1)
@@ -151,13 +149,17 @@ if __name__ == '__main__':
     model_filename = input("Enter saved model filename: ")
     ModelClass = input("Enter model type (e.g. BaseModel): ")
     dataset = input("Enter name of dataset used for training: ")
-    print("")
+    GBAR = input("\n(yes or no) - Are you using the GBAR: ")
+    if GBAR == 'yes':
+        studynumber = input("Studynumber: ")
 
     # specify model arguments and load model
     kwargs = {'experiment_name': experiment_name,
               'model_filename': model_filename,
               'ModelClass': str_to_class(ModelClass),
-              'dataset': dataset}
+              'dataset': dataset,
+              'GBAR': True if GBAR == 'yes' else False,
+              'studynumber': studynumber if GBAR == 'yes' else None}
 
     model = PretrainedModel(**kwargs)
 
