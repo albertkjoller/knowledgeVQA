@@ -9,21 +9,22 @@ model_config:
   qlarifais:
 
     fusion:
-      type: concat
+      type: hadamard
       params:
         layer: non-linear
+        in_dim: 512
         # to match classifier
-        out_dim: ${model_config.qlarifais.classifier.params.in_dim}
+        out_dim: 512 # tips and tricks
 
 
     classifier:
       type: logit
       params:
-        in_dim: 2816
+        in_dim: ${model_config.qlarifais.fusion.params.out_dim}
         out_dim: 2250
         # pythia
-        img_hidden_dim: 5000
-        text_hidden_dim: 300
+        img_hidden_dim: ${model_config.qlarifais.img_dim}
+        text_hidden_dim: ${model_config.qlarifais.ques_dim}
 
       prior: false # initalize weight matrix for each answer vocabulary object
       # path to prior images per answer in answer vocabulary

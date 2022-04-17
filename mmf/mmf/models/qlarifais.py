@@ -87,9 +87,13 @@ class Qlarifais(BaseModel):
                 # after concat, recommended by tips and tricks 2017
                 self.non_linear_fused = GatedTanh(self.fused_dim, self.fused_dim)
 
+        if self.config.fusion.type == 'hadamard':
+            if self.config.fusion.params.layer == 'non-linear':
+                self.img_layer = GatedTanh(self.config.img_dim, self.fused_dim)
+                self.ques_layer = GatedTanh(self.config.ques_dim, self.fused_dim)
 
 
-        # if model uses external knowledge
+        # knowledge graph
         if self.config.graph_module.use:
             # Import graph network module
             self.graph_module = GraphNetworkModule(self.config.graph_module)
@@ -224,7 +228,7 @@ class Qlarifais(BaseModel):
                 # average pool K features of size 2048
                 # doing it on dimensions 2 and 3 and keep 2048
                 image_features = torch.mean(image_features, dim = (2,3))
-                print('image features: ', image_features)
+                #print('image features: ', image_features)
 
             # only one image feature from e.g. resnet50
             elif self.config.image_encoder.resize == 'none':
@@ -252,7 +256,6 @@ class Qlarifais(BaseModel):
             elif self.config.graph_module.graph_logit_mode == "logit_fc":
                 # Compute logits from single hidden layer
                 graph_logits = self.graph_logit_fc(graph_output)
-
 
             # combining features
             if self.config.graph_module.output_combine == "concat":
@@ -291,7 +294,7 @@ class Qlarifais(BaseModel):
         elif self.config.fusion.type == 'hadamard':
             # concatinating features
             #question_features =
-            fused = torch.cat([question_features, image_features], dim=1)
+            fused = self.ques_layer(question_features) * self.img_layer(image_features)
 
 
 
@@ -311,7 +314,7 @@ class Qlarifais(BaseModel):
 
         #print('before', fused.shape)
         logits = self.classifier(fused)
-        print('final logits: ', logits)
+        #print('final logits: ', logits)
 
         output = {"scores": logits}
         # MMF will automatically calculate loss
