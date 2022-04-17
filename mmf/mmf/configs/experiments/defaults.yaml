@@ -19,12 +19,12 @@ dataset_config:
     dump_pred_info: false
 
 scheduler:
-  #type: warmup_linear
-  type: warmup_cosine # more varying
+  type: warmup_linear
+  #type: warmup_cosine # more varying
   params:
     num_warmup_steps: 2000
     # i.e. number of iterations/updates
-    num_training_steps: 1000 #${training.max_epochs} * ${training.batch_size}
+    num_training_steps: ${training.max_epochs} * ${training.batch_size}
 
 # Adamax better at embeddings
 optimizer:
