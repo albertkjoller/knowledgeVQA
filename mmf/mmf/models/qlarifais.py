@@ -161,14 +161,14 @@ class Qlarifais(BaseModel):
                     #ans_image_prior = torch.flatten(ans_image_prior, start_dim=1)
 
                     combined = torch.cat([ans_text_prior.to(self.device), ans_image_prior.to(self.device)], dim=0)
-
                     # append row-wise to priors
                     #self.priors = torch.cat([self.priors, combined.unsqueeze(0)])
                     # TODO: does this reduce computation complex?
                     #self.priors[idx] = weight_norm(combined, dim=None)#.unsqueeze(0)
-                    normalized = normalize(combined.unsqueeze(0), p=2, dim=1).squeeze()
-                    self.priors[idx] = normalized.unsqueeze(0)
+                    normalized = normalize(combined.unsqueeze(0), p=2, dim=1)
 
+                    print(normalized.unsqueeze(0))
+                    self.priors[idx] = normalized.unsqueeze(0)
                     #priors.append(tuple(ans_image_prior, ans_text_prior))
 
                     #gc.collect()
@@ -298,25 +298,22 @@ class Qlarifais(BaseModel):
         # classifying
         if self.config.classifier.prior:
             #print('prior shape: ', self.priors.shape)
-
             #print('concat ques and img: ', fused.shape)
             # fused with priors
             # multiplying features onto priors (each answer candidate) per batch
             fused_with_priors = torch.mul(fused.unsqueeze(dim=1).to(self.device), self.priors.to(self.device))
-            #print('all combined: ', fused_with_priors.shape)
-
-            # added features per answer candidate (only scalar remaining)
+            # added features per answer candidate (only scalar remaining), i.e. the dot product
             fused = torch.sum(fused_with_priors, dim=2)
-
-
             # predictions scores for each candidate answer in vocab
 
 
         #print('fused shape: ', fused.shape)
 
-
+        print('before', fused.shape)
         logits = self.classifier(fused)
+        print('after', logits.shape)
 
+        raise NotImplementedError
         output = {"scores": logits}
         # MMF will automatically calculate loss
         return output
