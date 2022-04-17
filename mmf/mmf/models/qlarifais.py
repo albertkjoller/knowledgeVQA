@@ -16,6 +16,9 @@ from mmf.utils.build import (
     build_text_encoder,
 )
 from torch.nn.utils.weight_norm import weight_norm
+from torch.nn.functional import normalize
+
+
 from mmf.utils.text import VocabDict
 
 from mmf.modules.layers import GatedTanh, ClassifierLayer
@@ -139,9 +142,8 @@ class Qlarifais(BaseModel):
             #for idx, (ans, ans_prior) in enumerate(processed_priors.items()):
             # tqdm
             for ans_cand, idx in answer_vocab.word2idx_dict.items():
-
-            # avoid this when using weight norm?
-            #with torch.no_grad():
+                # avoid this when using weight norm?
+                #with torch.no_grad():
                 # idx should be incremental
                 ans_prior = processed_priors[ans_cand]
                 # generating text priors
@@ -163,7 +165,8 @@ class Qlarifais(BaseModel):
                 # append row-wise to priors
                 #self.priors = torch.cat([self.priors, combined.unsqueeze(0)])
                 # TODO: does this reduce computation complex?
-                self.priors[idx] = weight_norm(combined, dim=None)#.unsqueeze(0)
+                #self.priors[idx] = weight_norm(combined, dim=None)#.unsqueeze(0)
+                self.priors[idx] = normalize(combined, p=2, dim=1)
                 #priors.append(tuple(ans_image_prior, ans_text_prior))
 
                 #gc.collect()
