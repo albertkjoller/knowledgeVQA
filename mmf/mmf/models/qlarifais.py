@@ -308,7 +308,6 @@ class Qlarifais(BaseModel):
             # added features per answer candidate (only scalar remaining)
             fused = torch.sum(fused_with_priors, dim=2)
 
-            #print('all summed: ', fused_with_priors.shape)
 
             # predictions scores for each candidate answer in vocab
 
