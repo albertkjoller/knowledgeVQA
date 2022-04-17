@@ -169,7 +169,6 @@ class Qlarifais(BaseModel):
                     normalized = normalize(combined.unsqueeze(0), p=2, dim=1).squeeze()
                     self.priors[idx] = normalized
 
-                    raise NotImplementedError
                     #priors.append(tuple(ans_image_prior, ans_text_prior))
 
                     #gc.collect()
