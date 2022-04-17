@@ -312,9 +312,8 @@ class Qlarifais(BaseModel):
             # predictions scores for each candidate answer in vocab
 
 
-        print('fused shape: ', fused.shape)
+        #print('fused shape: ', fused.shape)
 
-        raise NotImplementedError
 
         logits = self.classifier(fused)
 
