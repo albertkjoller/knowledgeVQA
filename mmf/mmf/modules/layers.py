@@ -116,6 +116,8 @@ class ClassifierLayer(nn.Module):
             self.module = TripleLinear(in_dim, out_dim)
         elif classifier_type == "linear":
             self.module = nn.Linear(in_dim, out_dim)
+        elif classifier_type == "sigmoid":
+            self.module = nn.Sigmoid()
         else:
             raise NotImplementedError("Unknown classifier type: %s" % classifier_type)
 

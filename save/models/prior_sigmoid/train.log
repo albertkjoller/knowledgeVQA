@@ -1,0 +1,27 @@
+2022-04-12T23:53:45 | INFO | mmf : Logging to: ./save/models/prior_sigmoid/train.log
+2022-04-12T23:53:45 | INFO | mmf_cli.run : Namespace(config_override=None, local_rank=None, opts=['config=configs/experiments/classifiers/sigmoid.yaml', 'model=qlarifais', 'dataset=okvqa', 'run_type=train_val'])
+2022-04-12T23:53:45 | INFO | mmf_cli.run : Torch version: 1.9.0.post2
+2022-04-12T23:53:45 | INFO | mmf_cli.run : Using seed 45766301
+2022-04-12T23:53:45 | INFO | mmf.trainers.mmf_trainer : Loading datasets
+2022-04-12T23:53:45 | DEBUG | urllib3.connectionpool : Starting new HTTPS connection (1): huggingface.co:443
+2022-04-12T23:53:46 | DEBUG | urllib3.connectionpool : https://huggingface.co:443 "HEAD /bert-base-uncased/resolve/main/tokenizer_config.json HTTP/1.1" 200 0
+2022-04-12T23:53:46 | DEBUG | urllib3.connectionpool : Starting new HTTPS connection (1): huggingface.co:443
+2022-04-12T23:53:47 | DEBUG | urllib3.connectionpool : https://huggingface.co:443 "HEAD /bert-base-uncased/resolve/main/config.json HTTP/1.1" 200 0
+2022-04-12T23:53:47 | DEBUG | urllib3.connectionpool : Starting new HTTPS connection (1): huggingface.co:443
+2022-04-12T23:53:48 | DEBUG | urllib3.connectionpool : https://huggingface.co:443 "HEAD /bert-base-uncased/resolve/main/tokenizer_config.json HTTP/1.1" 200 0
+2022-04-12T23:53:48 | DEBUG | urllib3.connectionpool : Starting new HTTPS connection (1): huggingface.co:443
+2022-04-12T23:53:49 | DEBUG | urllib3.connectionpool : https://huggingface.co:443 "HEAD /bert-base-uncased/resolve/main/vocab.txt HTTP/1.1" 200 0
+2022-04-12T23:53:49 | DEBUG | urllib3.connectionpool : Starting new HTTPS connection (1): huggingface.co:443
+2022-04-12T23:53:49 | DEBUG | urllib3.connectionpool : https://huggingface.co:443 "HEAD /bert-base-uncased/resolve/main/tokenizer.json HTTP/1.1" 200 0
+2022-04-12T23:53:49 | DEBUG | urllib3.connectionpool : Starting new HTTPS connection (1): huggingface.co:443
+2022-04-12T23:53:50 | DEBUG | urllib3.connectionpool : https://huggingface.co:443 "HEAD /bert-base-uncased/resolve/main/added_tokens.json HTTP/1.1" 404 0
+2022-04-12T23:53:50 | DEBUG | urllib3.connectionpool : Starting new HTTPS connection (1): huggingface.co:443
+2022-04-12T23:53:51 | DEBUG | urllib3.connectionpool : https://huggingface.co:443 "HEAD /bert-base-uncased/resolve/main/special_tokens_map.json HTTP/1.1" 404 0
+2022-04-12T23:53:51 | DEBUG | urllib3.connectionpool : Starting new HTTPS connection (1): huggingface.co:443
+2022-04-12T23:53:52 | DEBUG | urllib3.connectionpool : https://huggingface.co:443 "HEAD /bert-base-uncased/resolve/main/tokenizer_config.json HTTP/1.1" 200 0
+2022-04-12T23:53:52 | DEBUG | urllib3.connectionpool : Starting new HTTPS connection (1): huggingface.co:443
+2022-04-12T23:53:53 | DEBUG | urllib3.connectionpool : https://huggingface.co:443 "HEAD /bert-base-uncased/resolve/main/config.json HTTP/1.1" 200 0
+2022-04-12T23:53:53 | INFO | mmf.datasets.multi_datamodule : Multitasking disabled by default for single dataset training
+2022-04-12T23:53:53 | INFO | mmf.datasets.multi_datamodule : Multitasking disabled by default for single dataset training
+2022-04-12T23:53:53 | INFO | mmf.datasets.multi_datamodule : Multitasking disabled by default for single dataset training
+2022-04-12T23:53:53 | INFO | mmf.trainers.mmf_trainer : Loading model

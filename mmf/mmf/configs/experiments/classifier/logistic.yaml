@@ -2,7 +2,7 @@ includes:
 - ./defaults.yaml
 
 env:
-  save_dir: ${env.part_save_dir}/prior_sigmoid
+  save_dir: ${env.part_save_dir}/logistic
 
 
 model_config:
@@ -17,12 +17,15 @@ model_config:
 
 
     classifier:
-      type: sigmoid
+      type: logit
       params:
-        # 2048 + 768 + 1310 in case of features
-        in_dim: 2816 # TODO: more auto?
-        out_dim: 2250 # target size for okvqa (okvqa v1.1 has 2250) todo: autoindex_in_node
-      prior: true # initalize weight matrix for each answer vocabulary object
+        in_dim: 2816
+        out_dim: 2250
+        # pythia
+        img_hidden_dim: 5000
+        text_hidden_dim: 300
+
+      prior: false # initalize weight matrix for each answer vocabulary object
       # path to prior images per answer in answer vocabulary
       cache_dir: ${env.cache_dir}
       # path to dataset for answer vocabulary and building processors

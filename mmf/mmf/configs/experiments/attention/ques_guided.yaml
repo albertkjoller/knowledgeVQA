@@ -1,0 +1,28 @@
+includes:
+- ./defaults.yaml
+
+env:
+  save_dir: ${env.part_save_dir}/ques_guided
+
+
+model_config:
+  qlarifais:
+    attention:
+      use: true
+      type: question_guided
+      params:
+        modal_combine:
+          type: non_linear_element_multiply # concatenate
+          params:
+            dropout: 0
+            hidden_dim: 5000 #?
+        normalization: softmax
+        transform:
+          type: linear
+          params:
+            out_dim: 1
+
+
+
+
+

@@ -1,6 +1,10 @@
 
 
 import torch
+from pathlib import Path
+import gc
+from tqdm import tqdm
+
 # All model using MMF need to inherit BaseModel
 from mmf.models.base_model import BaseModel
 # registry is need to register the dataset or our new model so as to be MMF discoverable
@@ -11,13 +15,36 @@ from mmf.utils.build import (
     build_image_encoder,
     build_text_encoder,
 )
-from mmf.modules.layers import ReLUWithWeightNormFC
+from torch.nn.utils.weight_norm import weight_norm
+from torch.nn.functional import normalize
+
+
+from mmf.utils.text import VocabDict
+
+from mmf.modules.layers import GatedTanh, ClassifierLayer
 from mmf.modules.prior import load_priors
 
+from mmf.modules.attention import AttentionLayer
+from mmf.modules.embeddings import ImageFeatureEmbedding
+
 '''
-run command:
-# example
-mmf_run config='configs/experiments//defaults.yaml' model=qlarifais dataset=okvqa run_type=train_val
+run commands:
+
+# default:
+mmf_run config='configs/experiments/defaults.yaml' model=qlarifais dataset=okvqa run_type=train_val
+
+# image features example:
+mmf_run config='configs/experiments/image_encoder/grids.yaml' model=qlarifais dataset=okvqa run_type=train_val
+
+# classifier example:
+#   - define image encoder in experiment folder configs
+mmf_run config='configs/experiments/classifier/sigmoid.yaml' model=qlarifais dataset=okvqa run_type=train_val
+
+# attention example:
+#   - define image encoder in experiment folder configs
+mmf_run config='configs/experiments/attention/ques_guided.yaml' model=qlarifais dataset=okvqa run_type=train_val
+
+
 '''
 
 # Register the model for MMF, "concat_bert_tutorial" key would be used to find the model
@@ -30,6 +57,12 @@ class Qlarifais(BaseModel):
         # with same parameters. But to explain how config is initialized we
         # have kept this
         super().__init__(config)
+
+        self.vocab_path = self.config.classifier.processors.answer_processor.params.vocab_file
+        self.data_dir = self.config.classifier.data_dir
+        self.out_dim = self.config.classifier.params.out_dim
+        # in_dim for classifier should match fused dim
+        self.fused_dim = self.config.classifier.params.in_dim
         self.build()
 
     # This classmethod tells MMF where to look for default config of this model
@@ -42,12 +75,18 @@ class Qlarifais(BaseModel):
     # are actually build and assigned to the model
     def build(self):
 
-
+        # building general modules
         self.vision_module = build_image_encoder(self.config.image_encoder)
-
         self.language_module = build_text_encoder(self.config.text_encoder)
-
         self.classifier = build_classifier_layer(self.config.classifier)
+
+
+        # fusion
+        if self.config.fusion.type == 'concat':
+            if self.config.fusion.params.layer == 'non-linear':
+                # after concat, recommended by tips and tricks 2017
+                self.non_linear_fused = GatedTanh(self.fused_dim, self.fused_dim)
+
 
 
         # if model uses external knowledge
@@ -82,37 +121,78 @@ class Qlarifais(BaseModel):
         # if model uses prior based on answer vocabulary
         if self.config.classifier.prior:
 
-            # images
-            unprocessed_priors = load_priors(self.config.classifier.prior_path)
+            # final feature must be concatenated to match dimension of priors
+            assert self.config.fusion.type == 'concat'
+            # initializing list of empty priors
+            self.priors = torch.empty(self.out_dim, self.fused_dim)
 
+            answer_vocab = VocabDict(Path(f'{self.data_dir}/{self.vocab_path}'))
+
+            # loading pre-extracted priors from the web per answer candidate
+            #unprocessed_priors = load_priors(self.config.classifier.prior_path, self.config.classifier.vocab_path)
+            processed_priors = load_priors(self.config.classifier.cache_dir,
+                                           self.data_dir,
+                                           self.config.classifier.processors
+                                           )
             # priors have same size as answer_vocab
-            assert len(img_priors) == self.config.classifier.params.out_dim
-            # classifier is sigmoid (binary)
-            assert 'sigmoid' == self.config.classifier.type
+            assert len(processed_priors) == self.out_dim
 
-            # TODO: assert sigmoid?
+            # TODO: iterate thorough answer vocab
+            # iterate through each answer provided by the priors (e.g. '<unk>' and '' have random priors)
+            #for idx, (ans, ans_prior) in enumerate(processed_priors.items()):
+            # tqdm
+            for ans_cand, idx in answer_vocab.word2idx_dict.items():
+                # avoid this when using weight norm?
+                with torch.no_grad():
+                    # idx should be incremental
+                    ans_prior = processed_priors[ans_cand]
+                    # generating text priors
+                    text_features = self.language_module(ans_prior['input_ids'].unsqueeze(0))
 
-            # list of image priors per answer
-            self.priors = torch.tensor([])
-            # iterate through each answer in answer_vocab
-            for ans, ans_images in unprocessed_priors.items():
+                    #ans_text_prior = torch.flatten(text_features, start_dim=1).squeeze()
+                    ans_text_prior = text_features.squeeze()
 
-                # generating text priors
-                text_features = self.text_processor({'text': ans})
-                ans_text_prior = torch.flatten(text_features, start_dim=1)
+                    # calculating image priors
+                    # get features from image priors
+                    image_features = self.vision_module(ans_prior['images'])
+                    # average pool K features of size 2048
+                    # doing it on batches, and the grids e.g. 7x7 to get dim 2048
+                    ans_image_prior = torch.mean(image_features, dim=(0, 2, 3))
+                    #ans_image_prior = torch.flatten(ans_image_prior, start_dim=1)
 
-                # generating image priors
-                # get features from image priors
-                image_features = self.image_processor({'image': ans_images})
-                # average pool K features of size 2048
-                # doing it on batches, and the grids e.g. 7x7 to get dim 2048
-                ans_image_prior = torch.mean(image_features, dim=(0, 2, 3))
-                ans_image_prior = torch.flatten(ans_image_prior, start_dim=1)
+                    combined = torch.cat([ans_text_prior.to(self.device), ans_image_prior.to(self.device)], dim=0)
 
-                combined = torch.cat([ans_text_prior, ans_image_prior], dim=0)
-                # append row-wise
-                self.priors = torch.cat([self.priors, combined.unsqueeze(0)])
-                #priors.append(tuple(ans_image_prior, ans_text_prior))
+                    # append row-wise to priors
+                    #self.priors = torch.cat([self.priors, combined.unsqueeze(0)])
+                    # TODO: does this reduce computation complex?
+                    #self.priors[idx] = weight_norm(combined, dim=None)#.unsqueeze(0)
+                    normalized = normalize(combined.unsqueeze(0), p=2, dim=1).squeeze()
+                    self.priors[idx] = normalized
+
+                    #priors.append(tuple(ans_image_prior, ans_text_prior))
+
+                    #gc.collect()
+                    #torch.cuda.empty_cache()
+
+            # prior features are concatinated, should be similare for current model
+            assert self.priors.size(dim=1) == self.fused_dim
+
+            self.priors = self.priors.to(self.device)
+
+        if self.config.attention.use:
+            # image dim is 2048
+            # question dim is 768
+            # params has modal_combine, normalization and transform
+            # ImageFeatureEmbedding instead?
+
+            self.attention_model = ImageFeatureEmbedding(self.config.modal_hidden_size,
+                                                  self.config.text_hidden_size,
+                                                  **self.config.attention.params)
+
+
+
+
+
 
 
     def forward(self, sample_list):
@@ -123,6 +203,7 @@ class Qlarifais(BaseModel):
         # Get the text and image features from the encoders
         question_features = self.language_module(question)# TODO: [1] in bert encoder?
         question_features = torch.flatten(question_features, start_dim=1)
+        #print('ques: ', question_features.shape)
 
 
         # image encoding
@@ -131,17 +212,29 @@ class Qlarifais(BaseModel):
         #print('img: ', image_features.shape)
         # TODO: average pooling, lots of other options (top-down, sum, multi)
         #   - text-embedding and _operator has good example
-        if self.config.image_encoder.resize == 'average_pooling':
-            # average pool K features of size 2048
-            # doing it on dimensions 2 and 3 and keep 2048
-            image_features = torch.mean(image_features, dim = (2,3))
-        elif self.config.image_encoder.resize == 'none':
-            # image feature dim is only 2048
-            # assert self.config.image_encoder.type in ["resnet50", ...] # TODO: ?
-            pass
+
+        # if model uses top-down attention on images
+        if self.config.attention.use:
+            # question guided attention
+            if self.config.attention.type == 'question_guided':
+                input  = (encoded_feature, text_embedding_total, feature_dim, extra)
+                attention = self.attention_model(image_features, question_features, image_dims)
+
+        else:
+            if self.config.image_encoder.resize == 'average_pooling':
+                # average pool K features of size 2048
+                # doing it on dimensions 2 and 3 and keep 2048
+                image_features = torch.mean(image_features, dim = (2,3))
+
+            # only one image feature from e.g. resnet50
+            elif self.config.image_encoder.resize == 'none':
+                # image feature dim is only 2048
+                # assert self.config.image_encoder.type in ["resnet50", ...] # TODO: ?
+                pass
 
         # Flatten the embeddings before concatenation
         image_features = torch.flatten(image_features, start_dim=1)
+        #print('image: ', image_features.shape)
 
 
         # if using external knowledge (graph)
@@ -185,25 +278,44 @@ class Qlarifais(BaseModel):
             #    logits -= 6.58
 
 
-        # GatedTanh(in_dim, out_dim)
+
+        # fusion
+        if self.config.fusion.type == 'concat':
+            # concatinating features
+            fused = torch.cat([question_features, image_features], dim=1)
+
+            if self.config.fusion.params.layer == 'non-linear':
+                # passing through GatedTanh layer as recommended by tips and tricks 2017
+                fused = self.non_linear_fused(fused)
+
+        elif self.config.fusion.type == 'hadamard':
+            # concatinating features
+            #question_features =
+            fused = torch.cat([question_features, image_features], dim=1)
+
 
 
         # classifying
-        if self.config.classifier.prior and self.config.classifier.type == 'sigmoid':
+        if self.config.classifier.prior:
+            #print('prior shape: ', self.priors.shape)
 
-            # concatinating features
-            combined = torch.cat([question_features, image_features], dim=1)
-            # multiplying features on priors per answer/candidate in vocab
-            combind_with_priors = torch.mul(self.priors, combined)
+            #print('concat ques and img: ', fused.shape)
+            # fused with priors
+            # multiplying features onto priors (each answer candidate) per batch
+            fused_with_priors = torch.mul(fused.unsqueeze(dim=1).to(self.device), self.priors.to(self.device))
+            #print('all combined: ', fused_with_priors.shape)
+
+            # added features per answer candidate (only scalar remaining)
+            fused = torch.sum(fused_with_priors, dim=2)
+
+            #print('all summed: ', fused_with_priors.shape)
+
             # predictions scores for each candidate answer in vocab
-            logits = torch.sigmoid(combind_with_priors)
 
-        # mlp
-        else:
-            # Concatenate final features
-            fused = torch.cat([question_features, image_features], dim=1)
-            logits = self.classifier(fused)
 
+
+
+        logits = self.classifier(fused)
 
         output = {"scores": logits}
         # MMF will automatically calculate loss

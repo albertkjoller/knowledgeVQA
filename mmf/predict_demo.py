@@ -13,9 +13,10 @@ from mmf.utils.configuration import Configuration
 from mmf.models import *
 from mmf.utils.build import build_processors
 
-from model_utils.config import loadConfig
-from model_utils.image import openImage
-from model_utils.modeling import _multi_gpu_state_to_single
+#from model_utils.config import loadConfig
+#from model_utils.image import openImage
+from mmf.utils.model_utils import *
+#from model_utils.modeling import _multi_gpu_state_to_single
 
 setup_imports()
 
