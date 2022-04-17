@@ -140,34 +140,34 @@ class Qlarifais(BaseModel):
             # tqdm
             for ans_cand, idx in answer_vocab.word2idx_dict.items():
 
-                # avoid this when using weight norm?
-                with torch.no_grad():
-                    # idx should be incremental
-                    ans_prior = processed_priors[ans_cand]
-                    # generating text priors
-                    text_features = self.language_module(ans_prior['input_ids'].unsqueeze(0))
+            # avoid this when using weight norm?
+            #with torch.no_grad():
+                # idx should be incremental
+                ans_prior = processed_priors[ans_cand]
+                # generating text priors
+                text_features = self.language_module(ans_prior['input_ids'].unsqueeze(0))
 
-                    #ans_text_prior = torch.flatten(text_features, start_dim=1).squeeze()
-                    ans_text_prior = text_features.squeeze()
+                #ans_text_prior = torch.flatten(text_features, start_dim=1).squeeze()
+                ans_text_prior = text_features.squeeze()
 
-                    # calculating image priors
-                    # get features from image priors
-                    image_features = self.vision_module(ans_prior['images'])
-                    # average pool K features of size 2048
-                    # doing it on batches, and the grids e.g. 7x7 to get dim 2048
-                    ans_image_prior = torch.mean(image_features, dim=(0, 2, 3))
-                    #ans_image_prior = torch.flatten(ans_image_prior, start_dim=1)
+                # calculating image priors
+                # get features from image priors
+                image_features = self.vision_module(ans_prior['images'])
+                # average pool K features of size 2048
+                # doing it on batches, and the grids e.g. 7x7 to get dim 2048
+                ans_image_prior = torch.mean(image_features, dim=(0, 2, 3))
+                #ans_image_prior = torch.flatten(ans_image_prior, start_dim=1)
 
-                    combined = torch.cat([ans_text_prior.to(self.device), ans_image_prior.to(self.device)], dim=0)
+                combined = torch.cat([ans_text_prior.to(self.device), ans_image_prior.to(self.device)], dim=0)
 
-                    # append row-wise to priors
-                    #self.priors = torch.cat([self.priors, combined.unsqueeze(0)])
-                    # TODO: does this reduce computation complex?
-                    self.priors[idx] = weight_norm(combined, dim=None)#.unsqueeze(0)
-                    #priors.append(tuple(ans_image_prior, ans_text_prior))
+                # append row-wise to priors
+                #self.priors = torch.cat([self.priors, combined.unsqueeze(0)])
+                # TODO: does this reduce computation complex?
+                self.priors[idx] = weight_norm(combined, dim=None)#.unsqueeze(0)
+                #priors.append(tuple(ans_image_prior, ans_text_prior))
 
-                    #gc.collect()
-                    #torch.cuda.empty_cache()
+                #gc.collect()
+                #torch.cuda.empty_cache()
 
             # prior features are concatinated, should be similare for current model
             assert self.priors.size(dim=1) == self.fused_dim
