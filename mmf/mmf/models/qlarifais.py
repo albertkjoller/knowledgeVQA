@@ -15,7 +15,7 @@ from mmf.utils.build import (
     build_image_encoder,
     build_text_encoder,
 )
-from mmf.modules.layers import GatedTanh
+from mmf.modules.layers import GatedTanh, ClassifierLayer
 from mmf.utils.text import VocabDict
 from mmf.modules.prior import load_priors
 

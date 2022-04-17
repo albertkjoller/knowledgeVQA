@@ -1,0 +1,38 @@
+includes:
+- ./defaults.yaml
+
+env:
+  save_dir: ${env.part_save_dir}/prior_sigmoid
+
+
+model_config:
+  qlarifais:
+
+    fusion:
+      type: concat
+      params:
+        layer: non-linear
+        # to match classifier
+        out_dim: ${model_config.qlarifais.classifier.params.in_dim}
+
+
+    classifier:
+      type: logit
+      params:
+        in_dim: 2816
+        out_dim: 2250
+        # pythia
+        img_hidden_dim: 5000
+        text_hidden_dim: 300
+
+      prior: false # initalize weight matrix for each answer vocabulary object
+      # path to prior images per answer in answer vocabulary
+      cache_dir: ${env.cache_dir}
+      # path to dataset for answer vocabulary and building processors
+      data_dir: ${dataset_config.${datasets}.data_dir}
+      # path to answer vocabulary file
+      processors: ${dataset_config.${datasets}.processors}
+
+
+
+
