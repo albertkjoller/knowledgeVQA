@@ -9,7 +9,7 @@ model_config:
   qlarifais:
 
     fusion:
-      type: hadamard
+      type: hadamard # [concat, hadamard]
       params:
         layer: non-linear
         in_dim: 512
@@ -18,7 +18,7 @@ model_config:
 
 
     classifier:
-      type: logit
+      type: sigmoid # [logit, sigmoid]
       params:
         in_dim: ${model_config.qlarifais.fusion.params.out_dim}
         out_dim: 2250

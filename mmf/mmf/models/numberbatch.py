@@ -16,15 +16,15 @@ from typing import List
 
 @registry.register_model("Numberbatch")
 class Numberbatch(BaseModel):
-    
+
     def __init__(self, config):
-        
+
         # Path to numberbatch embeddings - download from here:
         # https://github.com/commonsense/conceptnet-numberbatch
-        
+
         #TODO: fix this as an input in the config
         self.numberbatch_filepath = '/work3/s194253/numberbatch-en-19.08.txt.gz'
-        
+
         super().__init__(config)
         self.build()
 
@@ -36,7 +36,7 @@ class Numberbatch(BaseModel):
 
         self.vision_module = build_image_encoder(self.config.image_encoder)
         self.language_module = build_text_encoder(self.config.text_encoder)
-        
+
         #TODO: check the structure of config.graph_encoder - is it a dict? then this should
         # be fed to the function below
         self.build_graph_encoder(self.config.graph_encoder) # implicitly builds graph_module
@@ -44,7 +44,7 @@ class Numberbatch(BaseModel):
 
     def build_graph_encoder(self, ): #TODO: Specify filename in config?
 
-        self.numberbatch = {} 
+        self.numberbatch = {}
         with gzip.open(self.numberbatch_filepath, 'rb') as f:
             info = f.readlines(1)
             lines, self.dim = (int(x) for x in info[0].decode('utf-8').strip("\n").split(" "))
@@ -52,7 +52,7 @@ class Numberbatch(BaseModel):
             for line in tqdm(f, total=lines):
                 l = line.decode('utf-8')
                 l = l.strip("\n")
-                
+
                 # create tensor-dictionary
                 word = l.split(' ')[0]
                 tensor = torch.tensor(list(map(float, l.split(' ')[1:])), dtype=torch.float32)
@@ -65,11 +65,11 @@ class Numberbatch(BaseModel):
         for i, token in enumerate(question_tokens):
             try:
                 tensor = self.numberbatch[token]
-                X[:, i] = tensor        
+                X[:, i] = tensor
             except KeyError:
                 pass
         return X.nanmean(axis=1)
-    
+
     def forward(self, sample_list):
         # Question input and embeddings
         text = sample_list['input_ids']
@@ -79,7 +79,7 @@ class Numberbatch(BaseModel):
         # Image input and features
         image = sample_list['image']
         image_features = self.vision_module(image)
-        
+
         #TODO: explain this
         image_features = torch.mean(image_features, dim = (2,3)) # to add average pooling based on attention
 
@@ -88,8 +88,8 @@ class Numberbatch(BaseModel):
 
         # External knowledge representation
         q_tokens = sample_list['tokens']
-        graph_features = self.graph_module(text) #TODO: check this
-        
+        graph_features = self.graph_module(q_tokens[0]) #TODO: check this
+
         # Combine features
         fusion = torch.cat([text_features, image_features, graph_features], dim=1)
         #TODO: something with asserting that all features are on same scaling? mean subtraction?

@@ -2,31 +2,29 @@ includes:
 - ./defaults.yaml
 
 env:
-  save_dir: ${env.part_save_dir}/sigmoid
+  save_dir: ${env.part_save_dir}/prior_sigmoid
 
 
 model_config:
+
   qlarifais:
 
     fusion:
-      type: hadamard # [concat, hadamard]
+      type: concat
       params:
         layer: non-linear
-        in_dim: 512
+        #layer: none
         # to match classifier
-        out_dim: 512 # tips and tricks
+        out_dim: ${model_config.qlarifais.classifier.params.in_dim}
 
 
     classifier:
-      type: sigmoid # [logit, sigmoid]
+      type: sigmoid
       params:
-        in_dim: ${model_config.qlarifais.fusion.params.out_dim}
-        out_dim: 2250
-        # pythia
-        img_hidden_dim: ${model_config.qlarifais.img_dim}
-        text_hidden_dim: ${model_config.qlarifais.ques_dim}
-
-      prior: false # initalize weight matrix for each answer vocabulary object
+        # 2048 + 768 + 1310 in case of features
+        in_dim: 2816 # TODO: more auto?
+        out_dim: 2250 # target size for okvqa (okvqa v1.1 has 2250) todo: autoindex_in_node
+      prior: true # initalize weight matrix for each answer vocabulary object
       # path to prior images per answer in answer vocabulary
       cache_dir: ${env.cache_dir}
       # path to dataset for answer vocabulary and building processors

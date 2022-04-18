@@ -38,3 +38,4 @@ model_config:
         num_output_features: 1
       # how to resize features
       resize: average_pooling
+      num_features: 49 # based on okvqa image dim, 224x224 and grid feats 32x32 sized stride (i.e. 224^2/32^2 = 7*7

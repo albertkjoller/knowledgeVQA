@@ -104,6 +104,8 @@ class ClassifierLayer(nn.Module):
             self.module = WeightNormClassifier(in_dim, out_dim, **kwargs)
         elif classifier_type == "logit":
             self.module = LogitClassifier(in_dim, out_dim, **kwargs)
+        elif classifier_type == "sigmoid":
+            self.module = SigmoidClassifier(in_dim, out_dim, **kwargs)
         elif classifier_type == "language_decoder":
             self.module = LanguageDecoder(in_dim, out_dim, **kwargs)
         elif classifier_type == "bert":
@@ -116,8 +118,6 @@ class ClassifierLayer(nn.Module):
             self.module = TripleLinear(in_dim, out_dim)
         elif classifier_type == "linear":
             self.module = nn.Linear(in_dim, out_dim)
-        elif classifier_type == "sigmoid":
-            self.module = nn.Sigmoid()
         else:
             raise NotImplementedError("Unknown classifier type: %s" % classifier_type)
 
@@ -214,6 +214,41 @@ class LogitClassifier(nn.Module):
 
         return logit_value
 
+class SigmoidClassifier(nn.Module):
+    # structure is recommended by <https://arxiv.org/abs/1708.02711>
+    def __init__(self, in_dim, out_dim, **kwargs):
+        super().__init__()
+        input_dim = in_dim
+        num_ans_candidates = out_dim
+        text_non_linear_dim = kwargs["text_hidden_dim"]
+        image_non_linear_dim = kwargs["img_hidden_dim"]
+        # same dimension, input is the same from the fused
+        self.f_o_text = GatedTanh(input_dim, text_non_linear_dim)
+        self.f_o_image = GatedTanh(input_dim, image_non_linear_dim)
+        # transform to num candidates dimension
+        self.linear_text = nn.Linear(text_non_linear_dim, num_ans_candidates)
+        self.linear_image = nn.Linear(image_non_linear_dim, num_ans_candidates)
+
+        # TODO: can we load prior here?
+
+        if "pretrained_image" in kwargs and kwargs["pretrained_text"] is not None:
+            self.linear_text.weight.data.copy_(
+                torch.from_numpy(kwargs["pretrained_text"])
+            )
+
+        if "pretrained_image" in kwargs and kwargs["pretrained_image"] is not None:
+            self.linear_image.weight.data.copy_(
+                torch.from_numpy(kwargs["pretrained_image"])
+            )
+
+    def forward(self, joint_embedding):
+        # pass through non-linear and linear layers
+        text_val = self.linear_text(self.f_o_text(joint_embedding))
+        image_val = self.linear_image(self.f_o_image(joint_embedding))
+        # adding features and applying sigmoid as recommended
+        sigmoid_values = torch.sigmoid(text_val + image_val)
+
+        return sigmoid_values
 
 class WeightNormClassifier(nn.Module):
     def __init__(self, in_dim, out_dim, hidden_dim, dropout):

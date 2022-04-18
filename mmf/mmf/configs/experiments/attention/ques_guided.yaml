@@ -7,15 +7,17 @@ env:
 
 model_config:
   qlarifais:
+
     attention:
       use: true
       type: question_guided
       params:
+        num_features: ${model_config.qlarifais.image_encoder.num_features}
         modal_combine:
           type: non_linear_element_multiply # concatenate
           params:
             dropout: 0
-            hidden_dim: 5000 #?
+            hidden_dim: 2048 #?
         normalization: softmax
         transform:
           type: linear

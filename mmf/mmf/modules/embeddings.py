@@ -244,7 +244,14 @@ class ImageFeatureEmbedding(nn.Module):
         attention = self.image_attention_model(
             image_feat_variable, question_embedding, image_dims
         )
+
+
         att_reshape = attention.permute(0, 2, 1)
+
+        print('attention: ', att_reshape.shape)
+        print('attention: ', att_reshape)
+
+
 
         order_vectors = getattr(extra, "order_vectors", None)
 

@@ -5,8 +5,7 @@ includes:
     # define image encoder or keep resnet50 as default
   - configs/experiments/image_features/grids.yaml
     # default classifier is mlp
-  #- configs/experiments/classifier/sigmoid.yaml
-
+  - configs/experiments/classifier/sigmoid.yaml
 
 # overwrite included if necessary:
 
