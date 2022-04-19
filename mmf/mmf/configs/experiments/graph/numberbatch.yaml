@@ -1,23 +1,27 @@
-env:
-  save_dir: ${env.part_save_dir}/hadamard
 
 includes:
     # include running experiment configs (defaults for all)
   - configs/experiments/defaults.yaml
     # define image encoder or keep resnet50 as default
   - configs/experiments/image_encoder/grids.yaml
+  # default fusion is simple concat
+  - configs/experiments/fusion/concat.yaml
     # default classifier is mlp
-  - configs/experiments/classifier/sigmoid.yaml
+  - configs/experiments/classifier/logistic.yaml
 
 # overwrite included if necessary:
+
+env:
+  save_dir: ${env.part_save_dir}/numberbatch
+
 
 model_config:
   qlarifais:
 
-    fusion:
-      type: hadamard # [concat, hadamard]
-      params:
-        layer: non-linear
-        in_dim: 512
-        # to match classifier
-        out_dim: 512 # tips and tricks
+    graph_encoder:
+      use: true
+      type: numberbatch
+
+
+
+

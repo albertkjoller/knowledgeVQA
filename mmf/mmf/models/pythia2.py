@@ -263,7 +263,7 @@ class Pythia(BaseModel):
             # Get all of the feature embeddings
             list_attr = attr + "_feature_embeddings_list"
             feature_embedding_models = getattr(self, list_attr)[i]
-
+            # TODO: forwarded img features with attention
             # Forward through these embeddings one by one
             for feature_embedding_model in feature_embedding_models:
                 inp = (encoded_feature, text_embedding_total, feature_dim, extra)

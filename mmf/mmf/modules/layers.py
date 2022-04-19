@@ -281,6 +281,8 @@ class ModalCombineLayer(nn.Module):
             self.module = MFH(img_feat_dim, txt_emb_dim, **kwargs)
         elif combine_type == "non_linear_element_multiply":
             self.module = NonLinearElementMultiply(img_feat_dim, txt_emb_dim, **kwargs)
+        elif combine_type == "non_linear_element_concat":
+            self.module = NonLinearElementConcat(img_feat_dim, txt_emb_dim, **kwargs)
         elif combine_type == "two_layer_element_multiply":
             self.module = TwoLayerElementMultiply(img_feat_dim, txt_emb_dim, **kwargs)
         elif combine_type == "top_down_attention_lstm":
@@ -398,6 +400,55 @@ class MFH(nn.Module):
 # first: image (N, K, i_dim), question (N, q_dim);
 # second: image (N, i_dim), question (N, q_dim);
 class NonLinearElementMultiply(nn.Module):
+    def __init__(self, image_feat_dim, ques_emb_dim, **kwargs):
+        super().__init__()
+        self.fa_image = ReLUWithWeightNormFC(image_feat_dim, kwargs["hidden_dim"])
+        self.fa_txt = ReLUWithWeightNormFC(ques_emb_dim, kwargs["hidden_dim"])
+
+        self.context_dim = kwargs.get("context_dim", None)
+        if self.context_dim is not None:
+            self.fa_context = ReLUWithWeightNormFC(self.context_dim, kwargs["hidden_dim"])
+
+        # if graph is also in attention
+        self.graph_dim = kwargs.get("graph_dim", None)
+        if self.graph_dim is not None:
+            self.fa_graph = ReLUWithWeightNormFC(self.graph_dim, kwargs["hidden_dim"])
+
+        self.dropout = nn.Dropout(kwargs["dropout"])
+        self.out_dim = kwargs["hidden_dim"]
+
+    def forward(self, image_feat, question_embedding, extra_embedding=None):
+        image_fa = self.fa_image(image_feat)
+        question_fa = self.fa_txt(question_embedding)
+
+        if len(image_feat.size()) == 3 and len(question_fa.size()) != 3:
+            question_fa_expand = question_fa.unsqueeze(1)
+        else:
+            question_fa_expand = question_fa
+
+        joint_feature = image_fa * question_fa_expand
+
+        if self.context_dim is not None:
+        #if context_embedding is not None:
+            # extra embeddings are context from question attention (self attention)
+            context_fa = self.fa_context(extra_embedding)
+            context_text_joint_feaure = context_fa * question_fa_expand
+            joint_feature = torch.cat([joint_feature, context_text_joint_feaure], dim=1)
+
+        if self.graph_dim is not None:
+            graph_fa = self.fa_graph(extra_embedding)
+            joint_feature = joint_feature * graph_fa
+
+        joint_feature = self.dropout(joint_feature)
+
+        return joint_feature
+
+
+
+# need to handle two situations,
+# first: image (N, K, i_dim), question (N, q_dim);
+# second: image (N, i_dim), question (N, q_dim);
+class NonLinearElementConcat(nn.Module):
     def __init__(self, image_feat_dim, ques_emb_dim, **kwargs):
         super().__init__()
         self.fa_image = ReLUWithWeightNormFC(image_feat_dim, kwargs["hidden_dim"])

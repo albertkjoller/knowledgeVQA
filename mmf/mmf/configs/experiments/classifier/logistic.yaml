@@ -6,7 +6,7 @@ includes:
     # define image encoder or keep resnet50 as default
   - configs/experiments/image_encoder/grids.yaml
   # default fusion is concat
-  - configs/experiments/fusion/hadamard.yaml
+  - configs/experiments/fusion/multiply.yaml
     # default classifier is mlp
 
 
@@ -22,13 +22,15 @@ model_config:
 
 
     classifier:
-      type: sigmoid # [logit, sigmoid]
+      type: logit # [logit, sigmoid]
       params:
-        in_dim: ${model_config.qlarifais.fusion.params.out_dim}
-        out_dim: 2250
-        # pythia
-        img_hidden_dim: ${model_config.qlarifais.img_dim}
-        text_hidden_dim: ${model_config.qlarifais.ques_dim}
+        # the output of fusion
+        # hidden dim from the fused features
+        in_dim: ${model_config.qlarifais.fusion.params.hidden_dim}
+        out_dim: 2250 # answer vocab size
+        # image dim can
+        img_hidden_dim: ${model_config.qlarifais.modal_hidden_size}
+        text_hidden_dim: ${model_config.qlarifais.text_hidden_size}
 
       prior: false # initalize weight matrix for each answer vocabulary object
 

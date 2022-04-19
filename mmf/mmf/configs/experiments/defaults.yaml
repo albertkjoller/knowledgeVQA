@@ -7,6 +7,10 @@ env:
   part_save_dir: ./save/models
   save_dir: ${env.part_save_dir}/default
 
+model_config:
+  qlarifais:
+    attention_hidden_dim: 5000
+    fusion_hidden_dim: 5000
 
 dataset_config:
   okvqa:

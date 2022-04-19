@@ -4,23 +4,23 @@ includes:
   - configs/experiments/defaults.yaml
     # define image encoder or keep resnet50 as default
   - configs/experiments/image_encoder/grids.yaml
+    # importing graph module
+  - configs/experiments/graph/krisp.yaml
     # default fusion is simple concat
   - configs/experiments/fusion/multiply.yaml
     # default classifier is mlp
   - configs/experiments/classifier/logistic.yaml
-
 # overwrite included if necessary:
 
 env:
-  save_dir: ${env.part_save_dir}/ques_guided
+  save_dir: ${env.part_save_dir}/graph_guided
 
 
 model_config:
   qlarifais:
-
     attention:
       use: true
-      type: question_guided
+      type: graph_guided
       params:
         modal_combine: # combining img and text
           type: non_linear_element_multiply # [-multiply, -concat]

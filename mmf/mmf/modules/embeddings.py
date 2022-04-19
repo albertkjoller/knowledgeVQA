@@ -245,13 +245,8 @@ class ImageFeatureEmbedding(nn.Module):
             image_feat_variable, question_embedding, image_dims
         )
 
-
+        # for match format for multiplying
         att_reshape = attention.permute(0, 2, 1)
-
-        print('attention: ', att_reshape.shape)
-        print('attention: ', att_reshape)
-
-
 
         order_vectors = getattr(extra, "order_vectors", None)
 
@@ -259,9 +254,12 @@ class ImageFeatureEmbedding(nn.Module):
             image_feat_variable = torch.cat(
                 [image_feat_variable, order_vectors], dim=-1
             )
+        # multiplying attentions to features per batch and summing
         tmp_embedding = torch.bmm(
             att_reshape, image_feat_variable
         )  # N x n_att x image_dim
+
+        # squeezing dims of size 1
         batch_size = att_reshape.size(0)
         image_embedding = tmp_embedding.view(batch_size, -1)
 

@@ -7,11 +7,7 @@ model_config:
     text_hidden_size: 768
 
     # Number of features extracted out per image
-    num_features: 1
-
-    img_dim: 2048
-    ques_dim: 768
-    kg_dim: false # ?
+    #num_features: 1 # TODO: used?
 
     losses:
       #- type: cross_entropy, target dim needs to be adjusted
@@ -35,6 +31,7 @@ model_config:
         zero_init_residual: false
       # how to resize features
       resize: none # choices [none, average_pooling]
+      num_features: 1
 
 
     # not using attention as default

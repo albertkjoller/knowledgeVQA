@@ -395,9 +395,19 @@ def mmf_indirect(path):
         return path
 
 
-# Graph network module
-# Can be added as part of a larger network, or used alone using GraphNetworkBare
-class GraphNetworkModule(nn.Module):
+# TODO: build this
+
+class build_graph_encoder(nn.Module):
+    def __init__(self, config):
+        super().__init__()
+        if config.type == "numberbatch":
+            self.module = Numberbatch(config)
+        elif config.type == "krisp":
+            self.module = GraphNetworkModule(config)
+        else:
+            raise NotImplementedError("Not implemented network module: %s" % config.type)
+
+class Numberbatch(nn.Module):
     """The generic class for graph networks
     Can be generically added to any other kind of network
     """
@@ -407,9 +417,47 @@ class GraphNetworkModule(nn.Module):
         self.config = config
         if config_extra is None:
             self.config_extra = {}
+
+        self.numberbatch = {}
+        with gzip.open(self.numberbatch_filepath, 'rb') as f:
+            info = f.readlines(1)
+            lines, self.dim = (int(x) for x in info[0].decode('utf-8').strip("\n").split(" "))
+
+            for line in tqdm(f, total=lines):
+                l = line.decode('utf-8')
+                l = l.strip("\n")
+
+                # create tensor-dictionary
+                word = l.split(' ')[0]
+                tensor = torch.tensor(list(map(float, l.split(' ')[1:])), dtype=torch.float32)
+                self.numberbatch[word] = tensor
+
+    def forward(self, question_tokens):#: list[str]):
+        assert type(question_tokens[0]) != list, ("Ensure that token input is a list of strings and not a list of a list!")
+
+        X = torch.ones((self.dim, question_tokens.__len__())) * torch.nan
+        for i, token in enumerate(question_tokens):
+            try:
+                tensor = self.numberbatch[token]
+                X[:, i] = tensor
+            except KeyError:
+                pass
+        return X.nanmean(axis=1)
+
+
+# Graph network module
+# Can be added as part of a larger network, or used alone using GraphNetworkBare
+class GraphNetworkModule(nn.Module):
+    """The generic class for graph networks
+    Can be generically added to any other kind of network
+    """
+    def __init__(self, config, config_extra=None):
+        super().__init__()
+        self.config = config
+        if config_extra is None:
+            self.config_extra = {}
         else:
             self.config_extra = config_extra
-
         # Load the input graph
         raw_graph = torch.load(mmf_indirect(config.kg_path))
         self.graph, self.graph_idx, self.edge_index, self.edge_type = make_graph(
@@ -956,6 +1004,7 @@ class GraphNetworkModule(nn.Module):
     # I need it and I'll figure it out layer
     def forward(self, sample_list):
         # Get the batch size, qids, and device
+        print('here!!!!!')
         qids = sample_list["id"]
         batch_size = qids.size(0)
         device = qids.device
