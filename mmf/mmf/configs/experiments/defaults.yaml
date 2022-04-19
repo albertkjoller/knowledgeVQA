@@ -5,7 +5,7 @@ includes:
 
 env:
   part_save_dir: ./save/models
-  save_dir: ${env.part_save_dir}/Q
+  save_dir: ${env.part_save_dir, /Q}
 
 
 dataset_config:
