@@ -6,7 +6,7 @@ includes:
     # define image encoder or keep resnet50 as default
   - configs/experiments/image_encoder/grids.yaml
   # default fusion is concat
-  - configs/experiments/fusion/multiply.yaml
+  #- configs/experiments/fusion/multiply.yaml
     # default classifier is mlp
 
 
