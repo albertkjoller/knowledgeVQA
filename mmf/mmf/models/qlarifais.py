@@ -122,6 +122,7 @@ class Qlarifais(BaseModel):
 
             # defining model
             #   - params are the combine, normalize and tranform layers
+            self.config.modal_hidden_size = self.config.attention_hidden_dim
 
             if self.config.attention.type == "question_guided":
                 self.guided_hidden_dim = self.config.text_hidden_size

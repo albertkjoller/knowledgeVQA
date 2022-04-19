@@ -38,7 +38,7 @@ model_config:
     attention:
       use: false
     # not using external knowledge as default
-    graph_module:
+    graph_encoder:
       use: false
 
     fusion:

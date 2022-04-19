@@ -18,3 +18,4 @@ model_config:
       params:
         dropout: 0 # avoid overfitting
         hidden_dim: ${model_config.qlarifais.fusion_hidden_dim}
+
