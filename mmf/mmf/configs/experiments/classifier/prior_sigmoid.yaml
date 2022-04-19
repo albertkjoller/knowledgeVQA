@@ -2,7 +2,7 @@ includes:
     # include running experiment configs (defaults for all)
   - configs/experiments/defaults.yaml
     # define image encoder or keep resnet50 as default
-  - configs/experiments/image_features/grids.yaml
+  - configs/experiments/image_encoder/grids.yaml
     # default fusion is concat
   - configs/experiments/fusion/concat.yaml
     # default classifier is mlp
