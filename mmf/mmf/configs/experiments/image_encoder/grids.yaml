@@ -6,7 +6,7 @@ includes:
 # overwrite if necessary
 
 env:
-  save_dir: ${env.save_dir} + _grids
+  save_dir: ${env.part_save_dir}/grids
 
 
 dataset_config:
