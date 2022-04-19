@@ -4,7 +4,6 @@ includes:
 # --- define default for all models ---
 
 env:
-  root_dir: ./
   part_save_dir: ./save/models
   save_dir: ${env.part_save_dir}/Q
 
