@@ -1,7 +1,9 @@
+# include running experiment configs
 includes:
-- ./defaults.yaml
+  - configs/experiments/defaults.yaml
+    # default image encoder is resnet50
 
-# this is similar to pythia
+# overwrite if necessary
 
 env:
   save_dir: ${env.part_save_dir}/regions

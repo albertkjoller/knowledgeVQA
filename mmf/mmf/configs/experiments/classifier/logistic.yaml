@@ -1,5 +1,17 @@
+
+
 includes:
-- ./defaults.yaml
+    # include running experiment configs (defaults for all)
+  - configs/experiments/defaults.yaml
+    # define image encoder or keep resnet50 as default
+  - configs/experiments/image_features/grids.yaml
+  # default fusion is concat
+  - configs/experiments/fusion/hadamard.yaml
+    # default classifier is mlp
+
+
+# overwrite included if necessary:
+
 
 env:
   save_dir: ${env.part_save_dir}/logistic
@@ -7,14 +19,6 @@ env:
 
 model_config:
   qlarifais:
-
-    fusion:
-      type: hadamard # [concat, hadamard]
-      params:
-        layer: non-linear
-        in_dim: 512
-        # to match classifier
-        out_dim: 512 # tips and tricks
 
 
     classifier:

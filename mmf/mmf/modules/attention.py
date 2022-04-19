@@ -38,6 +38,7 @@ class AttentionLayer(nn.Module):
 
 
 class ConcatenationAttention(nn.Module):
+    # as recommended by tips&tricks2017
     def __init__(self, image_feat_dim, txt_rnn_embeding_dim, hidden_size):
         super().__init__()
         self.image_feat_dim = image_feat_dim

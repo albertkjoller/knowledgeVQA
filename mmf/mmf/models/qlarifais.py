@@ -24,6 +24,7 @@ from mmf.utils.text import VocabDict
 from mmf.modules.layers import GatedTanh, ClassifierLayer
 from mmf.modules.prior import load_priors
 
+from mmf.modules.attention import ConcatenationAttention
 from mmf.modules.attention import AttentionLayer
 from mmf.modules.embeddings import ImageFeatureEmbedding
 

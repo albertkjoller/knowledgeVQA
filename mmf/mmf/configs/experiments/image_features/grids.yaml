@@ -1,8 +1,13 @@
+# include running experiment configs
 includes:
-- ./defaults.yaml
+  - configs/experiments/defaults.yaml
+    # default image encoder is resnet50
+
+# overwrite if necessary
 
 env:
-  save_dir: ${env.part_save_dir}/grids
+  save_dir: ${env.part_save_dir} + _grids
+
 
 dataset_config:
   okvqa:

@@ -1,3 +1,5 @@
+env:
+  save_dir: ${env.part_save_dir}/hadamard
 
 includes:
     # include running experiment configs (defaults for all)
@@ -9,3 +11,13 @@ includes:
 
 # overwrite included if necessary:
 
+model_config:
+  qlarifais:
+
+    fusion:
+      type: hadamard # [concat, hadamard]
+      params:
+        layer: non-linear
+        in_dim: 512
+        # to match classifier
+        out_dim: 512 # tips and tricks

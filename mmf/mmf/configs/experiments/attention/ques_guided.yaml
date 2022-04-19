@@ -1,8 +1,20 @@
+
 includes:
-- ./defaults.yaml
+    # include running experiment configs (defaults for all)
+  - configs/experiments/defaults.yaml
+    # define image encoder or keep resnet50 as default
+  - configs/experiments/image_features/grids.yaml
+  # default fusion is concat
+  - configs/experiments/fusion/hadamard.yaml
+    # default classifier is mlp
+  - configs/experiments/classifier/sigmoid.yaml
+
+# overwrite included if necessary:
 
 env:
   save_dir: ${env.part_save_dir}/ques_guided
+
+
 
 
 model_config:
