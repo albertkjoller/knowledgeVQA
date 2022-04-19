@@ -60,7 +60,12 @@ model_config:
         hidden_dim: 2533 # mean of input and output
         num_layers: 2 # ?
       prior: false # initalize weight matrix for each answer vocabulary object
-
+      # path to prior images per answer in answer vocabulary
+      cache_dir: ${env.cache_dir}
+      # path to dataset for answer vocabulary and building processors
+      data_dir: ${dataset_config.${datasets}.data_dir}
+      # path to answer vocabulary file
+      processors: ${dataset_config.${datasets}.processors}
 
 
 

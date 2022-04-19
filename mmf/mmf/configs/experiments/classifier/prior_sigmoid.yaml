@@ -24,13 +24,6 @@ model_config:
         # 2048 + 768 + 1310 in case of features
         in_dim: 2816 # TODO: more auto?
         out_dim: 2250 # target size for okvqa (okvqa v1.1 has 2250) todo: autoindex_in_node
-      prior: true # initalize weight matrix for each answer vocabulary object
-      # path to prior images per answer in answer vocabulary
-      cache_dir: ${env.cache_dir}
-      # path to dataset for answer vocabulary and building processors
-      data_dir: ${dataset_config.${datasets}.data_dir}
-      # path to answer vocabulary file
-      processors: ${dataset_config.${datasets}.processors}
 
 
 

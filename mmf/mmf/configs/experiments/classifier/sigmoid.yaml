@@ -30,12 +30,7 @@ model_config:
         text_hidden_dim: ${model_config.qlarifais.ques_dim}
 
       prior: false # initalize weight matrix for each answer vocabulary object
-      # path to prior images per answer in answer vocabulary
-      cache_dir: ${env.cache_dir}
-      # path to dataset for answer vocabulary and building processors
-      data_dir: ${dataset_config.${datasets}.data_dir}
-      # path to answer vocabulary file
-      processors: ${dataset_config.${datasets}.processors}
+
 
 
 

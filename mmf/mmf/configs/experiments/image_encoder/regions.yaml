@@ -13,7 +13,6 @@ dataset_config:
     data_dir: ${env.data_dir}/datasets
     depth_first: false
     fast_read: true
-
     use_images: true
     use_features: false
     zoo_requirements:
