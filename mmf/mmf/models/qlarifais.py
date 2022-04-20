@@ -35,6 +35,10 @@ run commands:
 # default:
 mmf_run config='configs/experiments/defaults.yaml' model=qlarifais dataset=okvqa run_type=train_val
 
+# simple fast
+mmf_run config='configs/experiments/fusion/multiply.yaml' model=qlarifais dataset=okvqa run_type=train_val
+
+
 # image features example:
 mmf_run config='configs/experiments/image_encoder/grids.yaml' model=qlarifais dataset=okvqa run_type=train_val
 
@@ -47,7 +51,7 @@ mmf_run config='configs/experiments/fusion/concat.yaml' model=qlarifais dataset=
 
 # attention example:
 #   - define image encoder in experiment folder configs
-mmf_run config='configs/experiments/attention/graph_guided.yaml' model=qlarifais dataset=okvqa run_type=train_val
+mmf_run config='configs/experiments/attention/ques_graph_guided.yaml' model=qlarifais dataset=okvqa run_type=train_val
 
 
 '''
@@ -309,11 +313,11 @@ class Qlarifais(BaseModel):
                                                                  feature_dim,
                                                                  graph_features)
 
-
             # old attention module
             # from batch_size x img_dim x (gird_map, e.g. 7x7) to batch_size x (flattened grid_map e.g. 49) x img_dim
             #image_features = image_features.flatten(2,3).permute(0, 2, 1)
             #attention_weights = self.attention_model(image_features, question_features)
+        # if not using attention
         else:
             if self.config.image_encoder.resize == 'average_pooling':
                 # average pool K features of size 2048

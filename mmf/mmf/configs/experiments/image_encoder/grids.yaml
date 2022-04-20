@@ -34,8 +34,7 @@ model_config:
       params:
         name: grid_feats_vqa
         # specify backbone and type of features
-        # choices: [R-50-(grid or updn), X-101-grid, X-152-(grid or challenge(MoVie+GridFeat))]
-        model: R-50-grid.yaml
+        model: R-50-grid.yaml # choices: [R-50-(grid or updn), X-101-grid, X-152-(grid or challenge(MoVie+GridFeat))]
         output_dir: ${env.save_dir}
         pretrained: true
         pool_type: avg
