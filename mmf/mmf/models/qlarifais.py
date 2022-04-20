@@ -96,7 +96,6 @@ class Qlarifais(BaseModel):
             # if graph module is from krisp
             if self.config.graph_encoder.type == 'krisp':
                 #self.graph_encoder = build_graph_encoder(self.config.graph_encoder)
-                print('here: ', self.config.graph_encoder)
                 self.graph_encoder = GraphNetworkModule(self.config.graph_encoder)
                 # graph logits
                 if self.config.graph_encoder.graph_logit_mode == "in_graph":
@@ -137,7 +136,7 @@ class Qlarifais(BaseModel):
                 # graph dim defined in attention.params
                 self.guided_hidden_dim = self.config.text_hidden_size
 
-            #
+
             self.attention_model = ImageFeatureEmbedding(self.config.modal_hidden_size,
                                                          self.guided_hidden_dim,
                                                          **self.config.attention.params)
@@ -241,13 +240,13 @@ class Qlarifais(BaseModel):
         # the image features are pooled once all endcodings are done
         # TODO: l2 norm?
 
-
         # if using external knowledge (graph)
         if self.config.graph_encoder.use:
             # initialize for graph module
             sample_list["q_encoded"] = question # dim 128
             # Forward through graph module
             graph_features = self.graph_encoder(sample_list) # [128, 1310, 128]
+
 
             # logits from the  the output of the network
             if self.config.graph_encoder.graph_logit_mode == "in_graph":
@@ -303,7 +302,7 @@ class Qlarifais(BaseModel):
                 image_features, attention = self.attention_model(image_features, graph_features, feature_dim)
 
             # if both, add attention weight and then do sofmax?
-            if self.config.attention.type == 'graph_guided':
+            if self.config.attention.type == 'question_graph_guided':
                 # attended and summed image features
                 image_features, attention = self.attention_model(image_features,
                                                                  question_features,

@@ -1004,7 +1004,6 @@ class GraphNetworkModule(nn.Module):
     # I need it and I'll figure it out layer
     def forward(self, sample_list):
         # Get the batch size, qids, and device
-        print('here!!!!!')
         qids = sample_list["id"]
         batch_size = qids.size(0)
         device = qids.device
