@@ -21,6 +21,8 @@ from networkx import convert_node_labels_to_integers
 from torch_geometric.nn import BatchNorm, GCNConv, RGCNConv, SAGEConv
 from tqdm import tqdm
 from mmf.utils.configuration import get_mmf_cache_dir
+import gzip
+
 
 def k_hop_subgraph(
     node_idx,
@@ -402,10 +404,13 @@ class build_graph_encoder(nn.Module):
         super().__init__()
         if config.type == "numberbatch":
             self.module = Numberbatch(config)
-        elif config.type == "krisp":
-            self.module = GraphNetworkModule(config)
+        #elif config.type == "krisp":
+        #    self.module = GraphNetworkModule(config)
+        # not implements return funciotn in krisp
         else:
             raise NotImplementedError("Not implemented network module: %s" % config.type)
+
+
 
 class Numberbatch(nn.Module):
     """The generic class for graph networks
@@ -418,10 +423,14 @@ class Numberbatch(nn.Module):
         if config_extra is None:
             self.config_extra = {}
 
+        self.max_seq_length = self.config.max_seq_length
         self.numberbatch = {}
-        with gzip.open(self.numberbatch_filepath, 'rb') as f:
+
+        with open(mmf_indirect(self.config.filepath), 'rb') as f:
+
             info = f.readlines(1)
-            lines, self.dim = (int(x) for x in info[0].decode('utf-8').strip("\n").split(" "))
+
+            lines, self.numberbatch_dim = (int(x) for x in info[0].decode('utf-8').strip("\n").split(" "))
 
             for line in tqdm(f, total=lines):
                 l = line.decode('utf-8')
@@ -432,17 +441,27 @@ class Numberbatch(nn.Module):
                 tensor = torch.tensor(list(map(float, l.split(' ')[1:])), dtype=torch.float32)
                 self.numberbatch[word] = tensor
 
-    def forward(self, question_tokens):#: list[str]):
-        assert type(question_tokens[0]) != list, ("Ensure that token input is a list of strings and not a list of a list!")
+    def forward(self, sample_list):
 
-        X = torch.ones((self.dim, question_tokens.__len__())) * torch.nan
-        for i, token in enumerate(question_tokens):
-            try:
-                tensor = self.numberbatch[token]
-                X[:, i] = tensor
-            except KeyError:
-                pass
-        return X.nanmean(axis=1)
+        question_tokens = sample_list['tokens']
+        batch_size = len(question_tokens)
+        # initializing graph embeddings
+        X = torch.ones((batch_size, self.numberbatch_dim, self.max_seq_length))
+        # looping tokens for each batch
+        for batch, tokens in enumerate(question_tokens):
+            # set to nan values as default
+            X[batch] *= np.nan
+            for i, token in enumerate(tokens):
+                # check if token is present in numberbatch
+                try:
+                    # extrach embeddings
+                    X[batch][:, i] = self.numberbatch[token]
+                except KeyError:
+                    pass
+        # average embeddings
+        X = torch.from_numpy(np.nanmean(X, axis=2))
+
+        return X
 
 
 # Graph network module

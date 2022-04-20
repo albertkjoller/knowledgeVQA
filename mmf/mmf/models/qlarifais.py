@@ -19,8 +19,7 @@ from mmf.utils.build import (
 from torch.nn.utils.weight_norm import weight_norm
 from mmf.utils.text import VocabDict
 
-from mmf.modules.graphnetwork import build_graph_encoder
-from mmf.modules.graphnetwork import GraphNetworkModule
+from mmf.modules.graphnetwork import (GraphNetworkModule, Numberbatch, build_graph_encoder)
 
 
 from mmf.modules.layers import (GatedTanh, ClassifierLayer, ModalCombineLayer)
@@ -95,11 +94,13 @@ class Qlarifais(BaseModel):
         if self.config.graph_encoder.use:
             # Import graph network module
             if self.config.graph_encoder.type == 'numberbatch':
-                self.graph_encoder = build_graph_encoder(self.config.graph_encoder)  # implicitly builds graph_module
+                self.graph_encoder = Numberbatch(self.config.graph_encoder)  # implicitly builds graph_module
+
 
             # if graph module is from krisp
             if self.config.graph_encoder.type == 'krisp':
                 #self.graph_encoder = build_graph_encoder(self.config.graph_encoder)
+
                 self.graph_encoder = GraphNetworkModule(self.config.graph_encoder)
                 # graph logits
                 if self.config.graph_encoder.graph_logit_mode == "in_graph":
@@ -164,16 +165,13 @@ class Qlarifais(BaseModel):
 
         # if model uses prior based on answer vocabulary
         if self.config.classifier.prior:
-
             # final feature must be concatenated to match dimension of priors
             assert self.config.fusion.type == 'concat', ('multiplication of seperation of priors not supported.. yet?')
-            # initializing list of empty priors
+            # initializing list of empty priors, or random?
             self.priors = torch.empty(self.out_dim, self.fused_dim)
-
             answer_vocab = VocabDict(Path(f'{self.data_dir}/{self.vocab_path}'))
 
             # loading pre-extracted priors from the web per answer candidate
-            #unprocessed_priors = load_priors(self.config.classifier.prior_path, self.config.classifier.vocab_path)
             processed_priors = load_priors(self.config.classifier.cache_dir,
                                            self.data_dir,
                                            self.config.classifier.processors
@@ -232,11 +230,8 @@ class Qlarifais(BaseModel):
         question = sample_list["input_ids"]
         # get the text and image features from the encoders
         question_features = self.language_module(question)# TODO: [1] in bert encoder?
-
-
-
+        # get correct shape, i.e.
         question_features = torch.flatten(question_features, start_dim=1)
-
 
         # image encoding
         image = sample_list["image"]
@@ -250,37 +245,6 @@ class Qlarifais(BaseModel):
             sample_list["q_encoded"] = question # dim 128
             # Forward through graph module
             graph_features = self.graph_encoder(sample_list) # [128, 1310, 128]
-
-
-            # logits from the  the output of the network
-            if self.config.graph_encoder.graph_logit_mode == "in_graph":
-                # Logits is already computed
-                pass
-
-            elif self.config.graph_encoder.graph_logit_mode == "logit_fc":
-                # Compute logits from single hidden layer
-                graph_features = self.graph_logit_fc(graph_features)
-
-            '''
-            # combining features
-            if self.config.graph_module.output_combine == "concat":
-                # Combine both logits
-                #logits = torch.cat([vb_logits, graph_logits], dim=1)
-                #print('graph', graph_logits.shape)
-
-                fusion = torch.cat([question_features, image_features, graph_features], dim=1)
-                # TODO: ?
-
-            elif self.config.graph_module.output_combine == "add":
-                # Set invalid inds to zero here
-                assert graph_features.size(1) == self.config.num_labels
-                graph_features[:, self.missing_ans_inds] = 0
-                # TODO: ?
-
-            # TODO: return graph as graph_features
-            # Now combine hidden dims
-            #graph_output = torch.mean(graph_output, dim = 2) # mean pooling hidden dim of 768 so now batch*1310
-            '''
 
 
 

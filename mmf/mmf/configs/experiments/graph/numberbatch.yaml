@@ -5,7 +5,7 @@ includes:
     # define image encoder or keep resnet50 as default
   - configs/experiments/image_encoder/grids.yaml
   # default fusion is simple concat
-  - configs/experiments/fusion/concat.yaml
+  - configs/experiments/fusion/multiply.yaml
     # default classifier is mlp
   - configs/experiments/classifier/logistic.yaml
 
@@ -18,10 +18,13 @@ env:
 model_config:
   qlarifais:
 
+    graph_hidden_size: 300
+
     graph_encoder:
       use: true
       type: numberbatch
-
-
+      dim: ${model_config.qlarifais.graph_hidden_size}
+      filepath: okvqa/defaults/graph/numberbatch-en.txt
+      max_seq_length: ${dataset_config.${datasets}.processors.text_processor.params.max_seq_length}
 
 
