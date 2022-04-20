@@ -42,9 +42,12 @@ mmf_run config='configs/experiments/image_encoder/grids.yaml' model=qlarifais da
 #   - define image encoder in experiment folder configs
 mmf_run config='configs/experiments/classifier/sigmoid.yaml' model=qlarifais dataset=okvqa run_type=train_val
 
+Fusion
+mmf_run config='configs/experiments/fusion/concat.yaml' model=qlarifais dataset=okvqa run_type=train_val
+
 # attention example:
 #   - define image encoder in experiment folder configs
-mmf_run config='configs/experiments/attention/ques_guided.yaml' model=qlarifais dataset=okvqa run_type=train_val
+mmf_run config='configs/experiments/attention/graph_guided.yaml' model=qlarifais dataset=okvqa run_type=train_val
 
 
 '''
@@ -59,7 +62,7 @@ class Qlarifais(BaseModel):
         # with same parameters. But to explain how config is initialized we
         # have kept this
         super().__init__(config)
-        self.image_features_dim = self.config.modal_hidden_size
+        #self.image_features_dim = self.config.modal_hidden_size
         self.vocab_path = self.config.classifier.processors.answer_processor.params.vocab_file
         self.data_dir = self.config.classifier.data_dir
         self.out_dim = self.config.classifier.params.out_dim
@@ -122,7 +125,7 @@ class Qlarifais(BaseModel):
 
             # defining model
             #   - params are the combine, normalize and tranform layers
-            self.image_features_dim = self.config.attention_hidden_dim
+            #self.image_features_dim = self.config.attention_hidden_dim
 
             if self.config.attention.type == "question_guided":
                 self.guided_hidden_dim = self.config.text_hidden_size
@@ -151,7 +154,7 @@ class Qlarifais(BaseModel):
         # fusion layer
         # if graph is used, it is included in params
         self.fusion_model = ModalCombineLayer(self.config.fusion.type,
-                                        self.image_features_dim,
+                                        self.config.modal_hidden_size,
                                         self.config.text_hidden_size,
                                         **self.config.fusion.params)
 
@@ -333,6 +336,7 @@ class Qlarifais(BaseModel):
 
         # fusion
         # type of fusion defined when building
+        # TODO, what about only graph?
         if self.config.graph_encoder.use:
             fused_features = self.fusion_model(image_features, question_features, graph_features)
         else:
