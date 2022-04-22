@@ -49,6 +49,7 @@ import warnings
 from typing import Dict
 
 import torch
+import tensorflow as tf
 from mmf.common.registry import registry
 from mmf.datasets.processors.processors import EvalAIAnswerProcessor
 from mmf.utils.logger import log_class_usage
@@ -240,6 +241,80 @@ class BaseMetric:
     def is_dataset_applicable(self, dataset_name):
         return len(self._dataset_names) == 0 or dataset_name in self._dataset_names
 
+@registry.register_metric("bert_score")
+class BertScore(BaseMetric):
+    """
+    Metric for calculating the Bert score, as seen in:
+    https://datascience.fm/top-evaluation-metrics-for-nlp-models/
+    https://pypi.org/project/bert-score/
+    """
+
+    def __init__(self, score_key="scores", target_key="targets", topk=1):
+        super().__init__("bert_score")
+        self.score_key = score_key
+        self.target_key = target_key
+        self.topk = topk
+
+    def calculate(self, sample_list, model_output, *args, **kwargs):
+        from mmf.metrics.bert_score import bert_score
+
+        output = model_output[self.score_key]
+
+        output_text = model_output['text']
+        print("-" * 30)
+        print("-" * 30)
+        output_batch_size = model_output['batch_size']
+        print("output_batch_size", output_batch_size)
+        print("-" * 30)
+
+        expected = sample_list[self.target_key]
+
+        print("-" * 30)
+        print("-" * 30)
+        expected_batch_size = sample_list['batch_size']
+        print("expected_batch_size", expected_batch_size)
+        print("-" * 30)
+
+        print("samplelist keys", sample_list.keys())
+        print("-" * 30)
+        print("model_output keys", model_output.keys())
+        print("-" * 30)
+        print("EXPECTED", expected)
+        print("-" * 30)
+        print("OUtPUT", output)
+        print("-" * 30)
+        print("-"*30)
+        print("expected shape", tf.shape(expected))
+        print("-" * 30)
+        print("output shape", tf.shape(output))
+        print("-" * 30)
+        print("output.argmax()", torch.argmax(output, dim=1))
+        print("-" * 30)
+        print("expected.argmax()", torch.argmax(expected, dim=1))
+        print("-" * 30)
+        print("output.max()", torch.max(output, dim=1))
+        print("-" * 30)
+        print("expected.max()", torch.max(expected, dim=1))
+        print("-" * 30)
+
+
+
+
+        #candidates = output_text
+        #references = [expected_text] # Der skal være ekstra bracket rundt om da de skal være samme læmngde
+
+        #P_max, R_max, F1_max = bert_score(candidates, references, min_max_mean="max", lang='en', rescale_with_baseline=True)
+
+        #P_min, R_min, F1_min = bert_score(candidates, references, min_max_mean="min", lang='en', rescale_with_baseline=True)
+
+        #P_mean, R_mean, F1_mean = bert_score(candidates, references, min_max_mean="mean", lang='en', rescale_with_baseline=True)
+
+        #print("F1max, min, mean", F1_max, F1_min, F1_mean)
+
+        return 1
+
+
+
 
 @registry.register_metric("accuracy")
 class Accuracy(BaseMetric):
@@ -398,6 +473,9 @@ class VQAAccuracy(BaseMetric):
         one_hots.scatter_(1, output.view(-1, 1), 1)
         scores = one_hots * expected
         accuracy = torch.sum(scores) / expected.size(0)
+
+        print("VQAacc", accuracy)
+        print("VQAacc shape", accuracy.shape())
 
         return accuracy
 
@@ -682,7 +760,9 @@ class TextVQAAccuracy(BaseMetric):
 
         batch_size = sample_list.context_tokens.size(0)
         pred_answers = model_output["scores"].argmax(dim=-1)
+        print("pred_answers", pred_answers)
         context_tokens = sample_list.context_tokens.cpu().numpy()
+        print("context_tokens", context_tokens)
         answers = sample_list.get(self.gt_key).cpu().numpy()
         answer_space_size = answer_processor.get_true_vocab_size()
 
@@ -707,6 +787,9 @@ class TextVQAAccuracy(BaseMetric):
             pred_answer = " ".join(answer_words).replace(" 's", "'s")
             gt_answers = byte_tensor_to_object(answers[idx])
             predictions.append({"pred_answer": pred_answer, "gt_answers": gt_answers})
+
+
+        print("predictions", predictions)
 
         accuracy = self.evaluator.eval_pred_list(predictions)
         accuracy = torch.tensor(accuracy).to(sample_list.context_tokens.device)
