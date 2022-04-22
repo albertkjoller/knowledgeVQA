@@ -104,6 +104,8 @@ class ClassifierLayer(nn.Module):
             self.module = WeightNormClassifier(in_dim, out_dim, **kwargs)
         elif classifier_type == "logit":
             self.module = LogitClassifier(in_dim, out_dim, **kwargs)
+        elif classifier_type == "sigmoid":
+            self.module = SigmoidClassifier(in_dim, out_dim, **kwargs)
         elif classifier_type == "language_decoder":
             self.module = LanguageDecoder(in_dim, out_dim, **kwargs)
         elif classifier_type == "bert":
@@ -116,8 +118,6 @@ class ClassifierLayer(nn.Module):
             self.module = TripleLinear(in_dim, out_dim)
         elif classifier_type == "linear":
             self.module = nn.Linear(in_dim, out_dim)
-        elif classifier_type == "sigmoid":
-            self.module = nn.Sigmoid()
         else:
             raise NotImplementedError("Unknown classifier type: %s" % classifier_type)
 
@@ -214,6 +214,41 @@ class LogitClassifier(nn.Module):
 
         return logit_value
 
+class SigmoidClassifier(nn.Module):
+    # structure is recommended by <https://arxiv.org/abs/1708.02711>
+    def __init__(self, in_dim, out_dim, **kwargs):
+        super().__init__()
+        input_dim = in_dim
+        num_ans_candidates = out_dim
+        text_non_linear_dim = kwargs["text_hidden_dim"]
+        image_non_linear_dim = kwargs["img_hidden_dim"]
+        # same dimension, input is the same from the fused
+        self.f_o_text = GatedTanh(input_dim, text_non_linear_dim)
+        self.f_o_image = GatedTanh(input_dim, image_non_linear_dim)
+        # transform to num candidates dimension
+        self.linear_text = nn.Linear(text_non_linear_dim, num_ans_candidates)
+        self.linear_image = nn.Linear(image_non_linear_dim, num_ans_candidates)
+
+        # TODO: can we load prior here?
+
+        if "pretrained_image" in kwargs and kwargs["pretrained_text"] is not None:
+            self.linear_text.weight.data.copy_(
+                torch.from_numpy(kwargs["pretrained_text"])
+            )
+
+        if "pretrained_image" in kwargs and kwargs["pretrained_image"] is not None:
+            self.linear_image.weight.data.copy_(
+                torch.from_numpy(kwargs["pretrained_image"])
+            )
+
+    def forward(self, joint_embedding):
+        # pass through non-linear and linear layers
+        text_val = self.linear_text(self.f_o_text(joint_embedding))
+        image_val = self.linear_image(self.f_o_image(joint_embedding))
+        # adding features and applying sigmoid as recommended
+        sigmoid_values = torch.sigmoid(text_val + image_val)
+
+        return sigmoid_values
 
 class WeightNormClassifier(nn.Module):
     def __init__(self, in_dim, out_dim, hidden_dim, dropout):
@@ -246,6 +281,8 @@ class ModalCombineLayer(nn.Module):
             self.module = MFH(img_feat_dim, txt_emb_dim, **kwargs)
         elif combine_type == "non_linear_element_multiply":
             self.module = NonLinearElementMultiply(img_feat_dim, txt_emb_dim, **kwargs)
+        elif combine_type == "non_linear_element_concat":
+            self.module = NonLinearElementConcat(img_feat_dim, txt_emb_dim, **kwargs)
         elif combine_type == "two_layer_element_multiply":
             self.module = TwoLayerElementMultiply(img_feat_dim, txt_emb_dim, **kwargs)
         elif combine_type == "top_down_attention_lstm":
@@ -363,6 +400,55 @@ class MFH(nn.Module):
 # first: image (N, K, i_dim), question (N, q_dim);
 # second: image (N, i_dim), question (N, q_dim);
 class NonLinearElementMultiply(nn.Module):
+    def __init__(self, image_feat_dim, ques_emb_dim, **kwargs):
+        super().__init__()
+        self.fa_image = ReLUWithWeightNormFC(image_feat_dim, kwargs["hidden_dim"])
+        self.fa_txt = ReLUWithWeightNormFC(ques_emb_dim, kwargs["hidden_dim"])
+
+        self.context_dim = kwargs.get("context_dim", None)
+        if self.context_dim is not None:
+            self.fa_context = ReLUWithWeightNormFC(self.context_dim, kwargs["hidden_dim"])
+
+        # if graph is also in attention
+        self.graph_dim = kwargs.get("graph_dim", None)
+        if self.graph_dim is not None:
+            self.fa_graph = ReLUWithWeightNormFC(self.graph_dim, kwargs["hidden_dim"])
+
+        self.dropout = nn.Dropout(kwargs["dropout"])
+        self.out_dim = kwargs["hidden_dim"]
+
+    def forward(self, image_feat, question_embedding, extra_embedding=None):
+        image_fa = self.fa_image(image_feat)
+        question_fa = self.fa_txt(question_embedding)
+
+        if len(image_feat.size()) == 3 and len(question_fa.size()) != 3:
+            question_fa_expand = question_fa.unsqueeze(1)
+        else:
+            question_fa_expand = question_fa
+
+        joint_feature = image_fa * question_fa_expand
+
+        if self.context_dim is not None:
+        #if context_embedding is not None:
+            # extra embeddings are context from question attention (self attention)
+            context_fa = self.fa_context(extra_embedding)
+            context_text_joint_feaure = context_fa * question_fa_expand
+            joint_feature = torch.cat([joint_feature, context_text_joint_feaure], dim=1)
+
+        if self.graph_dim is not None:
+            graph_fa = self.fa_graph(extra_embedding)
+            joint_feature = joint_feature * graph_fa
+
+        joint_feature = self.dropout(joint_feature)
+
+        return joint_feature
+
+
+
+# need to handle two situations,
+# first: image (N, K, i_dim), question (N, q_dim);
+# second: image (N, i_dim), question (N, q_dim);
+class NonLinearElementConcat(nn.Module):
     def __init__(self, image_feat_dim, ques_emb_dim, **kwargs):
         super().__init__()
         self.fa_image = ReLUWithWeightNormFC(image_feat_dim, kwargs["hidden_dim"])

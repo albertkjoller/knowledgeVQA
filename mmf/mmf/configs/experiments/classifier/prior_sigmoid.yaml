@@ -1,0 +1,30 @@
+includes:
+    # include running experiment configs (defaults for all)
+  - configs/experiments/defaults.yaml
+    # define image encoder or keep resnet50 as default
+  - configs/experiments/image_encoder/grids.yaml
+    # default fusion is concat
+  - configs/experiments/fusion/concat.yaml
+    # default classifier is mlp
+
+
+# overwrite included if necessary:
+
+env:
+  save_dir: ${env.part_save_dir}/prior_sigmoid
+
+
+model_config:
+
+  qlarifais:
+
+    classifier:
+      type: sigmoid
+      params:
+        # 2048 + 768 + 1310 in case of features
+        in_dim: 2816 # TODO: more auto?
+        out_dim: 2250 # target size for okvqa (okvqa v1.1 has 2250) todo: autoindex_in_node
+
+
+
+

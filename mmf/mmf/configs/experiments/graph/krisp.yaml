@@ -1,0 +1,70 @@
+
+includes:
+    # include running experiment configs (defaults for all)
+  - configs/experiments/defaults.yaml
+    # define image encoder or keep resnet50 as default
+  - configs/experiments/image_encoder/grids.yaml
+  # default fusion is simple concat
+  - configs/experiments/fusion/multiply.yaml
+    # default classifier is mlp
+  - configs/experiments/classifier/logistic.yaml
+
+# overwrite included if necessary:
+
+env:
+  save_dir: ${env.part_save_dir}/numberbatch
+
+
+model_config:
+  qlarifais:
+    # overwrite
+    fusion:
+      # this will activate fusion with graph features
+      graph_dim: ${model_config.qlarifais.graph_hidden_size}
+
+
+    graph_hidden_size: 1310 # TODO: more automatic??
+    graph_encoder:
+      use: true
+      type: krisp
+
+      dataset_info_path: okvqa/defaults/annotations/annotations/graph_vocab/okvqa_dataset_info.pth.tar
+      # dimension difference 2553 and 2550
+      vocab_file: okvqa/defaults/annotations/annotations/answer_vocab_count10.txt
+      kg_path: okvqa/defaults/annotations/annotations/graphs/cn_graph.pth.tar
+      node2vec_filename: okvqa/defaults/annotations/annotations/node2vec/node2vec_cn.pkl
+      graph_vocab_file: okvqa/defaults/annotations/annotations/graph_vocab/graph_vocab_cn.pth.tar
+      prune_culdesacs: false
+      use_w2v: true
+      # what type of inputs
+      node_inputs:
+        # numbers are not used in module
+        question: 1
+        #classifiers: 4 # 4 probabilities whether the node/word/concept is in the image
+        w2v: 300 # GloVe representation of the concept
+      output_type: graph_prediction # [output_type]
+      output_order: alpha # alphabetic, same as answer vocab
+      output_special_node: false
+      gcn_type: RGCN # Relational Graph Convolution Network
+      num_gcn_conv: 2
+      use_batch_norm: true
+      use_dropout: false
+      dropout_p: 0
+      add_ans_nodes: false
+      feed_special_node: false
+      node_hid_dim: ${dataset_config.okvqa.processors.text_processor.params.max_seq_length}  #128 # TODO: same as tokenization?
+      okvqa_v_mode: v1.1
+      analysis_mode: false
+      # TODO: useless?
+      noback_vb_to_graph: false
+      use_conf: false # ?
+      graph_logit_mode: in_graph # [in_graph, logit_fc]
+      #output_combine: concat # [add, concat]
+      feed_q_to_graph: false # not to be inputted, only if concept is or isn't in q
+      num_labels: 2250 # if inputted in fc
+      # since this will be the input
+
+
+
+
+

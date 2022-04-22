@@ -23,7 +23,7 @@ from .visual_bert import VisualBERT
 from .first_model import First_Model
 from .pilot import Pilot
 from .vqtor import Vqtor
-
+from .qlarifais import Qlarifais
 __all__ = [
     "TopDownBottomUp",
     "Pythia",
@@ -53,5 +53,6 @@ __all__ = [
     "VinVL",
     "First_Model",
     "Pilot",
-    "Vqtor"
+    "Vqtor",
+    "Qlarifais"
 ]

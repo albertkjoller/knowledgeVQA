@@ -9,7 +9,7 @@ def loadConfig(experiment_name, model_name, studynumber=None):
     if studynumber!= None:
         config_path = Path(f"/work3/{studynumber}/Bachelor/save/models/{experiment_name}/config.yaml")
     else:
-        config_path = Path(f"{os.getcwd()}/mmf/save/models/{experiment_name}/config.yaml")
+        config_path = Path(f"{os.getcwd()}/save/models/{experiment_name}/config.yaml")
 
     with open(config_path, 'r') as stream:
         try:

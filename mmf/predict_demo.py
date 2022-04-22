@@ -44,6 +44,7 @@ class PretrainedModel:
             config_path = Path(f'/work3/{self.studynumber}/Bachelor/save/models/{self.experiment_name}/config.yaml')
         else:
             config_path = Path(f'{ROOT_DIR}/mmf/save/models/{self.experiment_name}/config.yaml')
+            config_path = Path(f'{ROOT_DIR}/save/models/{self.experiment_name}/config.yaml')
 
         args.opts = [
             f"config={config_path}",
@@ -60,7 +61,7 @@ class PretrainedModel:
 
         # update .cache paths (different from the computer on which model was trained)
         cache_dir = str(Path.home() / '.cache/torch/mmf')
-        
+
         if self.GBAR:
             data_dir = '/work3/{:s}'.format(self.studynumber)
         else:
@@ -81,12 +82,14 @@ class PretrainedModel:
 
     def _build_vqa_model(self):
         # load configuration and create model object
-        config = loadConfig(self.experiment_name, self.model_name, studynumber=studynumber)
-        model = self.ModelClass(config)
         if self.GBAR:
             model_path = Path(f"/work3/{self.studynumber}/Bachelor/save/models/{self.experiment_name}/{self.model_filename}.pth")
+            config = loadConfig(self.experiment_name, self.model_name, studynumber=studynumber)
+
         else:
-            model_path = Path(f"{ROOT_DIR}/mmf/save/models/{self.experiment_name}/{self.model_filename}.pth")
+            model_path = Path(f"{ROOT_DIR}/save/models/{self.experiment_name}/{self.model_filename}.pth")
+            config = loadConfig(self.experiment_name, self.model_name)
+        model = self.ModelClass(config)
 
         # load state dict and eventually convert from multi-gpu to single
         if self.device == 'cpu':
@@ -113,14 +116,14 @@ class PretrainedModel:
             sample.input_ids = processed_text['input_ids']
             sample.text_len = len(processed_text['tokens'])
             sample.tokens = processed_text['tokens']
-                        
+
             # process image input
             processed_image = self.image_processor({'image': openImage(image_path)})
             sample.image = processed_image['image']
 
             # gather in sample list
             sample_list = SampleList([sample]).to(self.device)
-            
+
             # predict scores with model (multiclass)
             scores = self.vqa_model(sample_list)["scores"]
             scores = torch.nn.functional.softmax(scores, dim=1)

@@ -38,6 +38,7 @@ class AttentionLayer(nn.Module):
 
 
 class ConcatenationAttention(nn.Module):
+    # as recommended by tips&tricks2017
     def __init__(self, image_feat_dim, txt_rnn_embeding_dim, hidden_size):
         super().__init__()
         self.image_feat_dim = image_feat_dim
@@ -116,8 +117,8 @@ class TopDownAttention(nn.Module):
     def __init__(self, combination_layer, transform_module, normalization):
         super().__init__()
         self.combination_layer = combination_layer
-        self.normalization = normalization
         self.transform = transform_module
+        self.normalization = normalization
         self.out_dim = self.transform.out_dim
 
     @staticmethod
@@ -136,9 +137,13 @@ class TopDownAttention(nn.Module):
         attention = attention.masked_fill(mask, 0)
         return attention
 
-    def forward(self, image_feat, question_embedding, image_locs=None):
+    def forward(self, image_feat, question_embedding, image_locs=None, extra_embeddings=None):
         # N x K x joint_dim
-        joint_feature = self.combination_layer(image_feat, question_embedding)
+        if extra_embeddings is not None:
+            # e.g. graph embeddings
+            joint_feature = self.combination_layer(image_feat, question_embedding, extra_embeddings)
+        else:
+            joint_feature = self.combination_layer(image_feat, question_embedding)
         # N x K x n_att
         raw_attn = self.transform(joint_feature)
 

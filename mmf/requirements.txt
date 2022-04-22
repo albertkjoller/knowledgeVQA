@@ -24,3 +24,4 @@ gensim
 psutil
 filelock
 six
+bert-score

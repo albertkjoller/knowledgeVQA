@@ -21,6 +21,8 @@ from networkx import convert_node_labels_to_integers
 from torch_geometric.nn import BatchNorm, GCNConv, RGCNConv, SAGEConv
 from tqdm import tqdm
 from mmf.utils.configuration import get_mmf_cache_dir
+import gzip
+
 
 def k_hop_subgraph(
     node_idx,
@@ -395,9 +397,22 @@ def mmf_indirect(path):
         return path
 
 
-# Graph network module
-# Can be added as part of a larger network, or used alone using GraphNetworkBare
-class GraphNetworkModule(nn.Module):
+# TODO: build this
+
+class build_graph_encoder(nn.Module):
+    def __init__(self, config):
+        super().__init__()
+        if config.type == "numberbatch":
+            self.module = Numberbatch(config)
+        #elif config.type == "krisp":
+        #    self.module = GraphNetworkModule(config)
+        # not implements return funciotn in krisp
+        else:
+            raise NotImplementedError("Not implemented network module: %s" % config.type)
+
+
+
+class Numberbatch(nn.Module):
     """The generic class for graph networks
     Can be generically added to any other kind of network
     """
@@ -407,9 +422,61 @@ class GraphNetworkModule(nn.Module):
         self.config = config
         if config_extra is None:
             self.config_extra = {}
+
+        self.max_seq_length = self.config.max_seq_length
+        self.numberbatch = {}
+
+        with open(mmf_indirect(self.config.filepath), 'rb') as f:
+
+            info = f.readlines(1)
+
+            lines, self.numberbatch_dim = (int(x) for x in info[0].decode('utf-8').strip("\n").split(" "))
+
+            for line in tqdm(f, total=lines):
+                l = line.decode('utf-8')
+                l = l.strip("\n")
+
+                # create tensor-dictionary
+                word = l.split(' ')[0]
+                tensor = torch.tensor(list(map(float, l.split(' ')[1:])), dtype=torch.float32)
+                self.numberbatch[word] = tensor
+
+    def forward(self, sample_list):
+
+        question_tokens = sample_list['tokens']
+        batch_size = len(question_tokens)
+        # initializing graph embeddings
+        X = torch.ones((batch_size, self.numberbatch_dim, self.max_seq_length))
+        # looping tokens for each batch
+        for batch, tokens in enumerate(question_tokens):
+            # set to nan values as default
+            X[batch] *= np.nan
+            for i, token in enumerate(tokens):
+                # check if token is present in numberbatch
+                try:
+                    # extrach embeddings
+                    X[batch][:, i] = self.numberbatch[token]
+                except KeyError:
+                    pass
+        # average embeddings
+        X = torch.from_numpy(np.nanmean(X, axis=2))
+
+        return X
+
+
+# Graph network module
+# Can be added as part of a larger network, or used alone using GraphNetworkBare
+class GraphNetworkModule(nn.Module):
+    """The generic class for graph networks
+    Can be generically added to any other kind of network
+    """
+    def __init__(self, config, config_extra=None):
+        super().__init__()
+        self.config = config
+        if config_extra is None:
+            self.config_extra = {}
         else:
             self.config_extra = config_extra
-
         # Load the input graph
         raw_graph = torch.load(mmf_indirect(config.kg_path))
         self.graph, self.graph_idx, self.edge_index, self.edge_type = make_graph(

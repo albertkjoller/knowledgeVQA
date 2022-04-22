@@ -4,6 +4,7 @@ import torch
 from pathlib import Path
 import gc
 from tqdm import tqdm
+from torch.nn.functional import normalize
 
 # All model using MMF need to inherit BaseModel
 from mmf.models.base_model import BaseModel
@@ -16,15 +17,15 @@ from mmf.utils.build import (
     build_text_encoder,
 )
 from torch.nn.utils.weight_norm import weight_norm
-from torch.nn.functional import normalize
-
-
 from mmf.utils.text import VocabDict
 
-from mmf.modules.layers import GatedTanh, ClassifierLayer
+from mmf.modules.graphnetwork import (GraphNetworkModule, Numberbatch, build_graph_encoder)
+
+
+from mmf.modules.layers import (GatedTanh, ClassifierLayer, ModalCombineLayer)
 from mmf.modules.prior import load_priors
 
-from mmf.modules.attention import AttentionLayer
+from mmf.modules.attention import (ConcatenationAttention, ProjectAttention)
 from mmf.modules.embeddings import ImageFeatureEmbedding
 
 '''
@@ -33,6 +34,10 @@ run commands:
 # default:
 mmf_run config='configs/experiments/defaults.yaml' model=qlarifais dataset=okvqa run_type=train_val
 
+# simple fast
+mmf_run config='configs/experiments/fusion/multiply.yaml' model=qlarifais dataset=okvqa run_type=train_val
+
+
 # image features example:
 mmf_run config='configs/experiments/image_encoder/grids.yaml' model=qlarifais dataset=okvqa run_type=train_val
 
@@ -40,9 +45,12 @@ mmf_run config='configs/experiments/image_encoder/grids.yaml' model=qlarifais da
 #   - define image encoder in experiment folder configs
 mmf_run config='configs/experiments/classifier/sigmoid.yaml' model=qlarifais dataset=okvqa run_type=train_val
 
+Fusion
+mmf_run config='configs/experiments/fusion/concat.yaml' model=qlarifais dataset=okvqa run_type=train_val
+
 # attention example:
 #   - define image encoder in experiment folder configs
-mmf_run config='configs/experiments/attention/ques_guided.yaml' model=qlarifais dataset=okvqa run_type=train_val
+mmf_run config='configs/experiments/attention/ques_graph_guided.yaml' model=qlarifais dataset=okvqa run_type=train_val
 
 
 '''
@@ -57,7 +65,7 @@ class Qlarifais(BaseModel):
         # with same parameters. But to explain how config is initialized we
         # have kept this
         super().__init__(config)
-
+        #self.image_features_dim = self.config.modal_hidden_size
         self.vocab_path = self.config.classifier.processors.answer_processor.params.vocab_file
         self.data_dir = self.config.classifier.data_dir
         self.out_dim = self.config.classifier.params.out_dim
@@ -81,55 +89,89 @@ class Qlarifais(BaseModel):
         self.classifier = build_classifier_layer(self.config.classifier)
 
 
-        # fusion
-        if self.config.fusion.type == 'concat':
-            if self.config.fusion.params.layer == 'non-linear':
-                # after concat, recommended by tips and tricks 2017
-                self.non_linear_fused = GatedTanh(self.fused_dim, self.fused_dim)
 
-
-
-        # if model uses external knowledge
-        if self.config.graph_module.use:
+        # knowledge graph
+        if self.config.graph_encoder.use:
             # Import graph network module
-            self.graph_module = GraphNetworkModule(self.config.graph_module)
+            if self.config.graph_encoder.type == 'numberbatch':
+                self.graph_encoder = Numberbatch(self.config.graph_encoder)  # implicitly builds graph_module
 
-            # graph logits
-            if self.config.graph_logit_mode == "in_graph":
-                # Logits is already computed
-                assert self.config.graph_module.output_type == "graph_prediction"
 
-            elif self.config.graph_logit_mode == "logit_fc":
-                # Compute logits from single hidden layer
-                self.graph_logit_fc = nn.Linear(self.config.graph_module.node_hid_dim, self.config.num_labels)
+            # if graph module is from krisp
+            if self.config.graph_encoder.type == 'krisp':
+                #self.graph_encoder = build_graph_encoder(self.config.graph_encoder)
 
-            # whether to add or concat features (where 'add' meaning we want the num_labels size from answer vocab)
-            # Answer indices not in graph if we are adding features
-            if self.config.output_combine == "add":
-                # Output order should be ans
-                assert self.config.graph_module.output_order == "ans"
-                self.missing_ans_inds = torch.LongTensor(self.config.num_labels).fill_(1)
-                # Now any index stil set to 1 is missing from graph
-                self.missing_ans_inds[self.graph_module.index_in_ans ] = 0
+                self.graph_encoder = GraphNetworkModule(self.config.graph_encoder)
+                # graph logits
+                if self.config.graph_encoder.graph_logit_mode == "in_graph":
+                    # Logits is already computed
+                    assert self.config.graph_encoder.output_type == "graph_prediction"
+                elif self.config.graph_encoder.graph_logit_mode == "logit_fc":
+                    # Compute logits from single hidden layer
+                    self.graph_logit_fc = nn.Linear(self.config.graph_encoder.node_hid_dim, self.config.graph_encoder.num_labels)
 
-            # 'concat' not necessary to have answer_vocab dimension
-            elif self.config.output_combine == "concat":
-                # Output order should be alphabetical
-                assert self.config.graph_module.output_order == "alpha"
+                '''
+                # whether to add or concat features (where 'add' meaning we want the num_labels size from answer vocab)
+                # Answer indices not in graph if we are adding features
+                if self.config.output_combine == "add":
+                    # Output order should be ans
+                    assert self.config.graph_module.output_order == "ans"
+                    self.missing_ans_inds = torch.LongTensor(self.config.num_labels).fill_(1)
+                    # Now any index stil set to 1 is missing from graph
+                    self.missing_ans_inds[self.graph_module.index_in_ans ] = 0
+                # 'concat' not necessary to have answer_vocab dimension
+                elif self.config.output_combine == "concat":
+                    # Output order should be alphabetical
+                    assert self.config.graph_module.output_order == "alpha"
+                '''
+        if self.config.attention.use:
+            # number of features generated by the image encoder
+
+            # defining model
+            #   - params are the combine, normalize and tranform layers
+            #self.image_features_dim = self.config.attention_hidden_dim
+
+            if self.config.attention.type == "question_guided":
+                self.guided_hidden_dim = self.config.text_hidden_size
+
+            if self.config.attention.type == "graph_guided":
+                self.guided_hidden_dim = self.config.graph_hidden_size
+
+            if self.config.attention.type == "question_graph_guided":
+                # graph dim defined in attention.params
+                self.guided_hidden_dim = self.config.text_hidden_size
+
+
+            self.attention_model = ImageFeatureEmbedding(self.config.modal_hidden_size,
+                                                         self.guided_hidden_dim,
+                                                         **self.config.attention.params)
+
+            # old
+            #self.hidden_size = self.config.attention.params.hidden_size
+            #if self.config.attention.params.
+            #if self.config.attention.params.type == 'concat':
+            #    self.attention_model = ConcatenationAttention(self.config.img_dim, self.config.ques_dim, self.hidden_size)
+            #if self.config.attention.params.type == 'multi':
+            #    self.attention_model = ProjectAttention(self.config.img_dim, self.config.ques_dim, self.hidden_size)
+
+
+        # fusion layer
+        # if graph is used, it is included in params
+        self.fusion_model = ModalCombineLayer(self.config.fusion.type,
+                                        self.config.modal_hidden_size,
+                                        self.config.text_hidden_size,
+                                        **self.config.fusion.params)
 
 
         # if model uses prior based on answer vocabulary
         if self.config.classifier.prior:
-
             # final feature must be concatenated to match dimension of priors
-            assert self.config.fusion.type == 'concat'
-            # initializing list of empty priors
+            assert self.config.fusion.type == 'concat', ('multiplication of seperation of priors not supported.. yet?')
+            # initializing list of empty priors, or random?
             self.priors = torch.empty(self.out_dim, self.fused_dim)
-
             answer_vocab = VocabDict(Path(f'{self.data_dir}/{self.vocab_path}'))
 
             # loading pre-extracted priors from the web per answer candidate
-            #unprocessed_priors = load_priors(self.config.classifier.prior_path, self.config.classifier.vocab_path)
             processed_priors = load_priors(self.config.classifier.cache_dir,
                                            self.data_dir,
                                            self.config.classifier.processors
@@ -178,54 +220,75 @@ class Qlarifais(BaseModel):
 
             self.priors = self.priors.to(self.device)
 
-        if self.config.attention.use:
-            # image dim is 2048
-            # question dim is 768
-            # params has modal_combine, normalization and transform
-            # ImageFeatureEmbedding instead?
-
-            self.attention_model = ImageFeatureEmbedding(self.config.modal_hidden_size,
-                                                  self.config.text_hidden_size,
-                                                  **self.config.attention.params)
-
-
-
-
 
 
 
     def forward(self, sample_list):
 
         # question encoding
-        # Text input features will be in "input_ids" key
+        # text input features will be in "input_ids" key
         question = sample_list["input_ids"]
-        # Get the text and image features from the encoders
+        # get the text and image features from the encoders
         question_features = self.language_module(question)# TODO: [1] in bert encoder?
+        # get correct shape, i.e.
         question_features = torch.flatten(question_features, start_dim=1)
-        #print('ques: ', question_features.shape)
-
 
         # image encoding
         image = sample_list["image"]
         image_features = self.vision_module(image)
-        #print('img: ', image_features.shape)
-        # TODO: average pooling, lots of other options (top-down, sum, multi)
-        #   - text-embedding and _operator has good example
+        # the image features are pooled once all endcodings are done
+        # TODO: l2 norm?
+
+        # if using external knowledge (graph)
+        if self.config.graph_encoder.use:
+            # initialize for graph module
+            sample_list["q_encoded"] = question # dim 128
+            # Forward through graph module
+            graph_features = self.graph_encoder(sample_list) # [128, 1310, 128]
+
+
 
         # if model uses top-down attention on images
         if self.config.attention.use:
             # question guided attention
-            if self.config.attention.type == 'question_guided':
-                input  = (encoded_feature, text_embedding_total, feature_dim, extra)
-                attention = self.attention_model(image_features, question_features, image_dims)
+            # generating desired shape for attention module
+            # from batch_size x img_dim x (gird_map, e.g. 7x7) to batch_size x (flattened grid_map e.g. 49) x img_dim
+            feature_dim = None  # TODO: ??
 
+            image_features = image_features.flatten(2,3).permute(0, 2, 1)
+
+            # TODO: does normalization of features improve?
+
+            if self.config.attention.type == 'question_guided':
+
+                # attended and summed image features
+                image_features, attention = self.attention_model(image_features, question_features, feature_dim)
+
+            if self.config.attention.type == 'graph_guided':
+
+                # attended and summed image features
+                image_features, attention = self.attention_model(image_features, graph_features, feature_dim)
+
+            # if both, add attention weight and then do sofmax?
+            if self.config.attention.type == 'question_graph_guided':
+                # attended and summed image features
+                image_features, attention = self.attention_model(image_features,
+                                                                 question_features,
+                                                                 feature_dim,
+                                                                 graph_features)
+
+            # old attention module
+            # from batch_size x img_dim x (gird_map, e.g. 7x7) to batch_size x (flattened grid_map e.g. 49) x img_dim
+            #image_features = image_features.flatten(2,3).permute(0, 2, 1)
+            #attention_weights = self.attention_model(image_features, question_features)
+        # if not using attention
         else:
             if self.config.image_encoder.resize == 'average_pooling':
                 # average pool K features of size 2048
                 # doing it on dimensions 2 and 3 and keep 2048
                 image_features = torch.mean(image_features, dim = (2,3))
 
-            # only one image feature from e.g. resnet50
+            # if e.g. resnet50 with only one feature
             elif self.config.image_encoder.resize == 'none':
                 # image feature dim is only 2048
                 # assert self.config.image_encoder.type in ["resnet50", ...] # TODO: ?
@@ -236,63 +299,15 @@ class Qlarifais(BaseModel):
         #print('image: ', image_features.shape)
 
 
-        # if using external knowledge (graph)
-        if self.config.graph_module.use:
-            # initialize for graph module
-            sample_list["q_encoded"] = text # dim 128
-            # Forward through graph module
-            graph_output = self.graph_module(sample_list) # [128, 1310, 128]
-
-            # logits from the  the output of the network
-            if self.config.graph_module.graph_logit_mode == "in_graph":
-                # Logits is already computed
-                graph_logits = graph_output
-
-            elif self.config.graph_module.graph_logit_mode == "logit_fc":
-                # Compute logits from single hidden layer
-                graph_logits = self.graph_logit_fc(graph_output)
-
-
-            # combining features
-            if self.config.graph_module.output_combine == "concat":
-                # Combine both logits
-                #logits = torch.cat([vb_logits, graph_logits], dim=1)
-                #print('graph', graph_logits.shape)
-
-                fusion = torch.cat([question_features, image_features, graph_logits], dim=1)
-                # TODO: ?
-
-            elif self.config.graph_module.output_combine == "add":
-                # Set invalid inds to zero here
-                assert graph_logits.size(1) == self.config.num_labels
-                graph_logits[:, self.missing_ans_inds] = 0
-                # TODO: ?
-
-            # Now combine hidden dims
-            #graph_output = torch.mean(graph_output, dim = 2) # mean pooling hidden dim of 768 so now batch*1310
-
-            # Do zerobias
-            # TODO: where does this come from?
-            #if self.config.zerobias:
-            #    logits -= 6.58
-
 
 
         # fusion
-        if self.config.fusion.type == 'concat':
-            # concatinating features
-            fused = torch.cat([question_features, image_features], dim=1)
-
-            if self.config.fusion.params.layer == 'non-linear':
-                # passing through GatedTanh layer as recommended by tips and tricks 2017
-                fused = self.non_linear_fused(fused)
-
-        elif self.config.fusion.type == 'hadamard':
-            # concatinating features
-            #question_features =
-            fused = torch.cat([question_features, image_features], dim=1)
-
-
+        # type of fusion defined when building
+        # TODO, what about only graph?
+        if self.config.graph_encoder.use:
+            fused_features = self.fusion_model(image_features, question_features, graph_features)
+        else:
+            fused_features = self.fusion_model(image_features, question_features)
 
         # classifying
         if self.config.classifier.prior:
@@ -300,20 +315,21 @@ class Qlarifais(BaseModel):
             #print('concat ques and img: ', fused.shape)
             # fused with priors
             # multiplying features onto priors (each answer candidate) per batch
-            fused_with_priors = torch.mul(fused.unsqueeze(dim=1).to(self.device), self.priors.to(self.device))
+            fused_with_priors = torch.mul(fused_features.unsqueeze(dim=1).to(self.device), self.priors.to(self.device))
             # added features per answer candidate (only scalar remaining), i.e. the dot product
-            fused = torch.sum(fused_with_priors, dim=2)
+            fused_features = torch.sum(fused_with_priors, dim=2)
             # predictions scores for each candidate answer in vocab
 
 
         #print('fused shape: ', fused.shape)
 
-        print('before', fused.shape)
-        logits = self.classifier(fused)
-        print('after', logits.shape)
+        #print('before', fused.shape)
+        logits = self.classifier(fused_features)
+        #print('final logits: ', logits)
 
-        raise NotImplementedError
+
         output = {"scores": logits}
+
         # MMF will automatically calculate loss
         return output
 
