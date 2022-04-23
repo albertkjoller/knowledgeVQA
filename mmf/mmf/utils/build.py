@@ -493,6 +493,7 @@ def build_classifier_layer(config, *args, **kwargs):
     return classifier.module
 
 
+
 def build_text_encoder(config, *args, **kwargs):
     """Deprecated, please do not use"""
     try:
@@ -513,6 +514,36 @@ def build_image_encoder(config, direct_features=False, **kwargs):
     else:
         module = ImageEncoderFactory(config)
     return module.module
+
+
+# used in qlarifais
+def build_graph_encoder(config):
+    from mmf.modules.graphnetwork import Graph_Module
+
+    graph_module = Graph_Module(config)
+    return graph_module.module
+
+def build_fusion_module(config):
+    from mmf.modules.fusions import Fusion_Module
+
+    fusion_module = Fusion_Module(config)
+    return fusion_module.module
+
+def build_attention_module(config):
+    # TODO:
+    from mmf.modules.attention import Attention_Module
+
+    attention_module = Attention_Module(config)
+    return attention_module.module
+
+def build_classifier(config):
+    from mmf.modules.layers import Classifier
+
+    classifier = Classifier(config)
+    return classifier.module
+
+
+
 
 
 def build_encoder(config: Union[DictConfig, "mmf.modules.encoders.Encoder.Config"]):

@@ -1,32 +1,16 @@
 # include running experiment configs
 includes:
   - configs/experiments/defaults.yaml
-    # default image encoder is resnet50
-
-# overwrite if necessary
+    # TODO: include optimized fusion module
+  - configs/experiments/pilot/numberbatch.yaml
 
 env:
   save_dir: ${env.part_save_dir}/regions
 
-dataset_config:
-  okvqa:
-    data_dir: ${env.data_dir}/datasets
-    depth_first: false
-    fast_read: true
-    use_images: true
-    use_features: false
-    zoo_requirements:
-    - okvqa.defaults
-    images:
-      train:
-      - okvqa/defaults/images/
-      val:
-      - okvqa/defaults/images/
-      test:
-      - okvqa/defaults/images/
+
 
 model_config:
-  vqtor:
+  qlarifais:
     # models from grid-feats-vqa
     # taken from: https://github.com/facebookresearch/grid-feats-vqa
     image_encoder:

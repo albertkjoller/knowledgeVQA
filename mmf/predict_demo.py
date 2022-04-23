@@ -130,6 +130,7 @@ class PretrainedModel:
 
             # extract probabilities and answers for top k predicted answers
             scores, indices = scores.topk(topk, dim=1)
+            #output = output.topk(topk, 1, True, True)[1].t().squeeze()
             topK = [(score.item(), self.answer_processor.idx2word(indices[0][idx].item())) for (idx, score) in enumerate(scores[0])]
 
             probs, answers = list(zip(*topK))

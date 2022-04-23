@@ -9,6 +9,82 @@ from torch import nn
 from torch.nn.utils.weight_norm import weight_norm
 
 
+
+# get_norm, act, FCnet taken from <https://github.com/SinghJasdeep/Attention-on-Attention-for-VQA/blob/master/fc.py>
+#    - attention on attention paper (Pythia)
+# normalization
+def get_norm(norm):
+    no_norm = lambda x, dim: x
+    if norm == 'weight':
+        norm_layer = weight_norm
+    elif norm == 'batch':
+        norm_layer = nn.BatchNorm1d
+    elif norm == 'layer':
+        norm_layer = nn.LayerNorm
+    # other
+    elif norm == 'softmax':
+        norm_layer = nn.Softmax()
+    elif norm == 'Softmax':
+        norm_layer = nn.Sigmoid()
+    elif norm == 'none':
+        norm_layer = no_norm
+    else:
+        print("Invalid Normalization")
+        raise Exception("Invalid Normalization")
+    return norm_layer
+
+# activation functions
+def get_act(act):
+    if act == 'ReLU':
+        act_layer = nn.ReLU
+    elif act == 'LeakyReLU':
+        act_layer = nn.LeakyReLU
+    elif act == 'PReLU':
+        act_layer = nn.PReLU
+    elif act == 'RReLU':
+        act_layer = nn.RReLU
+    elif act == 'ELU':
+        act_layer = nn.ELU
+    elif act == 'SELU':
+        act_layer = nn.SELU
+    elif act == 'Tanh':
+        act_layer = nn.Tanh
+    elif act == 'Hardtanh':
+        act_layer = nn.Hardtanh
+    elif act == 'Sigmoid':
+        act_layer = nn.Sigmoid
+    else:
+        print("Invalid activation function")
+        raise Exception("Invalid activation function")
+    return act_layer
+
+class FCNet(nn.Module):
+    """Simple class for non-linear fully connect network
+    """
+    def __init__(self, dims, dropout, norm, act):
+        super(FCNet, self).__init__()
+
+        norm_layer = get_norm(norm)
+        act_layer = get_act(act)
+
+        layers = []
+        for i in range(len(dims)-2):
+            in_dim = dims[i]
+            out_dim = dims[i+1]
+            layers.append(norm_layer(nn.Linear(in_dim, out_dim), dim=None))
+            layers.append(act_layer())
+            layers.append(nn.Dropout(p=dropout))
+        layers.append(norm_layer(nn.Linear(dims[-2], dims[-1]), dim=None))
+        layers.append(act_layer())
+        layers.append(nn.Dropout(p=dropout))
+
+        self.main = nn.Sequential(*layers)
+
+    def forward(self, x):
+        return self.main(x)
+
+
+
 class ConvNet(nn.Module):
     def __init__(
         self,
@@ -83,6 +159,7 @@ class GatedTanh(nn.Module):
 
 
 # TODO: Do clean implementation without Sequential
+# TODO: implement this by config file
 class ReLUWithWeightNormFC(nn.Module):
     def __init__(self, in_dim, out_dim):
         super().__init__()
@@ -96,6 +173,50 @@ class ReLUWithWeightNormFC(nn.Module):
         return self.layers(x)
 
 
+
+# qlarifais
+class Classifier(nn.Module):
+    def __init__(self, config):
+        super().__init__()
+        if config.type == "simple":
+            self.module = SimpleClassifier(config.params)
+        else:
+            raise NotImplementedError("Unknown classifier type: %s" % classifier_type)
+
+    def forward(self, *args, **kwargs):
+        return self.module(*args, **kwargs)
+
+
+class SimpleClassifier(nn.Module):
+    def __init__(self, config):
+        super().__init__()
+
+        norm_layer = get_norm(config.norm)
+        act_layer = get_act(config.act)
+        layers = []
+        # appending first layer
+        layers.append(FCNet([int(config.in_dim), int(config.h_dim)], dropout=int(config.dropout),
+                            norm=config.norm, act=config.act))
+        # skipping first as it is initialized above
+        for i in range(int(config.num_non_linear_layers)-1):
+            layers.append(FCNet([int(config.h_dim), int(config.h_dim)], dropout=int(config.dropout),
+                            norm=config.norm, act=config.act))
+
+        # final linear layer, resize to output dim
+        layers.append(norm_layer(nn.Linear(int(config.h_dim), int(config.out_dim)), dim=None))
+
+        self.main = nn.Sequential(*layers)
+
+    def forward(self, x):
+        logits = self.main(x)
+        return logits
+
+
+
+
+
+
+
 class ClassifierLayer(nn.Module):
     def __init__(self, classifier_type, in_dim, out_dim, **kwargs):
         super().__init__()
@@ -104,14 +225,10 @@ class ClassifierLayer(nn.Module):
             self.module = WeightNormClassifier(in_dim, out_dim, **kwargs)
         elif classifier_type == "logit":
             self.module = LogitClassifier(in_dim, out_dim, **kwargs)
-        elif classifier_type == "sigmoid":
-            self.module = SigmoidClassifier(in_dim, out_dim, **kwargs)
         elif classifier_type == "language_decoder":
             self.module = LanguageDecoder(in_dim, out_dim, **kwargs)
         elif classifier_type == "bert":
-            self.module = BertClassifierHead(
-                in_dim, out_dim, kwargs.get("config", None)
-            ).module
+            self.module = BertClassifierHead(in_dim, out_dim, kwargs.get("config", None)).module
         elif classifier_type == "mlp":
             self.module = MLPClassifer(in_dim, out_dim, **kwargs)
         elif classifier_type == "triple_linear":
@@ -123,6 +240,8 @@ class ClassifierLayer(nn.Module):
 
     def forward(self, *args, **kwargs):
         return self.module(*args, **kwargs)
+
+
 
 
 class BertClassifierHead(nn.Module):
@@ -214,41 +333,6 @@ class LogitClassifier(nn.Module):
 
         return logit_value
 
-class SigmoidClassifier(nn.Module):
-    # structure is recommended by <https://arxiv.org/abs/1708.02711>
-    def __init__(self, in_dim, out_dim, **kwargs):
-        super().__init__()
-        input_dim = in_dim
-        num_ans_candidates = out_dim
-        text_non_linear_dim = kwargs["text_hidden_dim"]
-        image_non_linear_dim = kwargs["img_hidden_dim"]
-        # same dimension, input is the same from the fused
-        self.f_o_text = GatedTanh(input_dim, text_non_linear_dim)
-        self.f_o_image = GatedTanh(input_dim, image_non_linear_dim)
-        # transform to num candidates dimension
-        self.linear_text = nn.Linear(text_non_linear_dim, num_ans_candidates)
-        self.linear_image = nn.Linear(image_non_linear_dim, num_ans_candidates)
-
-        # TODO: can we load prior here?
-
-        if "pretrained_image" in kwargs and kwargs["pretrained_text"] is not None:
-            self.linear_text.weight.data.copy_(
-                torch.from_numpy(kwargs["pretrained_text"])
-            )
-
-        if "pretrained_image" in kwargs and kwargs["pretrained_image"] is not None:
-            self.linear_image.weight.data.copy_(
-                torch.from_numpy(kwargs["pretrained_image"])
-            )
-
-    def forward(self, joint_embedding):
-        # pass through non-linear and linear layers
-        text_val = self.linear_text(self.f_o_text(joint_embedding))
-        image_val = self.linear_image(self.f_o_image(joint_embedding))
-        # adding features and applying sigmoid as recommended
-        sigmoid_values = torch.sigmoid(text_val + image_val)
-
-        return sigmoid_values
 
 class WeightNormClassifier(nn.Module):
     def __init__(self, in_dim, out_dim, hidden_dim, dropout):
@@ -274,6 +358,7 @@ class Identity(nn.Module):
         return x
 
 
+
 class ModalCombineLayer(nn.Module):
     def __init__(self, combine_type, img_feat_dim, txt_emb_dim, **kwargs):
         super().__init__()
@@ -281,12 +366,12 @@ class ModalCombineLayer(nn.Module):
             self.module = MFH(img_feat_dim, txt_emb_dim, **kwargs)
         elif combine_type == "non_linear_element_multiply":
             self.module = NonLinearElementMultiply(img_feat_dim, txt_emb_dim, **kwargs)
-        elif combine_type == "non_linear_element_concat":
-            self.module = NonLinearElementConcat(img_feat_dim, txt_emb_dim, **kwargs)
         elif combine_type == "two_layer_element_multiply":
             self.module = TwoLayerElementMultiply(img_feat_dim, txt_emb_dim, **kwargs)
         elif combine_type == "top_down_attention_lstm":
             self.module = TopDownAttentionLSTM(img_feat_dim, txt_emb_dim, **kwargs)
+        elif combine_type == "two_modality_multiply":
+            self.module = TwoModalityMultiply(img_feat_dim, txt_emb_dim, **kwargs)
         else:
             raise NotImplementedError("Not implemented combine type: %s" % combine_type)
 
@@ -444,43 +529,6 @@ class NonLinearElementMultiply(nn.Module):
         return joint_feature
 
 
-
-# need to handle two situations,
-# first: image (N, K, i_dim), question (N, q_dim);
-# second: image (N, i_dim), question (N, q_dim);
-class NonLinearElementConcat(nn.Module):
-    def __init__(self, image_feat_dim, ques_emb_dim, **kwargs):
-        super().__init__()
-        self.fa_image = ReLUWithWeightNormFC(image_feat_dim, kwargs["hidden_dim"])
-        self.fa_txt = ReLUWithWeightNormFC(ques_emb_dim, kwargs["hidden_dim"])
-
-        context_dim = kwargs.get("context_dim", None)
-        if context_dim is not None:
-            self.fa_context = ReLUWithWeightNormFC(context_dim, kwargs["hidden_dim"])
-
-        self.dropout = nn.Dropout(kwargs["dropout"])
-        self.out_dim = kwargs["hidden_dim"]
-
-    def forward(self, image_feat, question_embedding, context_embedding=None):
-        image_fa = self.fa_image(image_feat)
-        question_fa = self.fa_txt(question_embedding)
-
-        if len(image_feat.size()) == 3 and len(question_fa.size()) != 3:
-            question_fa_expand = question_fa.unsqueeze(1)
-        else:
-            question_fa_expand = question_fa
-
-        joint_feature = image_fa * question_fa_expand
-
-        if context_embedding is not None:
-            context_fa = self.fa_context(context_embedding)
-
-            context_text_joint_feaure = context_fa * question_fa_expand
-            joint_feature = torch.cat([joint_feature, context_text_joint_feaure], dim=1)
-
-        joint_feature = self.dropout(joint_feature)
-
-        return joint_feature
 
 
 class TopDownAttentionLSTM(nn.Module):
@@ -690,7 +738,7 @@ class BCNet(nn.Module):
 
         return logits
 
-
+'''
 class FCNet(nn.Module):
     """
     Simple class for non-linear fully connect network
@@ -724,7 +772,7 @@ class FCNet(nn.Module):
 
     def forward(self, x):
         return self.main(x)
-
+'''
 
 class BiAttention(nn.Module):
     def __init__(self, x_dim, y_dim, z_dim, glimpse, dropout=None):

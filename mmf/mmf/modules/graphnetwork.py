@@ -24,6 +24,80 @@ from mmf.utils.configuration import get_mmf_cache_dir
 import gzip
 
 
+
+
+
+class Graph_Module(nn.Module):
+    def __init__(self, config):
+        super().__init__()
+        if config.type == "numberbatch":
+            self.module = Numberbatch(config)
+        elif config.type == "krisp":
+            self.module = GraphNetworkModule(config)
+        # not implements return funciotn in krisp
+        else:
+            raise NotImplementedError("Not implemented network module: %s" % config.type)
+
+    def forward(self, *args, **kwargs):
+        return self.module(*args, **kwargs)
+
+
+class Numberbatch(nn.Module):
+    """The generic class for graph networks
+    Can be generically added to any other kind of network
+    """
+
+    def __init__(self, config):
+        super().__init__()
+        self.config = config
+
+        self.max_seq_length = self.config.max_seq_length
+        self.numberbatch = {}
+
+        with open(mmf_indirect(self.config.filepath), 'rb') as f:
+
+            info = f.readlines(1)
+
+            lines, self.numberbatch_dim = (int(x) for x in info[0].decode('utf-8').strip("\n").split(" "))
+
+            for line in tqdm(f, total=lines):
+                l = line.decode('utf-8')
+                l = l.strip("\n")
+
+                # create tensor-dictionary
+                word = l.split(' ')[0]
+                tensor = torch.tensor(list(map(float, l.split(' ')[1:])), dtype=torch.float32)
+                self.numberbatch[word] = tensor
+
+    def forward(self, sample_list):
+
+        question_tokens = sample_list['tokens']
+        batch_size = len(question_tokens)
+        # initializing graph embeddings
+        X = torch.ones((batch_size, self.numberbatch_dim, self.max_seq_length))
+        # looping tokens for each batch
+        for batch, tokens in enumerate(question_tokens):
+            # set to nan values as default
+            X[batch] *= np.nan
+            for i, token in enumerate(tokens):
+                # check if token is present in numberbatch
+                try:
+                    # extrach embeddings
+                    X[batch][:, i] = self.numberbatch[token]
+                except KeyError:
+                    pass
+        # average embeddings
+        X = torch.from_numpy(np.nanmean(X, axis=2))
+
+        return X
+
+
+
+
+
+
+
+
 def k_hop_subgraph(
     node_idx,
     num_hops,
@@ -396,72 +470,6 @@ def mmf_indirect(path):
         path = os.path.join(get_mmf_cache_dir(), "data/datasets", path)
         return path
 
-
-# TODO: build this
-
-class build_graph_encoder(nn.Module):
-    def __init__(self, config):
-        super().__init__()
-        if config.type == "numberbatch":
-            self.module = Numberbatch(config)
-        #elif config.type == "krisp":
-        #    self.module = GraphNetworkModule(config)
-        # not implements return funciotn in krisp
-        else:
-            raise NotImplementedError("Not implemented network module: %s" % config.type)
-
-
-
-class Numberbatch(nn.Module):
-    """The generic class for graph networks
-    Can be generically added to any other kind of network
-    """
-
-    def __init__(self, config, config_extra=None):
-        super().__init__()
-        self.config = config
-        if config_extra is None:
-            self.config_extra = {}
-
-        self.max_seq_length = self.config.max_seq_length
-        self.numberbatch = {}
-
-        with open(mmf_indirect(self.config.filepath), 'rb') as f:
-
-            info = f.readlines(1)
-
-            lines, self.numberbatch_dim = (int(x) for x in info[0].decode('utf-8').strip("\n").split(" "))
-
-            for line in tqdm(f, total=lines):
-                l = line.decode('utf-8')
-                l = l.strip("\n")
-
-                # create tensor-dictionary
-                word = l.split(' ')[0]
-                tensor = torch.tensor(list(map(float, l.split(' ')[1:])), dtype=torch.float32)
-                self.numberbatch[word] = tensor
-
-    def forward(self, sample_list):
-
-        question_tokens = sample_list['tokens']
-        batch_size = len(question_tokens)
-        # initializing graph embeddings
-        X = torch.ones((batch_size, self.numberbatch_dim, self.max_seq_length))
-        # looping tokens for each batch
-        for batch, tokens in enumerate(question_tokens):
-            # set to nan values as default
-            X[batch] *= np.nan
-            for i, token in enumerate(tokens):
-                # check if token is present in numberbatch
-                try:
-                    # extrach embeddings
-                    X[batch][:, i] = self.numberbatch[token]
-                except KeyError:
-                    pass
-        # average embeddings
-        X = torch.from_numpy(np.nanmean(X, axis=2))
-
-        return X
 
 
 # Graph network module
