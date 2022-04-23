@@ -69,3 +69,15 @@ mmf_run config='configs/experiments/pilot/test.yaml' \
     env.save_dir=/work3/s194262/save/models/pilot_grids \
     trainer.params.gpus=1 \
 
+# fast run (Phillip) example:
+mmf_run config='configs/experiments/fusion/multiply.yaml' \
+    datasets=okvqa \
+    model=qlarifais \
+    run_type=train_val \
+    env.data_dir=/work3/s184984/torch/mmf/data \
+    env.cache_dir=/work3/s184984/torch/mmf \
+    env.save_dir=/work3/s184984/save/models/numberbatch \
+    training.max_updates=1 \
+    training.max_epochs=None \
+    trainer.params.gpus=1 \
+
