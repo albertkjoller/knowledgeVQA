@@ -6,8 +6,11 @@ from argparse import Namespace
 import torch
 import torch.nn.functional as F
 
-print(os.getcwd())
+from torchray.attribution.guided_backprop import GuidedBackpropContext
+from torchray.attribution.common import gradient_to_saliency
 
+
+"""
 from mmf.common.registry import registry
 from mmf.common.sample import Sample, SampleList
 from mmf.utils.env import setup_imports
@@ -20,6 +23,7 @@ from mmf.utils.model_utils.image import openImage
 from mmf.utils.model_utils.modeling import _multi_gpu_state_to_single
 
 setup_imports()
+"""
 
 class PretrainedModel:
     global ROOT_DIR
@@ -126,9 +130,20 @@ class PretrainedModel:
             # gather in sample list
             sample_list = SampleList([sample]).to(self.device)
 
+            sample_list['image'].requires_grad_(True)
+            #sample_list['input_ids'].requires_grad_(True)
+
             # predict scores with model (multiclass)
-            scores = self.vqa_model(sample_list)["scores"]
-            scores = torch.nn.functional.softmax(scores, dim=1)
+            #scores = self.vqa_model(sample_list)["scores"]
+            #scores = torch.nn.functional.softmax(scores, dim=1)
+            
+            with GuidedBackpropContext():
+                  y = self.vqa_model(sample_list)['scores']
+                  z = y[0, y.argmax()]
+                  z.backward()
+              
+            saliency = gradient_to_saliency(sample_list['image'])
+            
 
             # extract probabilities and answers for top k predicted answers
             scores, indices = scores.topk(topk, dim=1)
@@ -148,16 +163,21 @@ if __name__ == '__main__':
     # helper function for input
     def str_to_class(classname):
         return getattr(sys.modules['mmf.models'], classname)
-
-    # obtain user input
-    experiment_name = input("Enter experiment folder name: ")
-    model_filename = input("Enter saved model filename: ")
-    ModelClass = input("Enter model type (e.g. BaseModel): ")
-    dataset = input("Enter name of dataset used for training: ")
-    GBAR = input("\n(yes or no) - Are you using the GBAR: ")
-    if GBAR == 'yes':
-        studynumber = input("Studynumber: ")
-
+    
+    experiment_name = 'logit_mul'
+    model_filename = 'qlarifais_final'
+    ModelClass = 'Qlarifais'
+    dataset = 'okvqa'
+    GBAR = 'yes'
+    studynumber = 's194253'
+    
+    experiment_name = 'first_model'
+    model_filename = 'first_model_final'
+    ModelClass = 'First_Model'
+    dataset = 'okvqa'
+    GBAR = 'yes'
+    studynumber = 's194253'
+    
     # specify model arguments and load model
     kwargs = {'experiment_name': experiment_name,
               'model_filename': model_filename,
@@ -171,51 +191,22 @@ if __name__ == '__main__':
     # only when debugging - from bash this doesn't matter #TODO: remove in the end
     if os.getcwd().split(os.sep)[-1] != 'explainableVQA':
         os.chdir(os.path.dirname(os.getcwd()))
+        
+    img_name, question = 'rain.jpg', 'where is it raining'
 
-    # initialize data variables
-    old_img_name = None
-    img_name, question = None, None
+    img_path = Path(f"{os.getcwd()}/imgs/temp/{img_name}").as_posix()
+    img = cv2.imread(img_path)  # open from file object
 
-    # continue until user quits
-    while question != 'quit()':
-        print(f"\n{'-'*70}\n")
+    # calculate the 50 percent of original dimensions
+    width = int(img.shape[1] * 0.2)
+    height = int(img.shape[0] * 0.2)
 
-        # input image
-        img_name = input("Enter image name from '../imgs/temp' folder (e.g. 'rain.jpg'): ")
-        if old_img_name != None:
-            cv2.destroyWindow(f"{old_img_name}")
+    # get predictions and show input
+    topk = 5
+    outputs = model.predict(image_path=img_path, question=question, topk=topk)
 
-        if img_name != 'quit()': # continues until user quits
-            # load image
-            img_path = Path(f"{os.getcwd()}/imgs/temp/{img_name}").as_posix()
-            img = cv2.imread(img_path)  # open from file object
-
-            # calculate the 50 percent of original dimensions
-            width = int(img.shape[1] * 0.2)
-            height = int(img.shape[0] * 0.2)
-
-            # show image
-            cv2.namedWindow(f"{img_name}", cv2.WINDOW_NORMAL)
-            cv2.resizeWindow(f"{img_name}", width, height)
-            cv2.imshow(f"{img_name}", img)
-            cv2.waitKey(1)
-        else:
-            break
-
-        # input question
-        question = input("Enter question: ")
-
-
-        # get predictions and show input
-        topk = 5
-        outputs = model.predict(image_path=img_path, question=question, topk=topk)
-        old_img_name = img_name
-
-        # print answers and probabilities
-        print(f'\nQuestion: "{question}"')
-        print("\nPredicted outputs from the model:")
-        for i, (prob, answer) in enumerate(zip(*outputs)):
-            print(f"{i+1}) {answer} \t ({prob})")
-
-    # when loop is ended
-    cv2.destroyAllWindows()
+    # print answers and probabilities
+    print(f'\nQuestion: "{question}"')
+    print("\nPredicted outputs from the model:")
+    for i, (prob, answer) in enumerate(zip(*outputs)):
+        print(f"{i+1}) {answer} \t ({prob})")

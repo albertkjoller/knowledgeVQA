@@ -15,6 +15,7 @@
 
 # HPC files to ignore
 vqa/
+vqa2/
 *.err
 *.out
 *.#*
