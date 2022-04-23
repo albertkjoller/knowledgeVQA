@@ -62,7 +62,7 @@ from sklearn.metrics import (
 )
 from sklearn.preprocessing import MultiLabelBinarizer
 from torch import Tensor
-
+import numpy as np
 
 def _convert_to_one_hot(expected, output):
     # This won't get called in case of multilabel, only multiclass or binary
@@ -259,7 +259,8 @@ class BertScore(BaseMetric):
         from mmf.metrics.bert_score import bert_score
 
         output = model_output[self.score_key]
-
+        expected = sample_list[self.target_key]
+        """
         output_text = model_output['text']
         print("-" * 30)
         print("-" * 30)
@@ -267,7 +268,7 @@ class BertScore(BaseMetric):
         print("output_batch_size", output_batch_size)
         print("-" * 30)
 
-        expected = sample_list[self.target_key]
+
 
         print("-" * 30)
         print("-" * 30)
@@ -295,10 +296,26 @@ class BertScore(BaseMetric):
         print("output.max()", torch.max(output, dim=1))
         print("-" * 30)
         print("expected.max()", torch.max(expected, dim=1))
-        print("-" * 30)
+        print("-" * 30)"""
 
+        # Vector of length batch_size:
+        actual_ids = torch.argmax(expected, dim=1)
+        pred_ids = torch.argmax(output, dim=1)
+        # every index can be translated into a class
+        # so should be converted into list of same length, with class-text instead. --> idx2text
+        # (should be able to import from other metric)
 
+        answer_processor = registry.get(sample_list.dataset_name + "_answer_processor")
 
+        pred_answers = [answer_processor.idx2word(answer_id) for answer_id in pred_ids]
+        actual_answers = [answer_processor.idx2word(answer_id) for answer_id in actual_ids]
+
+        scores = [bert_score(*pair, min_max_mean="max", lang='en', rescale_with_baseline=True) for pair in list(zip(pred_answers, actual_answers))]
+
+        # expected, should be 10 answers each, but don't think it is??
+
+        # then, for element in range(batch_size) calculate BERTscore(class, [list of 10 annotator answers], lang='en')
+        # mean of said list.
 
         #candidates = output_text
         #references = [expected_text] # Der skal være ekstra bracket rundt om da de skal være samme læmngde
@@ -311,7 +328,9 @@ class BertScore(BaseMetric):
 
         #print("F1max, min, mean", F1_max, F1_min, F1_mean)
 
-        return 1
+        print("RETURNING;", np.mean(scores))
+
+        return np.mean(scores)
 
 
 
@@ -475,7 +494,7 @@ class VQAAccuracy(BaseMetric):
         accuracy = torch.sum(scores) / expected.size(0)
 
         print("VQAacc", accuracy)
-        print("VQAacc shape", accuracy.shape())
+        print("VQAacc shape", tf.shape(accuracy))
 
         return accuracy
 
