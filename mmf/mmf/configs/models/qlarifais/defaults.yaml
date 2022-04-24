@@ -62,9 +62,9 @@ model_config:
         out_dim: 2250 # target size for okvqa (okvqa v1.1 has 2250) todo: autoindex_in_node??
         # todo: optimization parameters:
         h_dim: 2533 # mean of input and output
-        num_non_linear_layers: 1 # ?
+        num_non_linear_layers: 2 # ?
         norm: weight # [weight, batch, layer, none]
         act: ReLU # activation function
-        dropout: 0 # avoid overfitting, or keep all information?
+        dropout: 0.1 # avoid overfitting, or keep all information?
 
 
