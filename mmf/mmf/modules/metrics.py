@@ -49,7 +49,6 @@ import warnings
 from typing import Dict
 
 import torch
-import tensorflow as tf
 from mmf.common.registry import registry
 from mmf.datasets.processors.processors import EvalAIAnswerProcessor
 from mmf.utils.logger import log_class_usage

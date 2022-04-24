@@ -33,7 +33,7 @@ run commands:
 mmf_run config='configs/experiments/defaults.yaml' model=qlarifais dataset=okvqa run_type=train_val
 
 # simple fast
-mmf_run config='configs/experiments/fusion/twomul.yaml' model=qlarifais dataset=okvqa run_type=train_val
+mmf_run config='configs/experiments/baseline/multiply.yaml' model=qlarifais dataset=okvqa run_type=train_val
 
 
 # image features example:
@@ -173,6 +173,7 @@ class Qlarifais(BaseModel):
             fused_features = self.fusion_module(image_features, question_features)
 
         logits = self.classifier(fused_features)
+
         output = {"scores": logits}
         # MMF will automatically calculate loss
         return output

@@ -81,9 +81,14 @@ class TwoModalityArithmetic(nn.Module):
         # # TODO: implement in attention: batch, k, _ = v.size()
         i_proj = self.i_proj(i) # [batch, k, num_hid]
         q_proj = self.q_proj(q) # TODO: implement in attention: .unsqueeze(1).repeat(1, k, 1) # [batch, k, num_hid]
+
+        # if the image features are of shape [batch, k, i_dim]
+        if len(i_proj.size()) == 3:
+            q_proj = q_proj.unsqueeze(1)
+
         if self.operation == 'multiply':
-            joint_repr = i_proj * q_proj.unsqueeze(1)#.repeat(1, k, 1)
-        if self.operation == 'add':
+            joint_repr = i_proj * q_proj
+        elif self.operation == 'add':
             joint_repr = i_proj + q_proj
         joint_feature = self.nonlinear(joint_repr)
         # TODO: implement in attention: logits = self.linear(joint_repr)

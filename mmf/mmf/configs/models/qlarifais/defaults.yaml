@@ -61,7 +61,7 @@ model_config:
         in_dim: ${model_config.qlarifais.fusion.params.h_dim}
         out_dim: 2250 # target size for okvqa (okvqa v1.1 has 2250) todo: autoindex_in_node??
         # todo: optimization parameters:
-        h_dim: 2533 # mean of input and output
+        h_dim: 2550 # mean of input and output
         num_non_linear_layers: 2 # ?
         norm: weight # [weight, batch, layer, none]
         act: ReLU # activation function
