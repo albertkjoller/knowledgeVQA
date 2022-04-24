@@ -492,8 +492,6 @@ class VQAAccuracy(BaseMetric):
         scores = one_hots * expected
         accuracy = torch.sum(scores) / expected.size(0)
 
-        print("VQAacc", accuracy)
-        print("VQAacc shape", tf.shape(accuracy))
 
         return accuracy
 
