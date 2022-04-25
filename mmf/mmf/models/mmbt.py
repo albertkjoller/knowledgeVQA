@@ -13,7 +13,9 @@ from typing import Dict, Optional, Union
 import torch
 from mmf.common.registry import registry
 from mmf.models.base_model import BaseModel
-from mmf.models.interfaces.mmbt import MMBTGridHMInterface
+from mmf.models.interfaces.image_models import GeneralInterface
+
+#from mmf.models.interfaces.mmbt import MMBTGridHMInterface
 from mmf.modules.encoders import (
     EncoderFactory,
     ImageEncoderFactory,
@@ -612,13 +614,12 @@ class MMBT(BaseModel):
         )
 
     @classmethod
-    def from_pretrained(cls, model_name, *args, **kwargs):
+    def from_pretrained(cls, model_name, *args, **kwargs):       
         model = super().from_pretrained(model_name, *args, **kwargs)
         config = load_pretrained_model(model_name)["full_config"]
         OmegaConf.set_struct(config, True)
-        if model_name == "mmbt.hateful_memes.images" or kwargs.get("interface"):
-            return MMBTGridHMInterface(model, config)
-        return model
+        return GeneralInterface(model, config)
+
 
     @classmethod
     def config_path(cls):

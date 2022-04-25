@@ -544,7 +544,10 @@ class gfvImageEncoder(Encoder):
         add_attribute_config(cfg) # # grid-feats-vqa default config
         # getting pretrained model
         model = config.get("model", False)
-        cfg.merge_from_file('./mmf/configs/other/feat_configs/' + model)
+
+        # For compatibility with both training and explainability, the 
+        # path needs to go back to the root (explainableVQA) and then enter mmf.            
+        cfg.merge_from_file('./../mmf/mmf/configs/other/feat_configs/' + model)
 
         # forcing the final residual block to have dilations 1
         # TODO: what do we choose? this means we don't dilate?

@@ -1,16 +1,13 @@
 
-
 import torch
-from pathlib import Path
-import gc
-from tqdm import tqdm
-from torch.nn.functional import normalize
+from omegaconf import OmegaConf
 
-# All model using MMF need to inherit BaseModel
+from mmf.models.interfaces.qlarifais import QlarifaisInterface
+
 from mmf.models.base_model import BaseModel
-# registry is need to register the dataset or our new model so as to be MMF discoverable
 from mmf.common.registry import registry
-# Builder methods for image encoder and classifier
+from mmf.utils.checkpoint import load_pretrained_model
+
 from mmf.utils.build import (
     #build_classifier_layer,
     build_image_encoder,
@@ -21,58 +18,27 @@ from mmf.utils.build import (
     build_attention_module
     )
 
-from mmf.utils.text import VocabDict
-
-from mmf.modules.prior import load_priors
-
-
-'''
-run commands:
-
-# default:
-mmf_run config='configs/experiments/defaults.yaml' model=qlarifais dataset=okvqa run_type=train_val
-
-# simple fast
-mmf_run config='configs/experiments/baseline/multiply.yaml' model=qlarifais dataset=okvqa run_type=train_val
-
-
-# image features example:
-mmf_run config='configs/experiments/image_encoder/grids.yaml' model=qlarifais dataset=okvqa run_type=train_val
-
-# classifier example:
-#   - define image encoder in experiment folder configs
-mmf_run config='configs/experiments/classifier/sigmoid.yaml' model=qlarifais dataset=okvqa run_type=train_val
-
-Fusion
-mmf_run config='configs/experiments/fusion/concat.yaml' model=qlarifais dataset=okvqa run_type=train_val
-
-# attention example:
-#   - define image encoder in experiment folder configs
-mmf_run config='configs/experiments/attention/ques_graph_guided.yaml' model=qlarifais dataset=okvqa run_type=train_val
-
-
-'''
 
 # Register the model for MMF, "concat_bert_tutorial" key would be used to find the model
 @registry.register_model("qlarifais")
 class Qlarifais(BaseModel):
-    # All models in MMF get first argument as config which contains all
-    # of the information you stored in this model's config (hyperparameters)
-    def __init__(self, config):
-        # This is not needed in most cases as it just calling parent's init
-        # with same parameters. But to explain how config is initialized we
-        # have kept this
+   
+    def __init__(self, config):    
         super().__init__(config)
         self.build()
-
-    # This classmethod tells MMF where to look for default config of this model
+        
+    @classmethod
+    def from_pretrained(cls, model_name, *args, **kwargs):
+        model = super().from_pretrained(model_name, *args, **kwargs)
+        config = load_pretrained_model(model_name)["full_config"]
+        OmegaConf.set_struct(config, True)
+        return QlarifaisInterface(model, config)
+    
     @classmethod
     def config_path(cls):
         # Relative to user dir root
         return "configs/models/qlarifais/defaults.yaml"
 
-    # Each method need to define a build method where the model's modules
-    # are actually build and assigned to the model
     def build(self):
 
         # building general modules
@@ -90,8 +56,6 @@ class Qlarifais(BaseModel):
         if self.config.attention.use:
             # initiating attention module
             self.attention_module = build_attention_module(self.config.attention.params)
-
-
 
     def forward(self, sample_list):
 

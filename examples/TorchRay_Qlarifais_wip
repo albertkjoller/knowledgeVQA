@@ -1,0 +1,39 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Created on Mon Apr 25 11:14:28 2022
+
+@author: s194253
+"""
+
+from mmxai.interpretability.classification.torchray.extremal_perturbation.multimodal_extremal_perturbation import multi_extremal_perturbation, image2tensor
+import torch
+from mmf.models import Qlarifais
+
+def main():
+    #image_path = input("enter your image path : ")
+    #text = input("enter your text : ")
+    
+    image_path = '/zhome/b8/5/147299/Desktop/explainableVQA/imgs/temp/lynch.jpg'
+    question = 'what is he holding'
+    model_name = 'fast_training'
+
+    model = Qlarifais.from_pretrained(f"/work3/s194253/save/models/{model_name}")
+    model.to(torch.device("cuda:0" if torch.cuda.is_available() else "cpu"))
+    y = model.classify(image=image_path, text=question)
+    
+    image_tensor = image2tensor(image_path)
+    mask_, hist_, output_tensor, txt_summary, text_explaination = multi_extremal_perturbation(
+        model,
+        image_tensor,
+        image_path,
+        text,
+        0,  # 0 non hateful 1 hateful
+        max_iter=50,
+        areas=[0.12],
+    )
+    return output_tensor, txt_summary, text_explaination
+if __name__ == "__main__":
+    output_tensor, txt_summary, text_explanation = main()
+    
+    print("")

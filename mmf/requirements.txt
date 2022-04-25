@@ -7,7 +7,7 @@ nltk==3.4.5
 editdistance==0.5.3
 transformers>=3.4.0, <=4.10.1
 sklearn==0.0
-omegaconf>=2.0.6, <=2.1
+omegaconf==2.1 # omegaconf>=2.0.6, <=2.1
 lmdb==0.98
 termcolor==1.1.0
 iopath==0.1.8
@@ -25,3 +25,4 @@ psutil
 filelock
 six
 bert-score
+torchray==1.0.0.2
