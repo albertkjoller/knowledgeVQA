@@ -16,7 +16,7 @@ model_config:
       # [triple_modality_arithmetic, double_two_modality_arithmetic, double_two_modality_ama]
       type: triple_modality_arithmetic
       params:
-        operation: average_multiply
+        operation: multiply
         i_dim: ${model_config.qlarifais.i_dim} # image dim
         q_dim: ${model_config.qlarifais.q_dim} # question dim
         g_dim: ${model_config.qlarifais.g_dim} # question dim
