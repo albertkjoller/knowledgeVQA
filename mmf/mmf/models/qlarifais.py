@@ -89,7 +89,7 @@ class Qlarifais(BaseModel):
         # attention
         if self.config.attention.use:
             # initiating attention module
-            self.attention_module = build_attention_module(self.config.attention)
+            self.attention_module = build_attention_module(self.config.attention.params)
 
 
 
