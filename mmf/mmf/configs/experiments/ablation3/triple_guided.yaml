@@ -26,6 +26,7 @@ model_config:
             i_dim: ${model_config.qlarifais.i_dim} # image dim
             q_dim: ${model_config.qlarifais.q_dim} # question dim
             g_dim: ${model_config.qlarifais.g_dim} # question dim
+            guided_dim: 0 # used as variable in fusion module
             # TODO: optimization parameters:
             h_dim: 2048  # hidden dim as input in classifier
             norm: weight # [weight, batch, layer, none]

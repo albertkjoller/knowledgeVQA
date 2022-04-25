@@ -48,12 +48,12 @@ class Fusion_Module(nn.Module):
         elif config.type == "two_modality_ama":
             self.module = TwoModalityAMA(config.params)
         # three inputs
-        elif config.type == "joined_triple_modality_arithmetic":
-            self.module = JoinedTripleModalityArithmetic(config.params)
-        elif config.type == "separated_triple_modality_arithmetic":
-            self.module = JoinedTripleModalityArithmetic(config.params)
-        elif config.type == "triple_modality_ama":
-            self.module = TripleModalityAMA(config.params)
+        elif config.type == "triple_modality_arithmetic":
+            self.module = TripleModalityArithmetic(config.params)
+        elif config.type == "double_two_modality_arithmetic":
+            self.module = DoubleTwoModalityArithmetic(config.params)
+        elif config.type == "double_two_modality_ama":
+            self.module = DoubleTwoModalityAMA(config.params)
         else:
             raise NotImplementedError("Not implemented combine type: %s" % config.type)
 
@@ -138,7 +138,7 @@ class TwoModalityAMA(nn.Module):
 
 
 
-class JoinedTripleModalityArithmetic(nn.Module):
+class TripleModalityArithmetic(nn.Module):
     def __init__(self, config):
         super().__init__()
         self.operation = config.operation
@@ -184,17 +184,17 @@ class JoinedTripleModalityArithmetic(nn.Module):
         return joint_feature
 
 
-class JoinedTripleModalityArithmetic(nn.Module):
+class DoubleTwoModalityArithmetic(nn.Module):
     def __init__(self, config):
         super().__init__()
         self.operation = config.operation
         norm_layer = get_norm(config.norm)
         # initializing layers
         # e.g. image and question
-        config.params.guided_dim = config.params.q_dim # small adjustment
+        config.guided_dim = config.q_dim # small adjustment
         self.i_q1_proj = TwoModalityArithmetic(config.params)
         # e.g. image and graph
-        config.params.guided_dim = config.params.g_dim # small adjustment
+        config.guided_dim = config.g_dim # small adjustment
         self.i_q2_proj = TwoModalityArithmetic(config.params)
 
         self.nonlinear = FCNet([int(config.h_dim), int(config.h_dim)], dropout=int(config.dropout),
@@ -225,17 +225,17 @@ class JoinedTripleModalityArithmetic(nn.Module):
         return joint_feature
 
 
-class TripleModalityAMA(nn.Module):
+class DoubleTwoModalityAMA(nn.Module):
     def __init__(self, config):
         super().__init__()
         self.operation = config.operation
         norm_layer = get_norm(config.norm)
         # initializing layers
         # e.g. image and question
-        config.params.guided_dim = config.params.q_dim  # small adjustment
+        config.guided_dim = config.params.q_dim  # small adjustment
         self.i_q1_proj = TwoModalityAMA(config.params)
         # e.g. image and graph
-        config.params.guided_dim = config.params.g_dim  # small adjustment
+        config.guided_dim = config.params.g_dim  # small adjustment
         self.i_q2_proj = TwoModalityAMA(config.params)
 
         self.nonlinear = FCNet([int(config.h_dim), int(config.h_dim)], dropout=int(config.dropout),
