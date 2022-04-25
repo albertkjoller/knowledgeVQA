@@ -1,0 +1,36 @@
+
+includes:
+    # include running experiment configs (defaults for all)
+  - configs/experiments/defaults.yaml
+
+env:
+  save_dir: ${env.part_save_dir}/numberbatch
+
+
+model_config:
+  qlarifais:
+
+    g_dim: 300
+
+    fusion:
+      type: joined_triple_modality_arithmetic # [joined_triple_modality_arithmetic, two_modality_ada]
+      params:
+        operation: average_multiply
+        i_dim: ${model_config.qlarifais.i_dim} # image dim
+        q_dim: ${model_config.qlarifais.q_dim} # question dim
+        g_dim: ${model_config.qlarifais.g_dim} # question dim
+        # TODO: optimization parameters:
+        h_dim: 2048  # hidden dim as input in classifier
+        norm: weight # [weight, batch, layer, none]
+        act: ReLU # activation function
+        dropout: 0 # avoid overfitting
+
+    graph_encoder:
+      use: true
+      type: numberbatch
+      g_dim: ${model_config.qlarifais.g_dim}
+      # downloaded from: <https://github.com/commonsense/conceptnet-numberbatch>
+      filepath: okvqa/defaults/graph/numberbatch-en.txt
+      max_seq_length: ${dataset_config.${datasets}.processors.text_processor.params.max_seq_length}
+
+

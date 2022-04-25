@@ -1,30 +1,12 @@
 # include running experiment configs
 includes:
   - configs/experiments/defaults.yaml
-    # default image encoder is resnet50
-
-# overwrite if necessary
+    # TODO: include optimized fusion from graph module, e.g., OR just define it in numberbatch
+  - configs/experiments/pilot/numberbatch.yaml
 
 env:
   save_dir: ${env.part_save_dir}/grids
 
-
-dataset_config:
-  okvqa:
-    # only load the images and not pre-extracted features
-    depth_first: false
-    fast_read: true
-    use_images: true
-    use_features: false
-    zoo_requirements:
-    - okvqa.defaults
-    images:
-      train:
-      - okvqa/defaults/images/
-      val:
-      - okvqa/defaults/images/
-      test:
-      - okvqa/defaults/images/
 
 model_config:
   qlarifais:

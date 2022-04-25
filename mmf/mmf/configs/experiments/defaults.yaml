@@ -7,11 +7,6 @@ env:
   part_save_dir: ./save/models
   save_dir: ${env.part_save_dir}/default
 
-model_config:
-  qlarifais:
-    attention_hidden_dim: 5000
-    fusion_hidden_dim: 5000
-
 dataset_config:
   okvqa:
     processors:
@@ -42,7 +37,7 @@ evaluation:
   metrics:
     - accuracy
     - vqa_accuracy
-    - bert_score
+    #- bert_score
     #- binary_f1
     #- roc_auc
 

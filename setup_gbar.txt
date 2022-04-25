@@ -28,8 +28,8 @@ python3 -m pip install --editable .
 python3 -m pip install torch==1.8.0+cu111 torchvision torchaudio torchtext -f https://download.pytorch.org/whl/torch_stable.html
 
 # install torch-geometric <https://pytorch-geometric.readthedocs.io/en/latest/notes/installation.html>
- python3 -m pip install torch-scatter==2.0.8 torch-sparse==0.6.12 torch-cluster==1.5.9 torch-spline-conv torch-geometric -f https://data.pyg.org/whl/torch-1.8.0+cu111.html
- #    - look into the website and wheels to find matching versions with torch
+python3 -m pip install torch-scatter==2.0.8 torch-sparse==0.6.12 torch-cluster==1.5.9 torch-spline-conv torch-geometric -f https://data.pyg.org/whl/torch-1.8.0+cu111.html
+#    - look into the website and wheels to find matching versions with torch
 
 # install detectron2 <https://github.com/facebookresearch/detectron2/blob/main/INSTALL.md#common-installation-issues>
 python3 -m pip install detectron2 -f https://dl.fbaipublicfiles.com/detectron2/wheels/cu111/torch1.8/index.html

@@ -1,13 +1,10 @@
 model_config:
-  qlarifais:
-    direct_features_input: false
-    # Dimension of the embedding finally returned by the modal encoder
-    modal_hidden_size: 2048
-    # Dimension of the embedding finally returned by the text encoder
-    text_hidden_size: 768
 
-    # Number of features extracted out per image
-    #num_features: 1 # TODO: used?
+  qlarifais:
+    #direct_features_input: false # todo: used?
+
+    i_dim: 2048
+    q_dim: 768
 
     losses:
       #- type: cross_entropy, target dim needs to be adjusted
@@ -21,17 +18,19 @@ model_config:
         num_hidden_layers: 12
         num_attention_heads: 12
 
+
+    # models from grid-feats-vqa: https://github.com/facebookresearch/grid-feats-vqa
     image_encoder:
-      type: torchvision_resnet
+      type: grid_feats_vqa
       params:
-        name: resnet50
-        pretrained: true
-        pool_type: avg
-        num_output_features: 1
-        zero_init_residual: false
+        name: grid_feats_vqa
+        # specify backbone and type of features
+        model: R-50-grid.yaml # choices: [R-50-(grid or updn), X-101-grid, X-152-(grid or challenge(MoVie+GridFeat))]
+        output_dir: ${env.save_dir}
       # how to resize features
-      resize: none # choices [none, average_pooling]
-      num_features: 1
+      resize: average_pooling
+      num_features: 49 # based on okvqa image dim, 224x224 and grid feats 32x32 sized stride (i.e. 224^2/32^2 = 7*7
+
 
 
     # not using attention as default
@@ -41,28 +40,31 @@ model_config:
     graph_encoder:
       use: false
 
+
     fusion:
-      type: concat
+      type: two_modality_arithmetic
       params:
-        # e.g. non-linear
-        layer: none
+        operation: multiply
+        i_dim: ${model_config.qlarifais.i_dim} # image dim
+        q_dim: ${model_config.qlarifais.q_dim} # question dim
+        # todo: optimization parameters:
+        h_dim: 2048  # hidden dim as input in classifier
+        norm: weight # [weight, batch, layer, none]
+        act: ReLU # activation function
+        dropout: 0 # avoid overfitting
 
 
     classifier:
-      type: mlp
+      type: simple
       params:
-        # 2048 + 768 + 1310 in case of features
-        in_dim: 2816 # TODO: more auto?
-        out_dim: 2250 # target size for okvqa (okvqa v1.1 has 2250) todo: autoindex_in_node
-        hidden_dim: 2533 # mean of input and output
-        num_layers: 2 # ?
-      prior: false # initalize weight matrix for each answer vocabulary object
-      # path to prior images per answer in answer vocabulary
-      cache_dir: ${env.cache_dir}
-      # path to dataset for answer vocabulary and building processors
-      data_dir: ${dataset_config.${datasets}.data_dir}
-      # path to answer vocabulary file
-      processors: ${dataset_config.${datasets}.processors}
-
+        # input dim is the output of the fusion module
+        in_dim: ${model_config.qlarifais.fusion.params.h_dim}
+        out_dim: 2250 # target size for okvqa (okvqa v1.1 has 2250) todo: autoindex_in_node??
+        # todo: optimization parameters:
+        h_dim: 2550 # mean of input and output
+        num_non_linear_layers: 2 # ?
+        norm: weight # [weight, batch, layer, none]
+        act: ReLU # activation function
+        dropout: 0.1 # avoid overfitting, or keep all information?
 
 

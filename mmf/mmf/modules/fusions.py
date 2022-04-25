@@ -33,6 +33,144 @@ import torch.nn.functional as F
 from mmf.common.registry import registry
 from mmf.utils.general import get_chunks, get_sizes_list, irfft, rfft
 from mmf.utils.logger import log_class_usage
+from mmf.modules.layers import (get_norm, get_act, FCNet)
+
+
+
+
+# Fusion module
+class Fusion_Module(nn.Module):
+    def __init__(self, config):
+        super().__init__()
+        # two imputs
+        if config.type == "two_modality_arithmetic":
+            self.module = TwoModalityArithmetic(config.params)
+        elif config.type == "two_modality_ama":
+            self.module = TwoModalityAMA(config.params)
+        # three inputs
+        elif config.type == "joined_triple_modality_arithmetic":
+            self.module = JoinedTripleModalityArithmetic(config.params)
+        else:
+            raise NotImplementedError("Not implemented combine type: %s" % config.type)
+
+    def forward(self, *args, **kwargs):
+        return self.module(*args, **kwargs)
+
+
+
+class TwoModalityArithmetic(nn.Module):
+    def __init__(self, config):
+        super().__init__()
+        self.operation = config.operation
+        norm_layer = get_norm(config.norm)
+        # initializing layers
+        self.i_proj = FCNet([int(config.i_dim), int(config.h_dim)], dropout=int(config.dropout),
+                            norm=config.norm, act=config.act)
+
+        self.q_proj = FCNet([int(config.q_dim), int(config.h_dim)], dropout=int(config.dropout),
+                            norm=config.norm, act=config.act)
+
+        self.nonlinear = FCNet([int(config.h_dim), int(config.h_dim)], dropout=int(config.dropout),
+                            norm=config.norm, act=config.act)
+
+        # TODO: implement in attention
+        #self.linear = norm_layer(nn.Linear(config.h_dim, 1), dim=None)
+
+    def forward(self, i, q):
+
+        # # TODO: implement in attention: batch, k, _ = v.size()
+        i_proj = self.i_proj(i) # [batch, k, num_hid]
+        q_proj = self.q_proj(q) # TODO: implement in attention: .unsqueeze(1).repeat(1, k, 1) # [batch, k, num_hid]
+
+        # if the image features are of shape [batch, k, i_dim]
+        if len(i_proj.size()) == 3:
+            q_proj = q_proj.unsqueeze(1)
+
+        if self.operation == 'multiply':
+            joint_repr = i_proj * q_proj
+        elif self.operation == 'add':
+            joint_repr = i_proj + q_proj
+        joint_feature = self.nonlinear(joint_repr)
+        # TODO: implement in attention: logits = self.linear(joint_repr)
+        # TODO: implement in attention: w = nn.functional.softmax(logits, 1)
+
+        return joint_feature
+
+
+
+class TwoModalityAMA(nn.Module):
+    # the add-multiply-add fusion module
+    def __init__(self, config):
+        super().__init__()
+        norm_layer = get_norm(config.norm)
+
+        # linear layers
+        self.alpha = norm_layer(nn.Linear(int(config.i_dim), int(config.h_dim)), dim=None)
+        self.beta = norm_layer(nn.Linear(int(config.h_dim), int(config.h_dim)), dim=None)
+        # non-linear layers for question feature
+        self.fc_add = FCNet([int(config.q_dim), int(config.h_dim)], dropout=int(config.dropout),
+                            norm=config.norm, act=config.act)
+        # question transformed to image dimension
+        self.fc_mul = FCNet([int(config.q_dim), int(config.i_dim)], dropout=int(config.dropout),
+                            norm=config.norm, act=config.act)
+        # non-linear for question and image features
+        self.fc_mul_add = FCNet([int(config.i_dim), int(config.h_dim)], dropout=int(config.dropout),
+                            norm=config.norm, act=config.act)
+
+
+    def forward(self, i, q):
+
+        # the AMA block
+        joint_feature = self.alpha(i) + self.beta(self.fc_add(q)) + self.fc_mul_add(i * self.fc_mul(q))
+
+        return joint_feature
+
+
+
+
+
+
+
+class JoinedTripleModalityArithmetic(nn.Module):
+    def __init__(self, config):
+        super().__init__()
+        self.operation = config.operation
+        norm_layer = get_norm(config.norm)
+        # initializing layers
+        self.i_proj = FCNet([int(config.i_dim), int(config.h_dim)], dropout=int(config.dropout),
+                            norm=config.norm, act=config.act)
+
+        self.q_proj = FCNet([int(config.q_dim), int(config.h_dim)], dropout=int(config.dropout),
+                            norm=config.norm, act=config.act)
+
+        self.g_proj = FCNet([int(config.g_dim), int(config.h_dim)], dropout=int(config.dropout),
+                            norm=config.norm, act=config.act)
+
+        self.nonlinear = FCNet([int(config.h_dim), int(config.h_dim)], dropout=int(config.dropout),
+                            norm=config.norm, act=config.act)
+
+
+    def forward(self, i, q, g):
+
+        i_proj = self.i_proj(i) # [batch, k, num_hid]
+        q_proj = self.q_proj(q)
+        g_proj = self.g_proj(g)
+
+        if self.operation == 'average_multiply':
+            qg_average = (q_proj + g_proj) / 2
+            joint_repr = i_proj * qg_average
+        if self.operation == 'add':
+            joint_repr = i_proj + q_proj + g_proj
+
+        joint_feature = self.nonlinear(joint_repr)
+
+
+        return joint_feature
+
+
+
+
+
 
 
 class CompactBilinearPooling(nn.Module):

@@ -1,0 +1,22 @@
+env:
+  save_dir: ${env.part_save_dir}/ama
+
+includes:
+    # include running experiment configs (defaults for all)
+  - configs/experiments/defaults.yaml
+
+# overwrite included if necessary:
+
+model_config:
+  qlarifais:
+    fusion:
+      type: two_modality_ama # [two_modality_arithmetic, two_modality_ada]
+      params:
+        i_dim: ${model_config.qlarifais.i_dim} # image dim
+        q_dim: ${model_config.qlarifais.q_dim} # question dim
+        # TODO: optimization parameters:
+        h_dim: 2048  # hidden dim as input in classifier
+        norm: weight # [weight, batch, layer, none]
+        act: ReLU # activation function: [ReLu, Leaky_ReLu...]
+        dropout: 0.1 # avoid overfitting:
+

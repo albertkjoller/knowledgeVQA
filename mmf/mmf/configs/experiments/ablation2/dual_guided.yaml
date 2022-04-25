@@ -1,0 +1,39 @@
+
+includes:
+    # include running experiment configs (defaults for all)
+  - configs/experiments/defaults.yaml
+    # TODO: include optimized fusion module and image encoder
+  - configs/experiments/ablation1/grids.yaml # graph module imported in here
+
+# overwrite included if necessary:
+
+env:
+  save_dir: ${env.part_save_dir}/dual_guided
+
+
+model_config:
+  qlarifais:
+    attention:
+      use: true
+      type: question_guided # TODO: [question_guided or graph_guided]
+      params:
+        type: dual_one_way_top_down
+        fusion:
+          type: two_modality_arithmetic # [two_modality_arithmetic, two_modality_ada]
+          params:
+            operation: multiply
+            i_dim: ${model_config.qlarifais.i_dim} # image dim
+            q_dim: ${model_config.qlarifais.q_dim} # question dim
+            # TODO: optimization parameters:
+            h_dim: 2048  # hidden dim as input in classifier
+            norm: weight # [weight, batch, layer, none]
+            act: ReLU # activation function
+            dropout: 0 # avoid overfitting
+        norm: softmax # [softmax, sigmoid]
+
+
+
+
+
+
+
