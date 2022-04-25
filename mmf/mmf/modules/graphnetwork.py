@@ -66,7 +66,7 @@ class Numberbatch(nn.Module):
 
                 # create tensor-dictionary
                 word = l.split(' ')[0]
-                tensor = torch.tensor(list(map(float, l.split(' ')[1:])), dtype=torch.float32)
+                tensor = torch.tensor(list(map(float, l.split(' ')[1:])), dtype=torch.float32).to(self.device)
                 self.numberbatch[word] = tensor
 
     def forward(self, sample_list):
