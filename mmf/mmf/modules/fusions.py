@@ -117,11 +117,13 @@ class TwoModalityAMA(nn.Module):
         self.fc_mul_add = FCNet([int(config.i_dim), int(config.h_dim)], dropout=int(config.dropout),
                             norm=config.norm, act=config.act)
 
+        self.nonlinear = FCNet([int(config.h_dim), int(config.h_dim)], dropout=int(config.dropout),
+                            norm=config.norm, act=config.act)
 
     def forward(self, i, q):
 
         # the AMA block
-        joint_feature = self.alpha(i) + self.beta(self.fc_add(q)) + self.fc_mul_add(i * self.fc_mul(q))
+        joint_feature = self.nonlinear(self.alpha(i) + self.beta(self.fc_add(q)) + self.fc_mul_add(i * self.fc_mul(q)))
 
         return joint_feature
 
