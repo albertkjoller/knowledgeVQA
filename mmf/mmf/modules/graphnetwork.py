@@ -88,6 +88,7 @@ class Numberbatch(nn.Module):
                     pass
         # average embeddings
         X = torch.from_numpy(np.nanmean(X, axis=2))
+        print('here:', X)
 
         return X
 

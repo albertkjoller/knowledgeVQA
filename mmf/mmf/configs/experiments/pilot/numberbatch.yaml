@@ -13,7 +13,8 @@ model_config:
     g_dim: 300
 
     fusion:
-      type: joined_triple_modality_arithmetic # [joined_triple_modality_arithmetic, two_modality_ada]
+      # [triple_modality_arithmetic, double_two_modality_arithmetic, double_two_modality_ama]
+      type: triple_modality_arithmetic
       params:
         operation: average_multiply
         i_dim: ${model_config.qlarifais.i_dim} # image dim

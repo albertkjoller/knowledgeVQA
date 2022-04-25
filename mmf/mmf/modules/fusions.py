@@ -48,8 +48,12 @@ class Fusion_Module(nn.Module):
         elif config.type == "two_modality_ama":
             self.module = TwoModalityAMA(config.params)
         # three inputs
-        elif config.type == "joined_triple_modality_arithmetic":
-            self.module = JoinedTripleModalityArithmetic(config.params)
+        elif config.type == "triple_modality_arithmetic":
+            self.module = TripleModalityArithmetic(config.params)
+        elif config.type == "double_two_modality_arithmetic":
+            self.module = DoubleTwoModalityArithmetic(config.params)
+        elif config.type == "double_two_modality_ama":
+            self.module = DoubleTwoModalityAMA(config.params)
         else:
             raise NotImplementedError("Not implemented combine type: %s" % config.type)
 
@@ -67,32 +71,32 @@ class TwoModalityArithmetic(nn.Module):
         self.i_proj = FCNet([int(config.i_dim), int(config.h_dim)], dropout=int(config.dropout),
                             norm=config.norm, act=config.act)
 
-        self.q_proj = FCNet([int(config.q_dim), int(config.h_dim)], dropout=int(config.dropout),
+        self.q_proj = FCNet([int(config.guided_dim), int(config.h_dim)], dropout=int(config.dropout),
                             norm=config.norm, act=config.act)
 
         self.nonlinear = FCNet([int(config.h_dim), int(config.h_dim)], dropout=int(config.dropout),
                             norm=config.norm, act=config.act)
 
-        # TODO: implement in attention
-        #self.linear = norm_layer(nn.Linear(config.h_dim, 1), dim=None)
 
     def forward(self, i, q):
 
-        # # TODO: implement in attention: batch, k, _ = v.size()
-        i_proj = self.i_proj(i) # [batch, k, num_hid]
-        q_proj = self.q_proj(q) # TODO: implement in attention: .unsqueeze(1).repeat(1, k, 1) # [batch, k, num_hid]
-
         # if the image features are of shape [batch, k, i_dim]
-        if len(i_proj.size()) == 3:
-            q_proj = q_proj.unsqueeze(1)
+        #   - i.e. fusion is used in the attention module
+        if len(i.size()) == 3:
+            q = q.unsqueeze(1)
 
+        i_proj = self.i_proj(i) # [batch, k, num_hid]
+        q_proj = self.q_proj(q)
+
+
+        # combining final features
         if self.operation == 'multiply':
             joint_repr = i_proj * q_proj
         elif self.operation == 'add':
             joint_repr = i_proj + q_proj
+        # TODO: average
+
         joint_feature = self.nonlinear(joint_repr)
-        # TODO: implement in attention: logits = self.linear(joint_repr)
-        # TODO: implement in attention: w = nn.functional.softmax(logits, 1)
 
         return joint_feature
 
@@ -108,30 +112,33 @@ class TwoModalityAMA(nn.Module):
         self.alpha = norm_layer(nn.Linear(int(config.i_dim), int(config.h_dim)), dim=None)
         self.beta = norm_layer(nn.Linear(int(config.h_dim), int(config.h_dim)), dim=None)
         # non-linear layers for question feature
-        self.fc_add = FCNet([int(config.q_dim), int(config.h_dim)], dropout=int(config.dropout),
+        self.fc_add = FCNet([int(config.guided_dim), int(config.h_dim)], dropout=int(config.dropout),
                             norm=config.norm, act=config.act)
         # question transformed to image dimension
-        self.fc_mul = FCNet([int(config.q_dim), int(config.i_dim)], dropout=int(config.dropout),
+        self.fc_mul = FCNet([int(config.guided_dim), int(config.i_dim)], dropout=int(config.dropout),
                             norm=config.norm, act=config.act)
         # non-linear for question and image features
         self.fc_mul_add = FCNet([int(config.i_dim), int(config.h_dim)], dropout=int(config.dropout),
                             norm=config.norm, act=config.act)
 
+        self.nonlinear = FCNet([int(config.h_dim), int(config.h_dim)], dropout=int(config.dropout),
+                            norm=config.norm, act=config.act)
 
     def forward(self, i, q):
 
+        # if the image features are of shape [batch, k, i_dim]
+        #   - i.e. fusion is used in the attention module
+        if len(i.size()) == 3:
+            q = q.unsqueeze(1)
+
         # the AMA block
-        joint_feature = self.alpha(i) + self.beta(self.fc_add(q)) + self.fc_mul_add(i * self.fc_mul(q))
+        joint_feature = self.nonlinear(self.alpha(i) + self.beta(self.fc_add(q)) + self.fc_mul_add(i * self.fc_mul(q)))
 
         return joint_feature
 
 
 
-
-
-
-
-class JoinedTripleModalityArithmetic(nn.Module):
+class TripleModalityArithmetic(nn.Module):
     def __init__(self, config):
         super().__init__()
         self.operation = config.operation
@@ -150,17 +157,67 @@ class JoinedTripleModalityArithmetic(nn.Module):
                             norm=config.norm, act=config.act)
 
 
-    def forward(self, i, q, g):
+    def forward(self, i, q1, q2):
+
+        # if the image features are of shape [batch, k, i_dim]
+        #   - i.e. fusion is used in the attention module
+        if len(i.size()) == 3:
+            q1 = q1.unsqueeze(1)
+            q2 = q2.unsqueeze(1)
 
         i_proj = self.i_proj(i) # [batch, k, num_hid]
-        q_proj = self.q_proj(q)
-        g_proj = self.g_proj(g)
+        q1_proj = self.q_proj(q1)
+        q2_proj = self.g_proj(q2)
 
-        if self.operation == 'average_multiply':
-            qg_average = (q_proj + g_proj) / 2
-            joint_repr = i_proj * qg_average
-        if self.operation == 'add':
-            joint_repr = i_proj + q_proj + g_proj
+        if self.operation == 'multiply':
+            joint_repr = i_proj * q1_proj * q2_proj
+        elif self.operation == 'add':
+            joint_repr = i_proj + q1_proj + q2_proj
+
+        # TODO: will we use this?
+        elif self.operation == 'average_multiply':
+            qs_average = (q1_proj + q2_proj) / 2
+            joint_repr = i_proj * qs_average
+
+        joint_feature = self.nonlinear(joint_repr)
+
+        return joint_feature
+
+
+class DoubleTwoModalityArithmetic(nn.Module):
+    def __init__(self, config):
+        super().__init__()
+        self.operation = config.operation
+        norm_layer = get_norm(config.norm)
+        # initializing layers
+        # e.g. image and question
+        config.guided_dim = config.q_dim # small adjustment
+        self.i_q1_proj = TwoModalityArithmetic(config.params)
+        # e.g. image and graph
+        config.guided_dim = config.g_dim # small adjustment
+        self.i_q2_proj = TwoModalityArithmetic(config.params)
+
+        self.nonlinear = FCNet([int(config.h_dim), int(config.h_dim)], dropout=int(config.dropout),
+                            norm=config.norm, act=config.act)
+
+
+    def forward(self, i, q1, q2):
+
+        # if the image features are of shape [batch, k, i_dim]
+        #   - i.e. fusion is used in the attention module
+        if len(i.size()) == 3:
+            q1 = q1.unsqueeze(1)
+            q2 = q2.unsqueeze(1)
+
+        # [batch, k, num_hid]
+        i_q1_proj = self.i_q1_proj(i, q1)
+        i_q2_proj = self.i_q2_proj(i, q2)
+
+        if self.operation == 'multiply':
+            joint_repr = i_q1_proj * i_q2_proj
+        elif self.operation == 'add':
+            joint_repr = i_q1_proj + i_q2_proj
+
 
         joint_feature = self.nonlinear(joint_repr)
 
@@ -168,6 +225,42 @@ class JoinedTripleModalityArithmetic(nn.Module):
         return joint_feature
 
 
+class DoubleTwoModalityAMA(nn.Module):
+    def __init__(self, config):
+        super().__init__()
+        self.operation = config.operation
+        norm_layer = get_norm(config.norm)
+        # initializing layers
+        # e.g. image and question
+        config.guided_dim = config.params.q_dim  # small adjustment
+        self.i_q1_proj = TwoModalityAMA(config.params)
+        # e.g. image and graph
+        config.guided_dim = config.params.g_dim  # small adjustment
+        self.i_q2_proj = TwoModalityAMA(config.params)
+
+        self.nonlinear = FCNet([int(config.h_dim), int(config.h_dim)], dropout=int(config.dropout),
+                               norm=config.norm, act=config.act)
+
+    def forward(self, i, q1, q2):
+
+        # if the image features are of shape [batch, k, i_dim]
+        #   - i.e. fusion is used in the attention module
+        if len(i.size()) == 3:
+            q1 = q1.unsqueeze(1)
+            q2 = q2.unsqueeze(1)
+
+        # [batch, k, num_hid]
+        i_q1_proj = self.i_q1_proj(i, q1)
+        i_q2_proj = self.i_q2_proj(i, q2)
+
+        if self.operation == 'multiply':
+            joint_repr = i_q1_proj * i_q2_proj
+        elif self.operation == 'add':
+            joint_repr = i_q1_proj + i_q2_proj
+
+        joint_feature = self.nonlinear(joint_repr)
+
+        return joint_feature
 
 
 

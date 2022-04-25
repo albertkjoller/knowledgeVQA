@@ -14,8 +14,8 @@ class Attention_Module(nn.Module):
         super().__init__()
         if config.type == "dual_one_way_top_down":
             self.module = DualOneWayTopDown(config)
-        elif config.type == "dual_one_way_top_down":
-            self.module = DualOneWayTopDown(config)
+        elif config.type == "triple_one_way_top_down":
+            self.module = TripleOneWayTopDown(config)
         else:
             raise NotImplementedError("Not implemented combine type: %s" % combine_type)
 
@@ -34,12 +34,27 @@ class DualOneWayTopDown(nn.Module):
         self.transform = norm_layer(nn.Linear(config.fusion.params.h_dim, 1), dim=None)
         self.norm = get_norm(config.norm)
 
-    def forward(self, i, q, q2 = None):
+    def forward(self, i, q):
 
-        if q2 is not None:
-            attention = self.norm(self.transform(self.fusion_module(i, q, q2)))
-        else:
-            attention = self.norm(self.transform(self.fusion_module(i, q)))
+        attention = self.norm(self.transform(self.fusion_module(i, q)))
+
+        return attention
+
+
+
+class TripleOneWayTopDown(nn.Module):
+    # the add-multiply-add fusion module
+    def __init__(self, config):
+        super().__init__()
+        norm_layer = get_norm(config.fusion.params.norm)
+        self.fusion_module = build_fusion_module(config.fusion)
+        # to one dim
+        self.transform = norm_layer(nn.Linear(config.fusion.params.h_dim, 1), dim=None)
+        self.norm = get_norm(config.norm)
+
+    def forward(self, i, q1, q2):
+
+        attention = self.norm(self.transform(self.fusion_module(i, q1, q2)))
 
         return attention
 

@@ -8,25 +8,22 @@ includes:
 # overwrite included if necessary:
 
 env:
-  save_dir: ${env.part_save_dir}/triple_guided
+  save_dir: ${env.part_save_dir}/dual_guided
 
 
 model_config:
   qlarifais:
     attention:
       use: true
-      type: question_graph_guided
+      type: question_guided # TODO: [question_guided or graph_guided]
       params:
-        type: triple_one_way_top_down # TODO: only one way
+        type: dual_one_way_top_down
         fusion:
-          # [joined_triple_modality_arithmetic, separated_triple_modality_arithmetic, triple_modality_ama]
-          type: joined_triple_modality_arithmetic
+          type: two_modality_arithmetic # [two_modality_arithmetic, two_modality_ama]
           params:
             operation: multiply
             i_dim: ${model_config.qlarifais.i_dim} # image dim
-            q_dim: ${model_config.qlarifais.q_dim} # question dim
-            g_dim: ${model_config.qlarifais.g_dim} # question dim
-            guided_dim: 0 # used as variable in fusion module
+            guided_dim: ${model_config.qlarifais.q_dim} # question dim
             # TODO: optimization parameters:
             h_dim: 2048  # hidden dim as input in classifier
             norm: weight # [weight, batch, layer, none]
