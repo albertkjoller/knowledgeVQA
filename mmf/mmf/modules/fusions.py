@@ -71,7 +71,7 @@ class TwoModalityArithmetic(nn.Module):
         self.i_proj = FCNet([int(config.i_dim), int(config.h_dim)], dropout=int(config.dropout),
                             norm=config.norm, act=config.act)
 
-        self.q_proj = FCNet([int(config.q_dim), int(config.h_dim)], dropout=int(config.dropout),
+        self.q_proj = FCNet([int(config.guided_dim), int(config.h_dim)], dropout=int(config.dropout),
                             norm=config.norm, act=config.act)
 
         self.nonlinear = FCNet([int(config.h_dim), int(config.h_dim)], dropout=int(config.dropout),
