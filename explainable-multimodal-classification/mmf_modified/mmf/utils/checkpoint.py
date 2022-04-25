@@ -71,6 +71,7 @@ def _load_pretrained_checkpoint(checkpoint_path, *args, **kwargs):
 
 
 def _load_pretrained_model(model_name_or_path, *args, **kwargs):
+    print(PathManager.exists(model_name_or_path))
     if PathManager.exists(model_name_or_path):
         download_path = model_name_or_path
         model_name = model_name_or_path
