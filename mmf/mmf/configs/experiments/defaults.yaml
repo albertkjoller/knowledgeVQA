@@ -42,7 +42,7 @@ evaluation:
     #- roc_auc
 
 training:
-  batch_size: 128 # default: 512, 128 or higher performs better (2017 tips and tricks)
+  batch_size: 1 # default: 512, 128 or higher performs better (2017 tips and tricks)
   lr_scheduler: true   # Don't forget to update schedule_attributes if you update this
   max_updates: null # default: 22000, krisp uses 88000
   max_epochs: 1000 # recommended by okvqa paper
