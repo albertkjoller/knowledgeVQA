@@ -35,7 +35,7 @@ class QlarifaisInterface(nn.Module):
         return self.model(*args, **kwargs)
 
     def init_processors(self):
-        config = self.config.dataset_config.okvqa # changed from GeneralInterFace
+        config = self.config.dataset_config.okvqa 
         extra_params = {"data_dir": config.data_dir}
         self.processor_dict = build_processors(config.processors, **extra_params)
 
@@ -89,8 +89,9 @@ class QlarifaisInterface(nn.Module):
 
             top_k = [(p.item(), answer.idx2word(indices[0][idx].item())) for (idx, p) in enumerate(confidence[0])]        
             probs, answers = list(zip(*top_k))
+            return probs, answers
+            
         else:
             confidence, index = torch.max(scores, dim=1)
-            label = answer.idx2word(index)
-            
-        return {"label": label, "confidence": confidence.item()}
+            label = answer.idx2word(index)            
+            return {"label": label, "confidence": confidence.item()}
