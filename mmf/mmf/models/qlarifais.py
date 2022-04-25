@@ -82,98 +82,68 @@ class Qlarifais(BaseModel):
         self.classifier = build_classifier(self.config.classifier)
 
 
-        # knowledge graph
+        # external knowledge
         if self.config.graph_encoder.use:
             self.graph_encoder = build_graph_encoder(self.config.graph_encoder)
 
         # attention
         if self.config.attention.use:
-            # defining dimension of guider
-            if self.config.attention.type == "question_guided":
-                self.guided_dim = self.config.q_dim
-            elif self.config.attention.type == "graph_guided":
-                self.guided_dim = self.config.g_dim
-            elif self.config.attention.type == "question_graph_guided":
-                # graph dim defined in attention.params
-                self.guided_dim = self.config.q_dim # TODO: ??
             # initiating attention module
             self.attention_module = build_attention_module(self.config.attention.params)
 
 
 
-
-
-
-
     def forward(self, sample_list):
 
-        # question encoding
+        # QUESTION EMBEDDINGS
         # text input features will be in "input_ids" key
         question = sample_list["input_ids"]
         # get the text and image features from the encoders
-        question_features = self.language_module(question)# TODO: [1] in bert encoder?
-        # get correct shape, i.e.
-        question_features = torch.flatten(question_features, start_dim=1)
+        question_features = self.language_module(question)
 
-        # image encoding
+
+        # IMAGE FEATURES
         image = sample_list["image"]
-        image_features = self.vision_module(image)
-        # the image features are pooled once all endcodings are done
+        image_features = self.vision_module(image) # [batch_size, i_dim, sqrt(max_features), sqrt(max_features)] # TODO: ?
 
-        # if using external knowledge (graph)
+
+        # GRAPH EMBEDDINGS
         if self.config.graph_encoder.use:
-            # initialize for graph module
             sample_list["q_encoded"] = question # dim 128
-            # Forward through graph module
-            graph_features = self.graph_encoder(sample_list) # [128, 1310, 128]
+            graph_features = self.graph_encoder(sample_list) # [batch_size, g_dim]
 
 
-
-        # if model uses top-down attention on images
+        # ATTENTION
         if self.config.attention.use:
-            # flattening image features to one dim per
-            image_features = image_features.flatten(2,3).permute(0, 2, 1)
-            print('here', image_features.shape)
+            # getting correct input shape
+            image_features = image_features.flatten(2,3).permute(0, 2, 1) # [batch_size, num_features, i_dim]
+            # extracting attention based on defined attention mechanism
             if self.config.attention.type == 'question_guided':
                 attention = self.attention_module(image_features, question_features)
-
             if self.config.attention.type == 'graph_guided':
                 attention = self.attention_module(image_features, graph_features)
-
-            # if both, add attention weight and then do sofmax?
             if self.config.attention.type == 'question_graph_guided':
                 attention = self.attention_module(image_features, question_features, graph_features)
-
-            # calculating weighted average
-            image_features = (attention * image_features).sum(1)  # [batch, v_dim]
-
-
+            # [batch_size, num_features, 1]
+            # weighted average of image features
+            image_features = (attention * image_features).sum(1)  # [batch_size, i_dim]
         # if not using attention
         else:
             if self.config.image_encoder.resize == 'average_pooling':
                 # average pool K features of size 2048
-                # doing it on dimensions 2 and 3 and keep 2048
-                image_features = torch.mean(image_features, dim = (2,3))
-
-            # if e.g. resnet50 with only one feature
-            elif self.config.image_encoder.resize == 'none':
-                # image feature dim is only 2048
-                # assert self.config.image_encoder.type in ["resnet50", ...] # TODO:
-                pass
-
-        # Flatten the embeddings before fusion
-        image_features = torch.flatten(image_features, start_dim=1)
+                image_features = torch.mean(image_features, dim = (2,3)) # [batch_size, i_dim]
 
 
-        # fusion
-        # type of fusion defined when building
+        # FUSION
+        # type of fusion based on inputs
         if self.config.graph_encoder.use:
             fused_features = self.fusion_module(image_features, question_features, graph_features)
         else:
             fused_features = self.fusion_module(image_features, question_features)
+        # [batch_size, answer_vocab_dim]
 
+        # CLASSIFICATION
         logits = self.classifier(fused_features)
-
         output = {"scores": logits}
         # MMF will automatically calculate loss
         return output

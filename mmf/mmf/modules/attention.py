@@ -14,6 +14,8 @@ class Attention_Module(nn.Module):
         super().__init__()
         if config.type == "dual_one_way_top_down":
             self.module = DualOneWayTopDown(config)
+        elif config.type == "dual_one_way_top_down":
+            self.module = DualOneWayTopDown(config)
         else:
             raise NotImplementedError("Not implemented combine type: %s" % combine_type)
 

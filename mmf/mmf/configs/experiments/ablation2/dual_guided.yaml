@@ -29,7 +29,7 @@ model_config:
             norm: weight # [weight, batch, layer, none]
             act: ReLU # activation function
             dropout: 0 # avoid overfitting
-        norm: softmax
+        norm: softmax # [softmax, sigmoid]
 
 
 

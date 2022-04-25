@@ -1,7 +1,7 @@
 # include running experiment configs
 includes:
   - configs/experiments/defaults.yaml
-    # TODO: include optimized fusion from graph module
+    # TODO: include optimized fusion from graph module, e.g., OR just define it in numberbatch
   - configs/experiments/pilot/numberbatch.yaml
 
 env:

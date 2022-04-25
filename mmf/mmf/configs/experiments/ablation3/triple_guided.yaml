@@ -17,7 +17,7 @@ model_config:
       use: true
       type: question_graph_guided
       params:
-        type: dual_one_way_top_down
+        type: triple_one_way_top_down # TODO: only one way
         fusion:
           type: joined_triple_modality_arithmetic # [joined_triple_modality_arithmetic, two_modality_ada]
           params:
@@ -30,7 +30,7 @@ model_config:
             norm: weight # [weight, batch, layer, none]
             act: ReLU # activation function
             dropout: 0 # avoid overfitting
-        norm: softmax
+        norm: softmax # [softmax, sigmoid]
 
 
 
