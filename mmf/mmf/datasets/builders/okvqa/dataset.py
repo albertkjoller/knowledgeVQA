@@ -76,6 +76,8 @@ class OKVQADataset(MMFDataset):
             answer_processor_arg = {"answers": answers}
             processed_soft_copy_answers = self.answer_processor(answer_processor_arg)
 
+            # adding annotator answers to samplelist
+            sample.answers = answers
             sample.targets = processed_soft_copy_answers["answers_scores"]
 
         return sample

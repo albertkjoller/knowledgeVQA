@@ -10,7 +10,7 @@ evaluation:
   metrics:
     - accuracy
     - vqa_accuracy
-    - bert_score
+    - numberbatch_score
     #- binary_f1
     #- roc_auc
 
