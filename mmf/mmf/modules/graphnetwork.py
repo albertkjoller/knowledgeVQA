@@ -69,7 +69,7 @@ class Numberbatch(nn.Module):
                 word = l.split(' ')[0]
                 #tensor = torch.tensor(list(map(float, l.split(' ')[1:])), dtype=torch.float32)
                 tensor = torch.tensor(list(map(float, l.split(' ')[1:])), dtype=torch.float32)
-                self.numberbatch[word] = tensor.to(get_current_device())
+                self.numberbatch[word] = tensor
 
     def forward(self, sample_list):
 
@@ -89,9 +89,7 @@ class Numberbatch(nn.Module):
                 except KeyError:
                     pass
         # average embeddings
-        X = torch.from_numpy(np.nanmean(X, axis=2))
-        print('here:', X)
-
+        X = torch.from_numpy(np.nanmean(X, axis=2)).to(get_current_device())
         return X
 
 
