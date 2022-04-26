@@ -89,6 +89,7 @@ class Numberbatch(nn.Module):
                 except KeyError:
                     pass
         # average embeddings
+        # TODO: fix to(device) when building instead of here
         X = torch.from_numpy(np.nanmean(X, axis=2)).to(get_current_device())
         return X
 
