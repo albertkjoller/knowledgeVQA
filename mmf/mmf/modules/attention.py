@@ -32,6 +32,7 @@ class DualOneWayTopDown(nn.Module):
         self.fusion_module = build_fusion_module(config.fusion)
         # to one dim
         self.transform = norm_layer(nn.Linear(config.fusion.params.h_dim, 1), dim=None)
+        # e.g. softmax or sigmoid
         self.norm = get_norm(config.norm)
 
     def forward(self, i, q):

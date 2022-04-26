@@ -192,10 +192,10 @@ class DoubleTwoModalityArithmetic(nn.Module):
         # initializing layers
         # e.g. image and question
         config.guided_dim = config.q_dim # small adjustment
-        self.i_q1_proj = TwoModalityArithmetic(config.params)
+        self.i_q1_proj = TwoModalityArithmetic(config)
         # e.g. image and graph
         config.guided_dim = config.g_dim # small adjustment
-        self.i_q2_proj = TwoModalityArithmetic(config.params)
+        self.i_q2_proj = TwoModalityArithmetic(config)
 
         self.nonlinear = FCNet([int(config.h_dim), int(config.h_dim)], dropout=int(config.dropout),
                             norm=config.norm, act=config.act)
@@ -232,11 +232,11 @@ class DoubleTwoModalityAMA(nn.Module):
         norm_layer = get_norm(config.norm)
         # initializing layers
         # e.g. image and question
-        config.guided_dim = config.params.q_dim  # small adjustment
-        self.i_q1_proj = TwoModalityAMA(config.params)
+        config.guided_dim = config.q_dim  # small adjustment
+        self.i_q1_proj = TwoModalityAMA(config)
         # e.g. image and graph
-        config.guided_dim = config.params.g_dim  # small adjustment
-        self.i_q2_proj = TwoModalityAMA(config.params)
+        config.guided_dim = config.g_dim  # small adjustment
+        self.i_q2_proj = TwoModalityAMA(config)
 
         self.nonlinear = FCNet([int(config.h_dim), int(config.h_dim)], dropout=int(config.dropout),
                                norm=config.norm, act=config.act)
