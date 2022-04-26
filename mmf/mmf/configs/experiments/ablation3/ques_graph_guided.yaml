@@ -19,8 +19,8 @@ model_config:
       params:
         type: triple_one_way_top_down # TODO: only one way
         fusion:
-          # [joined_triple_modality_arithmetic, separated_triple_modality_arithmetic, triple_modality_ama]
-          type: joined_triple_modality_arithmetic
+          # [triple_modality_arithmetic, double_two_modality_arithmetic, double_two_modality_ama]
+          type: triple_modality_arithmetic
           params:
             operation: multiply
             i_dim: ${model_config.qlarifais.i_dim} # image dim
