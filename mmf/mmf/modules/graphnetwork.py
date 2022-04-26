@@ -22,6 +22,7 @@ from torch_geometric.nn import BatchNorm, GCNConv, RGCNConv, SAGEConv
 from tqdm import tqdm
 from mmf.utils.configuration import get_mmf_cache_dir
 import gzip
+from mmf.utils.general import get_current_device, updir
 
 
 
@@ -53,7 +54,7 @@ class Numberbatch(nn.Module):
 
         self.max_seq_length = self.config.max_seq_length
         self.numberbatch = {}
-
+        self.device = get_current_device()
         with open(mmf_indirect(self.config.filepath), 'rb') as f:
 
             info = f.readlines(1)
@@ -66,8 +67,9 @@ class Numberbatch(nn.Module):
 
                 # create tensor-dictionary
                 word = l.split(' ')[0]
+                #tensor = torch.tensor(list(map(float, l.split(' ')[1:])), dtype=torch.float32)
                 tensor = torch.tensor(list(map(float, l.split(' ')[1:])), dtype=torch.float32)
-                self.numberbatch[word] = tensor
+                self.numberbatch[word] = tensor.to(get_current_device())
 
     def forward(self, sample_list):
 
