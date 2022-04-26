@@ -65,6 +65,6 @@ model_config:
         num_non_linear_layers: 2 # ?
         norm: weight # [weight, batch, layer, none]
         act: ReLU # activation function
-        dropout: 0.1 # avoid overfitting, or keep all information?
+        dropout: 0.4 # avoid overfitting, or keep all information?
 
 

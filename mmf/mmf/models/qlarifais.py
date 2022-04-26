@@ -18,22 +18,23 @@ from mmf.utils.build import (
     build_attention_module
     )
 
+# mmf_run config='configs/experiments/baseline/ama.yaml' model=qlarifais dataset=okvqa run_type=train_val
 
 # Register the model for MMF, "concat_bert_tutorial" key would be used to find the model
 @registry.register_model("qlarifais")
 class Qlarifais(BaseModel):
-   
-    def __init__(self, config):    
+
+    def __init__(self, config):
         super().__init__(config)
         self.build()
-        
+
     @classmethod
     def from_pretrained(cls, model_name, *args, **kwargs):
         model = super().from_pretrained(model_name, *args, **kwargs)
         config = load_pretrained_model(model_name)["full_config"]
         OmegaConf.set_struct(config, True)
         return QlarifaisInterface(model, config)
-    
+
     @classmethod
     def config_path(cls):
         # Relative to user dir root
