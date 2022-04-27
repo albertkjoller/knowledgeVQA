@@ -246,9 +246,9 @@ class DoubleTwoModalityAMA(nn.Module):
 
         # if the image features are of shape [batch, k, i_dim]
         #   - i.e. fusion is used in the attention module
-        if len(i.size()) == 3:
-            q1 = q1.unsqueeze(1)
-            q2 = q2.unsqueeze(1)
+        #if len(i.size()) == 3:
+        #    q1 = q1.unsqueeze(1)
+        #    q2 = q2.unsqueeze(1)
 
         # [batch, k, num_hid]
         i_q1_proj = self.i_q1_proj(i, q1)
