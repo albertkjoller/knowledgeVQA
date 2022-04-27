@@ -205,13 +205,6 @@ class DoubleTwoModalityArithmetic(nn.Module):
 
     def forward(self, i, q1, q2):
 
-        # if the image features are of shape [batch, k, i_dim]
-        #   - i.e. fusion is used in the attention module
-
-        #if len(i.size()) == 3:
-        #    q1 = q1.unsqueeze(1)
-        #    q2 = q2.unsqueeze(1)
-
         # [batch, k, num_hid]
         i_q1_proj = self.i_q1_proj(i, q1)
         i_q2_proj = self.i_q2_proj(i, q2)
@@ -243,12 +236,6 @@ class DoubleTwoModalityAMA(nn.Module):
                                norm=config.norm, act=config.act)
 
     def forward(self, i, q1, q2):
-
-        # if the image features are of shape [batch, k, i_dim]
-        #   - i.e. fusion is used in the attention module
-        #if len(i.size()) == 3:
-        #    q1 = q1.unsqueeze(1)
-        #    q2 = q2.unsqueeze(1)
 
         # [batch, k, num_hid]
         i_q1_proj = self.i_q1_proj(i, q1)

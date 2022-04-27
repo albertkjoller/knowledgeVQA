@@ -71,7 +71,7 @@ class Qlarifais(BaseModel):
         image = sample_list["image"]
         image_features = self.vision_module(image) # [batch_size, i_dim, sqrt(max_features), sqrt(max_features)] # TODO: ?
 
-
+        print('image: ', image_features.shape)
         # GRAPH EMBEDDINGS
         if self.config.graph_encoder.use:
             sample_list["q_encoded"] = question # dim 128
