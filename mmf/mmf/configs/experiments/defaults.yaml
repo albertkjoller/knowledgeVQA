@@ -18,6 +18,7 @@ dataset_config:
     dump_pred_info: false
   embedding_models:
     numberbatch: # [numberbatch, krisp]
+      type: numberbatch
       # downloaded from: <https://github.com/commonsense/conceptnet-numberbatch>
       filepath: okvqa/defaults/graph/numberbatch-en.txt
       max_seq_length: ${dataset_config.${datasets}.processors.text_processor.params.max_seq_length}
