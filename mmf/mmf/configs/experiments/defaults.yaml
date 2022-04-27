@@ -16,6 +16,12 @@ dataset_config:
           vocab_file: okvqa/defaults/annotations/annotations/answer_vocab_count10.txt
     dump_output_dir: ${env.save_dir}
     dump_pred_info: false
+  embedding_models:
+    numberbatch: # [numberbatch, krisp]
+      # downloaded from: <https://github.com/commonsense/conceptnet-numberbatch>
+      filepath: okvqa/defaults/graph/numberbatch-en.txt
+      max_seq_length: ${dataset_config.${datasets}.processors.text_processor.params.max_seq_length}
+
 
 scheduler:
   type: warmup_cosine
