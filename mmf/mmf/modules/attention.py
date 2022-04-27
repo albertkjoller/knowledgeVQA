@@ -63,6 +63,13 @@ class TripleOneWayTopDown(nn.Module):
 
 
 
+
+
+
+
+
+
+
 class AttentionLayer(nn.Module):
     def __init__(self, image_dim, question_dim, **kwargs):
         super().__init__()
