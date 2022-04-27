@@ -21,17 +21,14 @@ __all__ = [
 ]
 """
 
-import math
-import matplotlib
+
 from tqdm import tqdm
 
 #matplotlib.use("Agg") #TODO: remove or keep?
 import matplotlib.pyplot as plt
 import numpy as np
-from sklearn.linear_model import Ridge, lars_path
 
 import torch
-import torch.nn.functional as F
 import torch.optim as optim
 
 from torchray.utils import imsmooth, imsc
@@ -43,9 +40,7 @@ from torchray.attribution.extremal_perturbation import (
     contrastive_reward,
 )
 
-from PIL import Image
-from torchray.utils import imsc
-from torchvision import transforms
+
 
 BLUR_PERTURBATION = "blur"
 """Blur-type perturbation for :class:`Perturbation`."""
@@ -61,15 +56,6 @@ DELETE_VARIANT = "delete"
 
 DUAL_VARIANT = "dual"
 """Combined game for :func:`extremal_perturbation`."""
-
-
-def image2tensor(image_path):
-    # convert image to torch tensor with shape (1 * 3 * 224 * 224)
-    img = Image.open(image_path)
-    p = transforms.Compose([transforms.Scale((224, 224))])
-
-    img, i = imsc(p(img), quiet=False)
-    return torch.reshape(img, (1, 3, 224, 224))
 
 
 # --------------------------explainer of both image & text----------------------------

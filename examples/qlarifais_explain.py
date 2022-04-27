@@ -6,22 +6,34 @@ Created on Mon Apr 25 11:14:28 2022
 @author: s194253
 """
 
+import sys
 from pathlib import Path
 
 import torch
 from mmf.models import Qlarifais
 
+import cv2
+
+from mmexp.methods import *
+from mmexp.utils.visualize import plot_example
+from mmexp.utils.tools import image2tensor
+
+
+def str_to_class(classname):
+    return getattr(sys.modules['mmexp.methods'], classname)
 
 if __name__ == "__main__":
-
-    import cv2
 
     # obtain user input
     save_dir = input("Enter directory path of saved models ('save'-folder): ")
     model_name = input("Enter saved model filename: ")
+    path_to_torch_cache = input("Enter the path to where your torch-cache folder is located (e.g. /work3/s194253):")
 
-    model = Qlarifais.from_pretrained(f"{save_dir}/models/{model_name}")
+    model = Qlarifais.from_pretrained(f"{save_dir}/models/{model_name}", path_to_torch_cache)
     model.to(torch.device("cuda:0" if torch.cuda.is_available() else "cpu"))
+    
+    # Specify answer vocab
+    answer_vocab = model.processor_dict['answer_processor'].answer_vocab.word_list
     
     # initialize data variables
     old_img_name = None
@@ -55,18 +67,25 @@ if __name__ == "__main__":
 
         # input question
         question = input("Enter question: ")
+        answer = input("Enter ground truth answer (from answer list): ")
+        explainability_method = str_to_class(input("Enter explainability method: "))
 
-
-        # get predictions and show input
-        topk = 5
-        outputs = model.classify(image=img_path, text=question, top_k=topk)
-        old_img_name = img_name
-
-        # print answers and probabilities
-        print(f'\nQuestion: "{question}"')
-        print("\nPredicted outputs from the model:")
-        for i, (prob, answer) in enumerate(zip(*outputs)):
-            print(f"{i+1}) {answer} \t ({prob})")
+        # Process input
+        image_tensor = image2tensor(img_path)
+        category_id = model.processor_dict['answer_processor'].word2idx(answer)
+                
+        # TODO: make this general
+        # Run explainability method
+        saliency = explainability_method(model, image_tensor, category_id)
+        
+        plot_example(image_tensor, 
+                     saliency, 
+                     method='gradient', 
+                     category_id=category_id,
+                     answer_vocab=answer_vocab,
+                     show_plot=True,
+                     )
+        
 
     # when loop is ended
     cv2.destroyAllWindows()

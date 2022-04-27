@@ -28,11 +28,11 @@ class Qlarifais(BaseModel):
         self.build()
         
     @classmethod
-    def from_pretrained(cls, model_name, *args, **kwargs):
+    def from_pretrained(cls, model_name, path_to_torch_cache, *args, **kwargs):
         model = super().from_pretrained(model_name, *args, **kwargs)
         config = load_pretrained_model(model_name)["full_config"]
         OmegaConf.set_struct(config, True)
-        return QlarifaisInterface(model, config)
+        return QlarifaisInterface(model, config, path_to_torch_cache)
     
     @classmethod
     def config_path(cls):
