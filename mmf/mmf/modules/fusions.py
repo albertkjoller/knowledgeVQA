@@ -212,14 +212,15 @@ class DoubleTwoModalityArithmetic(nn.Module):
         # [batch, k, num_hid]
         i_q1_proj = self.i_q1_proj(i, q1)
         i_q2_proj = self.i_q2_proj(i, q2)
-
+        print(i_q1_proj.shape)
         if self.operation == 'multiply':
             joint_repr = i_q1_proj * i_q2_proj
         elif self.operation == 'add':
             joint_repr = i_q1_proj + i_q2_proj
 
-
+        print(joint_repr.shape)
         joint_feature = self.nonlinear(joint_repr)
+        print(joint_feature.shape)
 
 
         return joint_feature

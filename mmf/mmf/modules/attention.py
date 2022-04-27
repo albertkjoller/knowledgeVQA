@@ -56,7 +56,7 @@ class TripleOneWayTopDown(nn.Module):
     def forward(self, i, q1, q2):
 
         attention = self.norm(self.transform(self.fusion_module(i, q1, q2)))
-
+        print(attention.shape)
         return attention
 
 
