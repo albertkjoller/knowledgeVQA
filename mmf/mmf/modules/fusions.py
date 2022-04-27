@@ -82,11 +82,16 @@ class TwoModalityArithmetic(nn.Module):
 
         # if the image features are of shape [batch, k, i_dim]
         #   - i.e. fusion is used in the attention module
+        print('image', i.shape)
+
         if len(i.size()) == 3:
             q = q.unsqueeze(1)
+        print('image', i.shape)
+        print('question', q.shape)
 
         i_proj = self.i_proj(i) # [batch, k, num_hid]
         q_proj = self.q_proj(q)
+        print('q reshape', q_proj.shape)
 
 
         # combining final features
@@ -95,8 +100,10 @@ class TwoModalityArithmetic(nn.Module):
         elif self.operation == 'add':
             joint_repr = i_proj + q_proj
         # TODO: average
+        print(joint_repr.shape)
 
         joint_feature = self.nonlinear(joint_repr)
+        print(joint_feature.shape)
 
         return joint_feature
 
@@ -205,23 +212,21 @@ class DoubleTwoModalityArithmetic(nn.Module):
 
         # if the image features are of shape [batch, k, i_dim]
         #   - i.e. fusion is used in the attention module
-        print(q1.shape)
 
-        if len(i.size()) == 3:
-            q1 = q1.unsqueeze(1)
-            q2 = q2.unsqueeze(1)
-        print(q1.shape)
+        #if len(i.size()) == 3:
+        #    q1 = q1.unsqueeze(1)
+        #    q2 = q2.unsqueeze(1)
 
         # [batch, k, num_hid]
         i_q1_proj = self.i_q1_proj(i, q1)
         i_q2_proj = self.i_q2_proj(i, q2)
-        print(i_q1_proj.shape)
+        print('after two modality arithmetic', i_q1_proj.shape)
         if self.operation == 'multiply':
             joint_repr = i_q1_proj * i_q2_proj
         elif self.operation == 'add':
             joint_repr = i_q1_proj + i_q2_proj
 
-        print(joint_repr.shape)
+        print('joined', joint_repr.shape)
         joint_feature = self.nonlinear(joint_repr)
         print(joint_feature.shape)
 

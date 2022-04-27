@@ -38,7 +38,7 @@ class DualOneWayTopDown(nn.Module):
     def forward(self, i, q):
 
         attention = self.norm(self.transform(self.fusion_module(i, q)))
-
+        print('attention', attention)
         return attention
 
 
