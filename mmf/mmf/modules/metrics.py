@@ -470,6 +470,7 @@ class VQAAccuracy(BaseMetric):
 
         """
         output = model_output["scores"]
+        print('here!!!: ', output.shape)
         # for three branch movie+mcan model
         if output.dim() == 3:
             output = output[:, 0]

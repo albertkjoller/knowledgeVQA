@@ -19,9 +19,7 @@ model_config:
         model: R-50-grid.yaml # choices: [R-50-(grid or updn), X-101-grid, X-152-(grid or challenge(MoVie+GridFeat))]
         output_dir: ${env.save_dir}
         pretrained: true
-        pool_type: avg
         zero_init_residual: false
-        num_output_features: 1
       # how to resize features
       resize: average_pooling
       num_features: 49 # based on okvqa image dim, 224x224 and grid feats 32x32 sized stride (i.e. 224^2/32^2 = 7*7

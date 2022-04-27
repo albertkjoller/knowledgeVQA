@@ -251,7 +251,7 @@ class ImageEncoderFactory(EncoderFactory):
         elif self._type == "frcnn":
             self.module = FRCNNImageEncoder(params)
         elif self._type == "grid_feats_vqa":
-            self.module = gfvImageEncoder(params)
+            self.module = gfvqaImageEncoder(params)
         else:
             raise NotImplementedError("Unknown Image Encoder: %s" % self._type)
 
@@ -518,7 +518,7 @@ class FRCNNImageEncoder(Encoder):
 
 
 @registry.register_encoder("grid_feats_vqa")
-class gfvImageEncoder(Encoder):
+class gfvqaImageEncoder(Encoder):
     @dataclass
     class Config(Encoder.Config):
         name: str = "grid_feats_vqa"
@@ -528,7 +528,7 @@ class gfvImageEncoder(Encoder):
         self.config = config
 
         # maybe not necessary
-        args = argparse.ArgumentParser(description="Grid feature extraction")
+        #args = argparse.ArgumentParser(description="Grid feature extraction")
         # setting up config file for the defined model
         cfg = self.setup(args, self.config)
         # activating the model
@@ -545,8 +545,8 @@ class gfvImageEncoder(Encoder):
         # getting pretrained model
         model = config.get("model", False)
 
-        # For compatibility with both training and explainability, the 
-        # path needs to go back to the root (explainableVQA) and then enter mmf.            
+        # For compatibility with both training and explainability, the
+        # path needs to go back to the root (explainableVQA) and then enter mmf.
         cfg.merge_from_file('./../mmf/mmf/configs/other/feat_configs/' + model)
 
         # forcing the final residual block to have dilations 1

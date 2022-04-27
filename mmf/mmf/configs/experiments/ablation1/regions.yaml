@@ -21,6 +21,5 @@ model_config:
         # choices: [R-50-(grid or updn), X-101-grid, X-152-(grid or challenge(MoVie+GridFeat))]
         backbone_features: ./mmf/configs/other/feat_configs/R-50-updn.yaml
         pretrained: true
-        pool_type: avg
         zero_init_residual: false
-        num_output_features: 1
+      resize: average_pooling
