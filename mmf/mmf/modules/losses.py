@@ -196,6 +196,7 @@ class MMFLoss(nn.Module):
             ):
                 return loss_dict
 
+        print(model_output)
         loss_result = self.loss_criterion(sample_list, model_output['scores'])
 
         if not isinstance(loss_result, collections.abc.Mapping):
@@ -244,6 +245,7 @@ class LogitBinaryCrossEntropy(nn.Module):
             torch.FloatTensor: Float value for loss.
 
         """
+        print('bce', model_output)
         scores = model_output["scores"]
         targets = sample_list["targets"]
         loss = F.binary_cross_entropy_with_logits(scores, targets, reduction="mean")
