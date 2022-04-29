@@ -329,15 +329,13 @@ class NumberbatchScore(BaseMetric):
         # init output, expected output, and annotator answers
 
         # Numberbatch embeddings, 128x300
-        print(sample_list['scores'])
-        print('all', sample_list)
+        print('sample list', sample_list)
+        print('model output', model_output)
 
         batch_outputs = sample_list['scores']['embedding']  # will be how long? 3003 or 128
-        print("batch outputs", batch_outputs)
         raise NotImplementedError
         # Annotator answers, 128x10
         batch_answers = sample_list[self.annotator_key]
-        print("batch answers", batch_answers)
 
         """
         # [["word1", "word2"], ["word1"], ["word1"]] --> lists of split answers.

@@ -244,8 +244,7 @@ class LogitBinaryCrossEntropy(nn.Module):
             torch.FloatTensor: Float value for loss.
 
         """
-        print('bce', model_output)
-        #scores = model_output["scores"]['scores']
+
         scores = model_output["scores"]
         targets = sample_list["targets"]
         loss = F.binary_cross_entropy_with_logits(scores, targets, reduction="mean")
