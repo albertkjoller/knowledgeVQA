@@ -109,12 +109,13 @@ class Qlarifais(BaseModel):
         # [batch_size, answer_vocab_dim]
 
         # --- CLASSIFICATION ---
+        # embeddings
         output = self.classifier(fused_features)
         if self.config.classifier.output_type == 'embedding': # based on output dim
             embedding = output
             # finding similarities scores of embedding and answer candidates with nan as zeroes
             logits = torch.nansum(embedding.unsqueeze(dim=1) * self.embedded_answer_vocab, dim=2)
-            not_top_k_indices = torch.topk(logits, self.num_not_top_k, largest=True, dim = 1).indices
+            not_top_k_indices = torch.topk(logits, self.num_not_top_k, largest=False, dim = 1).indices
             # set not top k to 0
             for batch, indices in enumerate(not_top_k_indices):
                 logits[batch][indices] = 0
@@ -125,12 +126,8 @@ class Qlarifais(BaseModel):
         elif self.config.classifier.output_type == 'multilabel': # based on output dim
             logits = output
             # find top 1 answer candidate and convert it to an embedding
-            # TODO: do we want top k?
-            embedding = self.graph_encoder({'tokens': tokenize(self.answer_vocab.idx2word(logits.argmax(dim=1).indices))})
-            print(embedding.shape)
-            print(embedding)
-
-            raise NotImplementedError
+            top_k_indices = torch.topk(logits, self.config.classifier.params.top_k, largest=True, dim = 1).indices
+            embedding = self.graph_encoder({'tokens': [tokenize(self.answer_vocab.idx2word(idx)) for idx in top_k_indices]})
 
 
         output = {'embedding': embedding, 'scores': logits}
