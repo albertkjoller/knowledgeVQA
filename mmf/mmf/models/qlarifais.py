@@ -53,7 +53,7 @@ class Qlarifais(BaseModel):
         # used in classifier
         self.answer_vocab = registry.get(self.config.dataset_name + "_answer_processor").answer_vocab
         self.embedded_answer_vocab = self.graph_encoder({'tokens': [tokenize(sentence) for sentence in self.answer_vocab.word_list]})  # [batch_size, g_dim]
-        self.num_not_top_k = len(self.embedded_answer_vocab) - self.config.get("top_k", 0)#self.config.classifier.params.topk # if classifier outputs embeddings
+        self.num_not_top_k = len(self.embedded_answer_vocab) - int(self.config.classifier.params.top_k) # if classifier outputs embeddings
         # todo: tokenize better answer vocab
         #words = [self.answer_vocab.idx2word(idx) for idx, val in enumerate(torch.isnan(self.embedded_answer_vocab[:,0]).long()) if val == 1]
 
@@ -109,37 +109,25 @@ class Qlarifais(BaseModel):
         # [batch_size, answer_vocab_dim]
 
         # --- CLASSIFICATION ---
+        # embeddings
         output = self.classifier(fused_features)
         if self.config.classifier.output_type == 'embedding': # based on output dim
             embedding = output
             # finding similarities scores of embedding and answer candidates with nan as zeroes
             logits = torch.nansum(embedding.unsqueeze(dim=1) * self.embedded_answer_vocab, dim=2)
-            not_top_k_indices = torch.topk(logits, self.num_not_top_k, largest=True, dim = 1).indices
+            not_top_k_indices = torch.topk(logits, self.num_not_top_k, largest=False, dim = 1).indices
             # set not top k to 0
             for batch, indices in enumerate(not_top_k_indices):
                 logits[batch][indices] = 0
-            raise NotImplementedError
-
+            #
 
 
 
         elif self.config.classifier.output_type == 'multilabel': # based on output dim
             logits = output
-            #print('argmax', logits.argmax(dim=1))
-            #print('idx to word', self.answer_vocab.idx2word(logits.argmax(dim=1)))
-            #[tokenize(self.answer_vocab.idx2word) for idx in logits.argmax(dim=1)]
-            #emb = self.graph_module({'tokens': self.answer_vocab.idx2word(logits.argmax(dim=1))})
-
             # find top 1 answer candidate and convert it to an embedding
-            embedding = self.graph_module({'tokens': tokenize(self.answer_vocab.idx2word(logits.argmax(dim=1).indices))})
-            print(embedding.shape)
-            print(embedding)
-
-            #test2 = [*tokenize(self.answer_vocab.idx2word) for idx in logits.argmax(dim=1)]
-            #print(test2)
-            #embedding = self.graph_module({'tokens': [*tokenize(self.answer_vocab.idx2word) for idx in logits.argmax(dim=1)]})
-            #print(embedding.shape)
-            raise NotImplementedError
+            top_k_indices = torch.topk(logits, self.config.classifier.params.top_k, largest=True, dim = 1).indices
+            embedding = self.graph_encoder({'tokens': [tokenize(self.answer_vocab.idx2word(idx)) for idx in top_k_indices]})
 
 
         output = {'embedding': embedding, 'scores': logits}
