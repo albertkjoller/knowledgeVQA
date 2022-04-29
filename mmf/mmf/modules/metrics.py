@@ -152,15 +152,11 @@ class Metrics:
 
         dataset_type = sample_list.dataset_type
         dataset_name = sample_list.dataset_name
-        print('here!!!! sl', sample_list)
-        print('here!!!! mo', model_output)
-        
+
         with torch.no_grad():
             for metric_name, metric_object in self.metrics.items():
                 if not metric_object.is_dataset_applicable(dataset_name):
                     continue
-                print('here!!!! sl', sample_list)
-                print('here!!!! mo', model_output)
 
                 metric_result = metric_object._calculate_with_checks(
                     sample_list, model_output, *args, **kwargs

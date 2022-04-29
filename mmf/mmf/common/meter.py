@@ -68,11 +68,11 @@ class Meter:
             the current meter
 
         Usage::
-
         >>> meter = Meter()
         >>> report = Report(prepared_batch, model_output)
         >>> meter.update_from_report(report)
         """
+        print('here now!!!!', model_output)
         if hasattr(report, "metrics"):
             metrics_dict = report.metrics
             reduced_metrics_dict = reduce_dict(metrics_dict)
