@@ -196,8 +196,7 @@ class MMFLoss(nn.Module):
             ):
                 return loss_dict
 
-        print(model_output)
-        loss_result = self.loss_criterion(sample_list, model_output['scores'])
+        loss_result = self.loss_criterion(sample_list, model_output)
 
         if not isinstance(loss_result, collections.abc.Mapping):
             loss_result = {"": loss_result}
