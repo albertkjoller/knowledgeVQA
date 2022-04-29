@@ -116,7 +116,7 @@ class Losses(nn.Module):
             return output
 
         for loss in self.losses:
-            output.update(loss(sample_list, model_output))
+            output.update(loss(sample_list, model_output['scores']))
 
         if not torch.jit.is_scripting():
             registry_loss_key = "{}.{}.{}".format(
@@ -196,7 +196,7 @@ class MMFLoss(nn.Module):
             ):
                 return loss_dict
 
-        loss_result = self.loss_criterion(sample_list, model_output.scores)
+        loss_result = self.loss_criterion(sample_list, model_output['scores'])
 
         if not isinstance(loss_result, collections.abc.Mapping):
             loss_result = {"": loss_result}
