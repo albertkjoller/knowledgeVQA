@@ -330,7 +330,7 @@ class NumberbatchScore(BaseMetric):
 
         # Numberbatch embeddings, 128x300
 
-        batch_outputs = sample_list['embedding']  # will be how long? 3003 or 128
+        batch_outputs = sample_list['scores']['embedding']  # will be how long? 3003 or 128
         print("batch outputs", batch_outputs)
         raise NotImplementedError
         # Annotator answers, 128x10

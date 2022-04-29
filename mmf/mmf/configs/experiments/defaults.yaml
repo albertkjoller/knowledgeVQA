@@ -42,9 +42,9 @@ optimizer:
 
 evaluation:
   metrics:
+    - numberbatch_score
     - accuracy
     - vqa_accuracy
-    - numberbatch_score
     #- binary_f1
     #- roc_auc
 
