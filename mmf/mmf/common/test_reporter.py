@@ -29,6 +29,7 @@ DEFAULT_CANDIDATE_FIELDS = [
     "context_tokens",
     "captions",
     "scores",
+    "embedding",
 ]
 
 
@@ -38,7 +39,7 @@ class TestReporter(Dataset):
     @dataclass
     class Config:
         # A set of fields to be *considered* for exporting by the reporter
-        # Note that `format_for_prediction` is what ultimtly detemrimes the
+        # Note that `format_for_prediction` is what ultimtly determines the
         # exported fields
         candidate_fields: List[str] = field(
             default_factory=lambda: DEFAULT_CANDIDATE_FIELDS
