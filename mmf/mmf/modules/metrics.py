@@ -329,6 +329,8 @@ class NumberbatchScore(BaseMetric):
         # init output, expected output, and annotator answers
 
         # Numberbatch embeddings, 128x300
+        print(sample_list['scores'])
+        print('all', sample_list)
 
         batch_outputs = sample_list['scores']['embedding']  # will be how long? 3003 or 128
         print("batch outputs", batch_outputs)
