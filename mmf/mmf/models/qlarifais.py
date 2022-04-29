@@ -53,7 +53,7 @@ class Qlarifais(BaseModel):
         # used in classifier
         self.answer_vocab = registry.get(self.config.dataset_name + "_answer_processor").answer_vocab
         self.embedded_answer_vocab = self.graph_encoder({'tokens': [tokenize(sentence) for sentence in self.answer_vocab.word_list]})  # [batch_size, g_dim]
-        #print('nan sum!!!', torch.nansum(self.embedded_answer_vocab[:,0]))
+        #print('nan values, number!!!', torch.isnan(self.embedded_answer_vocab[:,0]).sum()
         #raise NotImplementedError
 
         # attention
@@ -110,7 +110,9 @@ class Qlarifais(BaseModel):
         output = self.classifier(fused_features)
         if self.config.classifier.output_type == 'embedding': # based on output dim
             embedding = output
-            logits = (embedding.unsqueeze(dim=1) * self.embedded_answer_vocab).sum(axis=2)
+            #logits = (embedding.unsqueeze(dim=1) * self.embedded_answer_vocab).sum(axis=2)
+            logits = torch.nansum(embedding.unsqueeze(dim=1) * self.embedded_answer_vocab, dim=2)
+
         elif self.config.classifier.output_type == 'multilabel': # based on output dim
             logits = output
             emb = self.graph_module({'tokens': self.answer_vocab.idx2word(logits.argmax(dim=1))})
