@@ -116,7 +116,7 @@ class Losses(nn.Module):
             return output
 
         for loss in self.losses:
-            output.update(loss(sample_list, model_output['scores']))
+            output.update(loss(sample_list, model_output))
 
         if not torch.jit.is_scripting():
             registry_loss_key = "{}.{}.{}".format(
@@ -245,7 +245,7 @@ class LogitBinaryCrossEntropy(nn.Module):
 
         """
         print('bce', model_output)
-        scores = model_output["scores"]
+        scores = model_output["scores"]['scores']
         targets = sample_list["targets"]
         loss = F.binary_cross_entropy_with_logits(scores, targets, reduction="mean")
 
