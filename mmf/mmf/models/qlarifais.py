@@ -53,7 +53,7 @@ class Qlarifais(BaseModel):
         # used in classifier
         self.answer_vocab = registry.get(self.config.dataset_name + "_answer_processor").answer_vocab
         self.embedded_answer_vocab = self.graph_encoder({'tokens': [tokenize(sentence) for sentence in self.answer_vocab.word_list]})  # [batch_size, g_dim]
-        self.num_not_top_k = len(self.embedded_answer_vocab) - self.config.classifier.params.topk # if classifier outputs embeddings
+        self.num_not_top_k = len(self.embedded_answer_vocab) - self.config.get("top_k", 0)#self.config.classifier.params.topk # if classifier outputs embeddings
         # todo: tokenize better answer vocab
         #words = [self.answer_vocab.idx2word(idx) for idx, val in enumerate(torch.isnan(self.embedded_answer_vocab[:,0]).long()) if val == 1]
 
