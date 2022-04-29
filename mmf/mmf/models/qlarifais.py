@@ -124,20 +124,12 @@ class Qlarifais(BaseModel):
 
         elif self.config.classifier.output_type == 'multilabel': # based on output dim
             logits = output
-            #print('argmax', logits.argmax(dim=1))
-            #print('idx to word', self.answer_vocab.idx2word(logits.argmax(dim=1)))
-            #[tokenize(self.answer_vocab.idx2word) for idx in logits.argmax(dim=1)]
-            #emb = self.graph_encoder({'tokens': self.answer_vocab.idx2word(logits.argmax(dim=1))})
-
             # find top 1 answer candidate and convert it to an embedding
+            # TODO: do we want top k?
             embedding = self.graph_encoder({'tokens': tokenize(self.answer_vocab.idx2word(logits.argmax(dim=1).indices))})
             print(embedding.shape)
             print(embedding)
 
-            #test2 = [*tokenize(self.answer_vocab.idx2word) for idx in logits.argmax(dim=1)]
-            #print(test2)
-            #embedding = self.graph_encoder({'tokens': [*tokenize(self.answer_vocab.idx2word) for idx in logits.argmax(dim=1)]})
-            #print(embedding.shape)
             raise NotImplementedError
 
 

@@ -13,6 +13,7 @@ model_config:
       type: simple
       output_type: multilabel
       params:
+        top_k: 0 # TODO: implement this? not used now
         # input dim is the output of the fusion module
         in_dim: ${model_config.qlarifais.fusion.params.h_dim}
         out_dim: 2250 # target size for okvqa (okvqa v1.1 has 2250) todo: autoindex_in_node??
