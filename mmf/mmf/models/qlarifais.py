@@ -129,7 +129,7 @@ class Qlarifais(BaseModel):
             top_k_indices = torch.topk(logits, self.config.classifier.params.top_k, largest=True, dim = 1).indices
             embedding = self.graph_encoder({'tokens': [tokenize(self.answer_vocab.idx2word(idx)) for idx in top_k_indices]})
 
-        output = {'embedding': embedding, 'scores': logits}
+        output = {'embedding': embedding.tolist(), 'scores': logits}
         #output = {'scores': {'embedding': embedding, 'scores': logits}}
         #output = {'scores': embedding}
         return output
