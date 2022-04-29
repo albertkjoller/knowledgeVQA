@@ -13,6 +13,7 @@ model_config:
       type: simple
       output_type: embedding # i.e. numberbatch embedding
       params:
+        topk: 3
         # input dim is the output of the fusion module
         in_dim: ${model_config.qlarifais.fusion.params.h_dim}
         out_dim: 300 # numberbatch output size
