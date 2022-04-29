@@ -29,7 +29,6 @@ DEFAULT_CANDIDATE_FIELDS = [
     "context_tokens",
     "captions",
     "scores",
-    "embedding",
 ]
 
 

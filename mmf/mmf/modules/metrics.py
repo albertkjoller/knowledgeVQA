@@ -198,7 +198,7 @@ class BaseMetric:
 
     def __init__(self, name, *args, **kwargs):
         self.name = name
-        self.required_params = ["scores", "targets"]
+        self.required_params = ["scores", "targets", "embeddings"]
         # the set of datasets where this metric will be applied
         # an empty set means it will be applied on *all* datasets
         self._dataset_names = set()
