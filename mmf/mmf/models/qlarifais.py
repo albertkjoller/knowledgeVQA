@@ -51,11 +51,10 @@ class Qlarifais(BaseModel):
         self.graph_encoder = build_graph_encoder(self.config.graph_encoder)
 
         # used in classifier
-        answer_processor = registry.get(self.config.dataset_name + "_answer_processor")
-        answer_processor.answer_vocab
-        tokenized_answer_vocab = [tokenize(sentence) for sentence in answer_processor.answer_vocab.word_list]
-        self.embedded_answer_vocab = self.graph_encoder({'tokens': tokenized_answer_vocab})  # [batch_size, g_dim]
-
+        self.answer_vocab = registry.get(self.config.dataset_name + "_answer_processor").answer_vocab
+        self.embedded_answer_vocab = self.graph_encoder({'tokens': [tokenize(sentence) for sentence in self.answer_vocab.word_list]})  # [batch_size, g_dim]
+        #print('nan sum!!!', torch.nansum(self.embedded_answer_vocab[:,0]))
+        #raise NotImplementedError
 
         # attention
         if self.config.attention.use:
@@ -109,14 +108,17 @@ class Qlarifais(BaseModel):
 
         # --- CLASSIFICATION ---
         output = self.classifier(fused_features)
-        if self.config.classifier.output_type == 'embedding': # i.e. numberbatch embedding
+        if self.config.classifier.output_type == 'embedding': # based on output dim
             embedding = output
             logits = (embedding.unsqueeze(dim=1) * self.embedded_answer_vocab).sum(axis=2)
-        elif self.config.classifier.output_type == 'multilabel': # i.e. based on answer vocabulary
+        elif self.config.classifier.output_type == 'multilabel': # based on output dim
             logits = output
-            embedding = 0
+            emb = self.graph_module({'tokens': self.answer_vocab.idx2word(logits.argmax(dim=1))})
+            print(emb.shape)
+            embedding = self.graph_module({'tokens': self.answer_vocab.idx2word(logits.argmax(dim=1))})
+        #
         output = {'embedding': embedding, 'scores': logits}
-        # MMF will automatically calculate loss
+
         return output
 
 
