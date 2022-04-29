@@ -45,6 +45,7 @@ Example config for above metric::
 """
 
 import collections
+import sys
 import warnings
 from typing import Dict
 
@@ -251,78 +252,101 @@ class NumberbatchScore(BaseMetric):
 
     def __init__(self, score_key="scores", target_key="targets", annotator_key="answers", topk=5):
         super().__init__("bert_score")
-        self.score_key = score_key
-        self.target_key = target_key
+        from mmf.utils.build import build_graph_encoder, build_processors
+        from mmf.utils.configuration import get_global_config
+        # self.score_key = score_key
+        # self.target_key = target_key
         self.annotator_key = annotator_key
-        self.batch_size = 128  # config.get("batch_size", None)
-        self.topk = topk
-        self.build_numberbatch('/work3/s184984/numberbatch-en-19.08.txt.gz')
+        self.config = get_global_config()
+        self.batch_size = self.config.training.batch_size
+        # self.topk = topk
+        self.numberbatch = build_graph_encoder(self.config.dataset_config.embedding_models.numberbatch)
+        self.tokenizer = registry.get(self.config.datasets + "_text_processor")
+        self.answer_processor = registry.get(self.config.datasets + "_answer_processor")
         self.cosine_sim = torch.nn.CosineSimilarity(dim=0)
 
-    def build_numberbatch(self, numberbatch_filepath):  # TODO: Specify filename in config?
-        import gzip
-
-        self.numberbatch = {}
-        with gzip.open(numberbatch_filepath, 'rb') as f:
-            info = f.readlines(1)
-            lines, self.dim = (int(x) for x in info[0].decode('utf-8').strip("\n").split(" "))
-
-            for line in tqdm(f, total=lines):
-                l = line.decode('utf-8')
-                l = l.strip("\n")
-
-                # create tensor-dictionary
-                word = l.split(' ')[0]
-                tensor = torch.tensor(list(map(float, l.split(' ')[1:])), dtype=torch.float32)
-                self.numberbatch[word] = tensor
-
+    """
     def sent_similarity_score(self, sent1, sent2):
         # Apply word similarity score between all combinations of words, then find mean
-        scores = []
-        for word1 in sent1.split():
-            for word2 in sent2.split():
-                try:
-                    scores.append(self.cosine_sim(self.numberbatch[word1], self.numberbatch[word2]).numpy())
-                except KeyError:
-                    pass
 
-        score = np.mean(scores)
+        if self.albert_idea:
+            avg_sent1, avg_sent2 = [np.mean([self.numberbatch[word] for word in sent])
+                                    for sent in [sent1, sent2]]
+
+            score = self.cosine_sim(avg_sent1, avg_sent2).numpy()
+
+
+        else:
+            scores = []
+            for word1 in sent1.split():
+                word1 = self.tokenizer({'text': word1})  # a sample list
+                print(word1)
+                for word2 in sent2.split():
+
+                    word2 = self.tokenizer({'text': word2})  # a sample list
+                    try:
+                        print(self.numberbatch(word1))
+                        scores.append(self.cosine_sim(self.numberbatch(word1), self.numberbatch(word2)).numpy())
+                    except KeyError:
+                        pass
+
+            score = np.mean(scores)
 
         # return 0 if no words to calculate scores from (i.e. not in numberbatch)
-        return score if not np.isnan(score) else 0
+        return score if not np.isnan(score) else 0"""
+
+    def answer_to_numberbatch(self, output, answers):
+        from mmf.utils.text import tokenize
+
+        # Tokenized answers: 128x10, where each of the 10 is a list of tokens
+        tokenized_answers = {'tokens': [tokenize(answer) for answer in answers]}
+
+        # self.numberbatch({'tokens': [tokenize(answer) for answer in answers]})
+
+        # Cutting start- and end-of-sentence tokens
+        # tokenized_answers['tokens'] = tokenized_answers['tokens'][1:-1]
+        # print("tokenized_answers", tokenized_answers)
+
+        # Getting numberbatch scores for each annotation, for each in batch
+        numberbatch_annotations = self.numberbatch(tokenized_answers)
+        # print("number batch annotations", numberbatch_annotations, numberbatch_annotations.size())
+
+        # print("output", output.cpu())
+
+        # 10x1 cosine similarities, one for each annotator
+        annotation_scores = [self.cosine_sim(output.cpu(), annotation.cpu()).numpy() for annotation in
+                             numberbatch_annotations]
+
+        # print("annotationh_scores", annotation_scores, len(annotation_scores))
+
+        return np.mean(annotation_scores)
 
     def calculate(self, sample_list, model_output, *args, **kwargs):
         # from mmf.metrics.bert_score import bert_score
 
         # initializing answer processor
-        answer_processor = registry.get(sample_list.dataset_name + "_answer_processor")
 
         # init output, expected output, and annotator answers
-        output = model_output[self.score_key]
-        expected = sample_list[self.target_key]
-        answers = sample_list[self.annotator_key]
 
-        # getting topK outputs
-        output_ids = output.topk(self.topk, dim=1, largest=True, sorted=True)[1][
-                     :self.batch_size]  # outputting values and indices
-        expected_ids = expected.topk(self.topk, dim=1, largest=True, sorted=True)[1][
-                       :self.batch_size]
+        # Numberbatch embeddings, 128x300
 
-        # converting outputs to words
-        output_words = [[answer_processor.idx2word(answer_id) for answer_id in topk_ids] for topk_ids in output_ids]
+        batch_outputs = sample_list['embedding']  # will be how long? 3003 or 128
+        print("batch outputs", batch_outputs)
 
-        # calculating average numberbatch score
-        numberbatch_score = np.mean([[[self.sent_similarity_score(annotator, output_class)
-                                       for annotator in answers[i]]
-                                      for output_class in output_words[i]]
-                                     for i in range(self.batch_size)])
+        # Annotator answers, 128x10
+        batch_answers = sample_list[self.annotator_key]
+        print("batch answers", batch_answers)
 
+        """
+        # [["word1", "word2"], ["word1"], ["word1"]] --> lists of split answers.
+        answers = [answer.split() for answer in answers] """
 
-        # TODO: evt. lav følgende check:
-        # only if predicted == <UNK>, check if expected <UNK>
-        # Else do annotator answers
+        # 128x1 average numberbatch scores
+        scores = [self.answer_to_numberbatch(output, annotations) for (output, annotations) in
+                  zip(batch_outputs, batch_answers)]
+        print(scores)
 
-        return numberbatch_score
+        return np.mean(scores)
 
 
 @registry.register_metric("accuracy")
@@ -451,17 +475,9 @@ class VQAAccuracy(BaseMetric):
         super().__init__("vqa_accuracy")
 
     def _masked_unk_softmax(self, x, dim, mask_idx):
-        # softmax per batch prediction
         x1 = torch.nn.functional.softmax(x, dim=dim)
-        # TODO??
-        print('vqa_acc, x1: ', x1.shape)
-        print('vqa_acc, x1: ', x1)
         x1[:, mask_idx] = 0
-        print('vqa_acc, x1 masked: ', x1.shape)
-        print('vqa_acc, x1 masked: ', x1)
         x1_sum = torch.sum(x1, dim=1, keepdim=True)
-        print('vqa_acc, xsum: ', x1_sum.shape)
-        print('vqa_acc, xsum: ', x1_sum)
         y = x1 / x1_sum
         return y
 
@@ -485,21 +501,11 @@ class VQAAccuracy(BaseMetric):
 
         output = self._masked_unk_softmax(output, 1, 0)
         output = output.argmax(dim=1)  # argmax
-        print('vqa_acc, output: ', output.shape)
-        print('vqa_acc, output: ', output)
-        one_hots = expected.new_zeros(*expected.size())
-        print('vqa_acc, onehots: ', one_hots.shape)
-        one_hots.scatter_(1, output.view(-1, 1), 1)
-        print('vqa_acc, onehots: ', one_hots.shape)
-        scores = one_hots * expected
-        print('vqa_acc, scores: ', scores.shape)
-        print('vqa_acc, expected size: ', expected.size(0))
-        accuracy = torch.sum(scores) / expected.size(0)
-        print('vqa_acc, sorces summed: ', torch.sum(scores).shape)
-        print('vqa_acc, sorces summed: ', torch.sum(scores))
-        print('vqa_acc, accuracy: ', accuracy.shape)
-        print('vqa_acc, accuracy: ', accuracy)
 
+        one_hots = expected.new_zeros(*expected.size())
+        one_hots.scatter_(1, output.view(-1, 1), 1)
+        scores = one_hots * expected
+        accuracy = torch.sum(scores) / expected.size(0)
 
         return accuracy
 
@@ -784,9 +790,7 @@ class TextVQAAccuracy(BaseMetric):
 
         batch_size = sample_list.context_tokens.size(0)
         pred_answers = model_output["scores"].argmax(dim=-1)
-        print("pred_answers", pred_answers)
         context_tokens = sample_list.context_tokens.cpu().numpy()
-        print("context_tokens", context_tokens)
         answers = sample_list.get(self.gt_key).cpu().numpy()
         answer_space_size = answer_processor.get_true_vocab_size()
 
@@ -811,8 +815,6 @@ class TextVQAAccuracy(BaseMetric):
             pred_answer = " ".join(answer_words).replace(" 's", "'s")
             gt_answers = byte_tensor_to_object(answers[idx])
             predictions.append({"pred_answer": pred_answer, "gt_answers": gt_answers})
-
-        print("predictions", predictions)
 
         accuracy = self.evaluator.eval_pred_list(predictions)
         accuracy = torch.tensor(accuracy).to(sample_list.context_tokens.device)
@@ -1006,6 +1008,8 @@ class F1PrecisionRecall(BaseMetric):
         scores = model_output["scores"]
         expected = sample_list["targets"]
 
+        print("F1!! Is multilabel?", self._multilabel)
+
         if self._multilabel:
             output = torch.sigmoid(scores)
             output = torch.round(output)
@@ -1025,6 +1029,9 @@ class F1PrecisionRecall(BaseMetric):
             "recall": expected.new_tensor(value_tuple[1], dtype=torch.float),
             "f1": expected.new_tensor(value_tuple[2], dtype=torch.float),
         }
+
+        print("f1 prec rec", value)
+
         return value
 
 
