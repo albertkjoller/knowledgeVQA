@@ -451,9 +451,17 @@ class VQAAccuracy(BaseMetric):
         super().__init__("vqa_accuracy")
 
     def _masked_unk_softmax(self, x, dim, mask_idx):
+        # softmax per batch prediction
         x1 = torch.nn.functional.softmax(x, dim=dim)
+        # TODO??
+        print('vqa_acc, x1: ', x1.shape)
+        print('vqa_acc, x1: ', x1)
         x1[:, mask_idx] = 0
+        print('vqa_acc, x1 masked: ', x1.shape)
+        print('vqa_acc, x1 masked: ', x1)
         x1_sum = torch.sum(x1, dim=1, keepdim=True)
+        print('vqa_acc, xsum: ', x1_sum.shape)
+        print('vqa_acc, xsum: ', x1_sum)
         y = x1 / x1_sum
         return y
 
@@ -470,7 +478,6 @@ class VQAAccuracy(BaseMetric):
 
         """
         output = model_output["scores"]
-        print('here!!!: ', output.shape)
         # for three branch movie+mcan model
         if output.dim() == 3:
             output = output[:, 0]
@@ -478,11 +485,21 @@ class VQAAccuracy(BaseMetric):
 
         output = self._masked_unk_softmax(output, 1, 0)
         output = output.argmax(dim=1)  # argmax
-
+        print('vqa_acc, output: ', output.shape)
+        print('vqa_acc, output: ', output)
         one_hots = expected.new_zeros(*expected.size())
+        print('vqa_acc, onehots: ', one_hots.shape)
         one_hots.scatter_(1, output.view(-1, 1), 1)
+        print('vqa_acc, onehots: ', one_hots.shape)
         scores = one_hots * expected
+        print('vqa_acc, scores: ', scores.shape)
+        print('vqa_acc, expected size: ', expected.size(0))
         accuracy = torch.sum(scores) / expected.size(0)
+        print('vqa_acc, sorces summed: ', torch.sum(scores).shape)
+        print('vqa_acc, sorces summed: ', torch.sum(scores))
+        print('vqa_acc, accuracy: ', accuracy.shape)
+        print('vqa_acc, accuracy: ', accuracy)
+
 
         return accuracy
 

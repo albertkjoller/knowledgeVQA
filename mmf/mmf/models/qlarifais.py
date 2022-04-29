@@ -7,9 +7,9 @@ from mmf.models.interfaces.qlarifais import QlarifaisInterface
 from mmf.models.base_model import BaseModel
 from mmf.common.registry import registry
 from mmf.utils.checkpoint import load_pretrained_model
+from mmf.utils.text import *
 
 from mmf.utils.build import (
-    #build_classifier_layer,
     build_image_encoder,
     build_text_encoder,
     build_graph_encoder,
@@ -18,9 +18,8 @@ from mmf.utils.build import (
     build_attention_module
     )
 
-# mmf_run config='configs/experiments/baseline/ama.yaml' model=qlarifais dataset=okvqa run_type=train_val
+# mmf_run config='configs/experiments/baseline/mul.yaml' model=qlarifais dataset=okvqa run_type=train_val
 
-# Register the model for MMF, "concat_bert_tutorial" key would be used to find the model
 @registry.register_model("qlarifais")
 class Qlarifais(BaseModel):
 
@@ -48,10 +47,15 @@ class Qlarifais(BaseModel):
         self.fusion_module = build_fusion_module(self.config.fusion)
         self.classifier = build_classifier(self.config.classifier)
 
-
         # external knowledge
-        if self.config.graph_encoder.use:
-            self.graph_encoder = build_graph_encoder(self.config.graph_encoder)
+        self.graph_encoder = build_graph_encoder(self.config.graph_encoder)
+
+        # used in classifier
+        answer_processor = registry.get(self.config.dataset_name + "_answer_processor")
+        answer_processor.answer_vocab
+        tokenized_answer_vocab = [tokenize(sentence) for sentence in answer_processor.answer_vocab.word_list]
+        self.embedded_answer_vocab = self.graph_encoder({'tokens': tokenized_answer_vocab})  # [batch_size, g_dim]
+
 
         # attention
         if self.config.attention.use:
@@ -60,24 +64,21 @@ class Qlarifais(BaseModel):
 
     def forward(self, sample_list):
 
-        # QUESTION EMBEDDINGS
+        # --- QUESTION EMBEDDINGS ---
         # text input features will be in "input_ids" key
         question = sample_list["input_ids"]
         # get the text and image features from the encoders
         question_features = self.language_module(question)
-
-
         # IMAGE FEATURES
         image = sample_list["image"]
         image_features = self.vision_module(image) # [batch_size, i_dim, sqrt(max_features), sqrt(max_features)] # TODO: ?
 
-        print('image: ', image_features.shape)
-        # GRAPH EMBEDDINGS
+        # --- GRAPH EMBEDDINGS ---
         if self.config.graph_encoder.use:
             graph_features = self.graph_encoder(sample_list) # [batch_size, g_dim]
 
 
-        # ATTENTION
+        # --- ATTENTION ---
         if self.config.attention.use:
             # getting correct input shape
             image_features = image_features.flatten(2,3).permute(0, 2, 1) # [batch_size, num_features, i_dim]
@@ -98,7 +99,7 @@ class Qlarifais(BaseModel):
                 image_features = torch.mean(image_features, dim = (2,3)) # [batch_size, i_dim]
 
 
-        # FUSION
+        # --- FUSION ---
         # type of fusion based on inputs
         if self.config.graph_encoder.use:
             fused_features = self.fusion_module(image_features, question_features, graph_features)
@@ -106,9 +107,15 @@ class Qlarifais(BaseModel):
             fused_features = self.fusion_module(image_features, question_features)
         # [batch_size, answer_vocab_dim]
 
-        # CLASSIFICATION
-        logits = self.classifier(fused_features)
-        output = {"scores": logits}
+        # --- CLASSIFICATION ---
+        output = self.classifier(fused_features)
+        if self.config.classifier.output_type == 'embedding': # i.e. numberbatch embedding
+            embedding = output
+            logits = (embedding.unsqueeze(dim=1) * self.embedded_answer_vocab).sum(axis=2)
+        elif self.config.classifier.output_type == 'multilabel': # i.e. based on answer vocabulary
+            logits = output
+            embedding = 0
+        output = {'embedding': embedding, 'scores': logits}
         # MMF will automatically calculate loss
         return output
 

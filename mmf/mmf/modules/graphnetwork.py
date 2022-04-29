@@ -72,11 +72,11 @@ class Numberbatch(nn.Module):
                 self.numberbatch[word] = tensor
 
     def forward(self, sample_list):
-
         question_tokens = sample_list['tokens']
         batch_size = len(question_tokens)
         # initializing graph embeddings
         X = torch.ones((batch_size, self.numberbatch_dim, self.max_seq_length))
+
         # looping tokens for each batch
         for batch, tokens in enumerate(question_tokens):
             # set to nan values as default

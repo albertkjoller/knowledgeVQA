@@ -4,6 +4,9 @@ env:
 includes:
     # include running experiment configs (defaults for all)
   - configs/experiments/defaults.yaml
+    # type of classifier
+  - configs/experiments/baseline/embedding.yaml
+
 
 # overwrite included if necessary:
 
@@ -18,6 +21,6 @@ model_config:
         # TODO: optimization parameters:
         h_dim: 2048  # hidden dim as input in classifier
         norm: weight # [weight, batch, layer, none]
-        act: ReLU # activation function
-        dropout: 0.1 # avoid overfitting
+        act: ReLU # activation function: [ReLu, Leaky_ReLu...]
+        dropout: 0.1 # avoid overfitting:
 

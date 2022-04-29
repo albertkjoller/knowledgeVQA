@@ -1,0 +1,24 @@
+env:
+  save_dir: ${env.part_save_dir}/embedding
+
+includes:
+    # include running experiment configs (defaults for all)
+  - configs/experiments/defaults.yaml
+
+# overwrite included if necessary:
+
+model_config:
+  qlarifais:
+    classifier:
+      type: simple
+      output_type: embedding # i.e. numberbatch embedding
+      params:
+        # input dim is the output of the fusion module
+        in_dim: ${model_config.qlarifais.fusion.params.h_dim}
+        out_dim: 300 # numberbatch output size
+        # todo: optimization parameters:
+        h_dim: 300 # mean of input and output w.r.t. mlp
+        num_non_linear_layers: 2 # activation functions
+        norm: weight # [weight, batch, layer, none]
+        act: ReLU # activation function
+        dropout: 0.4 # avoid overfitting, or keep all information?

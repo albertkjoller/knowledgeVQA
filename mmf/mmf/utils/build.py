@@ -488,7 +488,6 @@ def build_scheduler(optimizer, config):
 
 def build_classifier_layer(config, *args, **kwargs):
     from mmf.modules.layers import ClassifierLayer
-
     classifier = ClassifierLayer(config.type, *args, **config.params, **kwargs)
     return classifier.module
 
@@ -537,7 +536,7 @@ def build_attention_module(config):
     return attention_module.module
 
 def build_classifier(config):
-    from mmf.modules.layers import Classifier
+    from mmf.modules.classifiers import Classifier
 
     classifier = Classifier(config)
     return classifier.module
