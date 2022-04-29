@@ -308,7 +308,6 @@ class BaseModel(pl.LightningModule):
 
         model_output = super().__call__(sample_list, *args, **kwargs)
 
-        embedding = model_output['embedding']
 
         # Don't do anything fancy to output if it is pretrained
         if self.is_pretrained:
@@ -334,8 +333,6 @@ class BaseModel(pl.LightningModule):
             model_output["losses"] = self.losses(sample_list, model_output)
         else:
             model_output["losses"] = {}
-
-        model_output['embedding'] = embedding
 
         return model_output
 
