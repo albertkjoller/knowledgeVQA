@@ -543,7 +543,7 @@ class gfvqaImageEncoder(Encoder):
         cfg = get_cfg() # detectron default config
         add_attribute_config(cfg) # # grid-feats-vqa default config
         # getting pretrained model
-        model = config.get("model", False)
+        model = config.get("model", False) # TODO: does this work???
 
         # For compatibility with both training and explainability, the
         # path needs to go back to the root (explainableVQA) and then enter mmf.
