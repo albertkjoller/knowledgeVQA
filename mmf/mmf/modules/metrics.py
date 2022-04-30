@@ -283,7 +283,7 @@ class NumberbatchScore(BaseMetric):
         # todo: assert if output type is defined
 
         # model output does not have dimension of numberbatch
-        if self.model_output['output_type'] == 'multilabel':  # based on output dim
+        if model_output['output_type'] == 'multilabel':  # based on output dim
             logits = output
             # find top 1 answer candidate and convert it to an embedding
             top_k_indices = torch.topk(logits, self.top_k, largest=True, dim=1).indices
