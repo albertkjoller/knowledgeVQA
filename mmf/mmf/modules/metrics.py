@@ -183,12 +183,10 @@ class Metrics:
                 model_output['embeddings'] =  embeddings# todo
 
 
-
-
             elif model_output['output_type'] == 'embeddings':
                 model_output['embeddings'] = model_output['score']
 
-                model_output['score'] = # todo
+                model_output['score'] = 0# todo
 
         except KeyError:
             pass
