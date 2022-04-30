@@ -115,11 +115,12 @@ class Qlarifais(BaseModel):
         if self.config.classifier.output_type == 'embedding': # based on output dim
             embedding = output
             # finding similarities scores of embedding and answer candidates with nan as zeroes
-            logits = torch.nansum(embedding.unsqueeze(dim=1) * self.embedded_answer_vocab, dim=2)
-            not_top_k_indices = torch.topk(logits, self.num_not_top_k, largest=False, dim = 1).indices
+            #logits = torch.nansum(embedding.unsqueeze(dim=1) * self.embedded_answer_vocab, dim=2)
+            logits = torch.rand(output.shape[0], 2250)
+            #not_top_k_indices = torch.topk(logits, self.num_not_top_k, largest=False, dim = 1).indices
             # set not top k to 0
-            for batch, indices in enumerate(not_top_k_indices):
-                logits[batch][indices] = 0
+            #for batch, indices in enumerate(not_top_k_indices):
+            #    logits[batch][indices] = 0
             #
 
 
