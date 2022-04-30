@@ -291,7 +291,7 @@ class NumberbatchScore(BaseMetric):
                 {'tokens': [tokenize(self.answer_vocab.idx2word(idx)) for idx in top_k_indices]})
 
         print('we have the embeddings: ', embeddings)
-        
+
         raise NotImplementedError
 
         batch_outputs = sample_list['scores']['embeddings']  # will be how long? 3003 or 128
