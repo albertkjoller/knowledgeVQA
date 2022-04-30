@@ -312,6 +312,10 @@ class NumberbatchScore(BaseMetric):
 
     def calculate(self, sample_list, model_output, *args, **kwargs):
         # answers are averaged by numberbatch
+        print('model, emb ', model_output['embeddings'].shape)
+        print(model_output)
+        print('sample, ans', sample_list['answers'].shape)
+        print(sample_list['answers'])
         return torch.mean(self.cos(model_output['embeddings'], self.numberbatch(sample_list['answers'])))
 
 
