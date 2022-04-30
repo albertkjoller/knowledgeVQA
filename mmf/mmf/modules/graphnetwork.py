@@ -71,9 +71,38 @@ class Numberbatch(nn.Module):
                 tensor = torch.tensor(list(map(float, l.split(' ')[1:])), dtype=torch.float32)
                 self.numberbatch[word] = tensor
 
+
+    def conceptualize(self, tokenized_sentence):
+
+        """
+        Input:
+        sentence (str): input sentence
+
+        Output:
+        concepts_found (set): the set of concepts in the sentence which are available in numberbatch
+        """
+
+        concepts_found = set()
+        start = 0
+        while start < len(tokenized_sentence):
+            for end in range(len(tokenized_sentence), start, -1):
+                concept = tokenized_sentence[start:end]
+                print(concept)
+                try:
+                    self.numberbatch["_".join(concept)]
+                    print(concept)
+                    concepts_found.add("_".join(concept))
+                    start += len(concept)
+                    break
+                except KeyError:
+                    if start == end:
+                        start += 1
+                    else:
+                        pass
+        return concepts_found
+
+
     def forward(self, text):
-
-
         batch_size = len(text)
         # initializing graph embeddings
         X = torch.ones((batch_size, self.numberbatch_dim, self.max_seq_length))
@@ -96,38 +125,6 @@ class Numberbatch(nn.Module):
         # TODO: fix to(device) when building instead of here
         X = torch.from_numpy(np.nanmean(X, axis=2)).to(get_current_device())
         return X
-
-    def conceptualize(self, tokenized_sentence):
-
-        """
-        Input:
-        sentence (str): input sentence
-
-        Output:
-        concepts_found (set): the set of concepts in the sentence which are available in numberbatch
-        """
-
-        concepts_found = set()
-
-        start = 0
-        while start < len(tokenized_sentence):
-            for end in range(len(tokenized_sentence), start, -1):
-                concept = tokenized_sentence[start:end]
-                print(concept)
-                try:
-                    self.numberbatch["_".join(concept)]
-                    print(concept)
-                    concepts_found.add("_".join(concept))
-                    start += len(concept)
-                    break
-                except KeyError:
-                    if start == end:
-                        start += 1
-                    else:
-                        pass
-
-        return concepts_found
-
 
 
 
