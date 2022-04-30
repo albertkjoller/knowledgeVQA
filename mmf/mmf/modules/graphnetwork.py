@@ -109,7 +109,7 @@ class Numberbatch(nn.Module):
         # todo: write other than batch?
         # looping tokens for each batch
         for batch, tokens in enumerate(text):
-            if len(tokens) == 1: # i.e. text is not tokenized
+            if len(tokens) == 1 or type(token) == str: # i.e. text is not tokenized
                 tokens = [tokens[0].split(' ')] # todo?
             tokens = self.conceptualize(tokens.remove('[CLS]', '[SEP]')) # if bert has tokenized
             # set to nan values as default
