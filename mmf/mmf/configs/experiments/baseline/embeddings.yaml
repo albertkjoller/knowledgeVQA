@@ -9,6 +9,12 @@ includes:
 
 model_config:
   qlarifais:
+
+    losses:
+      #- type: cross_entropy, target dim needs to be adjusted
+      - type: refiner_contrastive_loss # binary cross-entropy loss since each question has multiple answers (MGFAN with ref.)
+
+
     classifier:
       type: simple
       output_type: embedding # i.e. numberbatch embedding

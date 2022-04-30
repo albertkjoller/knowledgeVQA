@@ -252,6 +252,7 @@ class LogitBinaryCrossEntropy(nn.Module):
         return loss * targets.size(1)
 
 
+
 @registry.register_loss("triple_logit_bce")
 class TripleLogitBinaryCrossEntropy(nn.Module):
     """
@@ -773,6 +774,8 @@ class ContrastiveLoss(nn.Module):
     def __init__(self):
         super().__init__()
 
+
+
     def forward(self, sample_list: Dict[str, Tensor], model_output: Dict[str, Tensor]):
         assert (
             "embedding_1" in model_output and "embedding_2" in model_output
@@ -1080,8 +1083,14 @@ class RefinerContrastiveLoss(nn.Module):
         self.epsilon = epsilon
 
     def forward(self, sample_list, model_output):
-        targets = sample_list["targets"]
+
         inputs = model_output["scores"]
+
+        if model_output['output_type'] == 'embeddings':
+            targets = sample_list["embedded_answers"]
+        else:
+
+            targets = sample_list["targets"]
 
         batch_size = inputs.size(0)
         # normalize inputs and targets

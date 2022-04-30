@@ -52,15 +52,6 @@ class Qlarifais(BaseModel):
         # external knowledge
         self.graph_encoder = build_graph_encoder(self.config.graph_encoder)
 
-        # used in classifier
-        self.answer_vocab = registry.get(self.config.dataset_name + "_answer_processor").answer_vocab
-        self.embedded_answer_vocab = self.graph_encoder({'tokens': [tokenize(sentence) for sentence in self.answer_vocab.word_list]})  # [batch_size, g_dim]
-        self.num_not_top_k = len(self.embedded_answer_vocab) - int(self.config.classifier.params.top_k) # if classifier outputs embeddings
-        # todo: tokenize better answer vocab
-        #words = [self.answer_vocab.idx2word(idx) for idx, val in enumerate(torch.isnan(self.embedded_answer_vocab[:,0]).long()) if val == 1]
-        #self.save_dir = Path(f'{self.config.cache_dir}/embeddings.pt')
-
-
         # attention
         if self.config.attention.use:
             # initiating attention module
@@ -79,7 +70,7 @@ class Qlarifais(BaseModel):
 
         # --- GRAPH EMBEDDINGS ---
         if self.config.graph_encoder.use:
-            graph_features = self.graph_encoder(sample_list) # [batch_size, g_dim]
+            graph_features = self.graph_encoder(sample_list['tokens']) # [batch_size, g_dim]
 
 
         # --- ATTENTION ---
@@ -115,8 +106,11 @@ class Qlarifais(BaseModel):
         # embeddings
         logits = self.classifier(fused_features)
 
+        # for losses
+        embedded_answers  = self.graph_encoder(sample_list['answers'])
         #torch.save(embeddings, self.save_dir)
-        output = {'output_type': self.config.classifier.output_type, 'scores': logits}
+        output = {'output_type': self.config.classifier.output_type, 'embedded_answers': embedded_answers,
+                  'scores': logits}
 
         return output
 

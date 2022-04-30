@@ -71,14 +71,18 @@ class Numberbatch(nn.Module):
                 tensor = torch.tensor(list(map(float, l.split(' ')[1:])), dtype=torch.float32)
                 self.numberbatch[word] = tensor
 
-    def forward(self, sample_list):
-        question_tokens = sample_list['tokens']
-        batch_size = len(question_tokens)
+    def forward(self, text):
+
+
+        batch_size = len(text)
         # initializing graph embeddings
         X = torch.ones((batch_size, self.numberbatch_dim, self.max_seq_length))
-
+        # todo: write other than batch?
         # looping tokens for each batch
         for batch, tokens in enumerate(question_tokens):
+            if len(tokens) == 1: # i.e. text is not tokenized
+                tokens = tokens.split(' ') # todo?
+            tokens = conceptualize(tokens.remove('[CLS]', '[SEP]')) # if bert has tokenized
             # set to nan values as default
             X[batch] *= np.nan
             for i, token in enumerate(tokens):
@@ -93,8 +97,7 @@ class Numberbatch(nn.Module):
         X = torch.from_numpy(np.nanmean(X, axis=2)).to(get_current_device())
         return X
 
-    def concepts_in_sentence(self, sentence):
-
+    def conceptualize(self, tokenized_sentence):
 
         """
         Input:
@@ -107,10 +110,9 @@ class Numberbatch(nn.Module):
         concepts_found = set()
 
         start = 0
-        sent = sentence.split()
-        while start < len(sent):
-            for end in range(len(sent), start, -1):
-                concept = sent[start:end]
+        while start < len(tokenized_sentence):
+            for end in range(len(tokenized_sentence), start, -1):
+                concept = tokenized_sentence[start:end]
                 print(concept)
                 try:
                     self.numberbatch["_".join(concept)]

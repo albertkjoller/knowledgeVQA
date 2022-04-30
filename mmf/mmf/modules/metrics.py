@@ -108,7 +108,7 @@ class Metrics:
 
             self.answer_vocab = self.answer_processor.answer_vocab
             # todo: update for new tokenizer in numberbatch
-            self.embedded_answer_vocab = self.numberbatch({'tokens': [self.tokenize(sentence) for sentence in self.answer_vocab.word_list]})  # [batch_size, g_dim]
+            self.embedded_answer_vocab = self.numberbatch([sentence for sentence in self.answer_vocab.word_list])  # [batch_size, g_dim]
             self.top_k = int(self.config.model_config[self.config.model].classifier.params.top_k)
             self.num_not_top_k = len(self.embedded_answer_vocab) - self.top_k # if classifier outputs embeddings
 
@@ -176,8 +176,7 @@ class Metrics:
             if model_output['output_type'] == 'multilabel': # model output is based on answer vocabulary
                 # find top 1 answer candidate and convert it to an embedding
                 top_k_indices = torch.topk(model_output['scores'], self.top_k, largest=True, dim=1).indices
-                embeddings = self.numberbatch(
-                    {'tokens': [self.tokenize(self.answer_vocab.idx2word(idx)) for idx in top_k_indices]})
+                embeddings = self.numberbatch([self.answer_vocab.idx2word(idx) for idx in top_k_indices])
                 # else model output is a numberbatch embedding
                 model_output['embeddings'] =  embeddings
 
