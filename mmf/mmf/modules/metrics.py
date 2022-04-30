@@ -110,7 +110,6 @@ class Metrics:
             # todo: update for new tokenizer in numberbatch
 
             self.embedded_answer_vocab = self.numberbatch(self.answer_vocab.word_list)  # [batch_size, g_dim]
-            print(self.embedded_answer_vocab.shape)
 
             self.top_k = int(self.config.model_config[self.config.model].classifier.params.top_k)
             self.num_not_top_k = len(self.embedded_answer_vocab) - self.top_k # if classifier outputs embeddings
@@ -177,13 +176,10 @@ class Metrics:
         # todo: general?
         try:
             if model_output['output_type'] == 'multilabel': # model output is based on answer vocabulary
-                # find top 1 answer candidate and convert it to an embedding
+                # find top k answer candidate and convert it to an embedding
                 top_k_indices = torch.topk(model_output['scores'], self.top_k, largest=True, dim=1).indices
-                print('does multilabel work?')
-                print([[self.answer_vocab.idx2word(idx)] for idx in top_k_indices])
-                # todo??
+                # meaning the numberbatch embeddings
                 embeddings = self.numberbatch([[self.answer_vocab.idx2word(idx)] for idx in top_k_indices])
-                # else model output is a numberbatch embedding
                 model_output['embeddings'] =  embeddings
 
 
@@ -316,6 +312,8 @@ class NumberbatchScore(BaseMetric):
 
     def calculate(self, sample_list, model_output, *args, **kwargs):
         # answers are averaged by numberbatch
+        print(model_output['embeddings'].shape)
+        print(self.numberbatch(sample_list['answers']).shape)
         return torch.mean(torch.nn.CosineSimilarity(model_output['embeddings'], self.numberbatch(sample_list['answers']), dim=1))
 
 
