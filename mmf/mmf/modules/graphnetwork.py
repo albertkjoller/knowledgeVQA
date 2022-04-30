@@ -81,7 +81,7 @@ class Numberbatch(nn.Module):
         # looping tokens for each batch
         for batch, tokens in enumerate(question_tokens):
             if len(tokens) == 1: # i.e. text is not tokenized
-                tokens = tokens.split(' ') # todo?
+                tokens = [tokens[0].split(' ')] # todo?
             tokens = conceptualize(tokens.remove('[CLS]', '[SEP]')) # if bert has tokenized
             # set to nan values as default
             X[batch] *= np.nan
