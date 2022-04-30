@@ -3,6 +3,7 @@ model_config:
   qlarifais:
 
     dataset_name: ${datasets} # used to get answer vocabulary
+    cache_dir: ${env.cache_dir}
     i_dim: 2048
     q_dim: 768
     g_dim: 300 # only used in classifier

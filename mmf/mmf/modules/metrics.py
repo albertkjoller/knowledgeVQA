@@ -328,10 +328,13 @@ class NumberbatchScore(BaseMetric):
 
         # init output, expected output, and annotator answers
         # Numberbatch embeddings, 128x300
+
         print('sample list', sample_list)
         print('model output', model_output)
-
+        embedding = torch.load(model_output.save_dir)
+        print('embedding', embedding)
         batch_outputs = sample_list['scores']['embedding']  # will be how long? 3003 or 128
+
         raise NotImplementedError
         # Annotator answers, 128x10
         batch_answers = sample_list[self.annotator_key]
