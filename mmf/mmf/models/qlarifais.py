@@ -131,7 +131,7 @@ class Qlarifais(BaseModel):
             embedding = self.graph_encoder({'tokens': [tokenize(self.answer_vocab.idx2word(idx)) for idx in top_k_indices]})
 
         #output = {'embedding': read_object(embedding), 'scores': logits}
-        output = {'context': embedding, 'scores': logits}
+        output = {'context': frozenset(embedding), 'scores': logits}
 
         #output = {'scores': {'embedding': embedding, 'scores': logits}}
         #output = {'scores': embedding}
