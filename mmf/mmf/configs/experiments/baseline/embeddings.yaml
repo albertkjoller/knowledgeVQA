@@ -17,7 +17,7 @@ model_config:
 
     classifier:
       type: simple
-      output_type: embedding # i.e. numberbatch embedding
+      output_type: embeddings # i.e. numberbatch embedding
       params:
         top_k: 3
         # input dim is the output of the fusion module

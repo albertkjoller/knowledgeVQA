@@ -1113,7 +1113,7 @@ class RefinerContrastiveLoss(nn.Module):
             # neg_pair_ contains all the batch samples whose similarity with i^th
             #  decoder is better than a threshold corrected similarity between
             # i^th decoder and i^th target
-
+            # true for all pairs above
             neg_pair_ = torch.masked_select(
                 sim_ij, sim_ij > pos_similarity - self.similarity_threshold
             )
