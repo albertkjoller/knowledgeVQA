@@ -55,10 +55,10 @@ class Numberbatch(nn.Module):
         self.max_seq_length = self.config.max_seq_length
         self.numberbatch = {}
         self.device = get_current_device()
+
         with open(mmf_indirect(self.config.filepath), 'rb') as f:
 
             info = f.readlines(1)
-
             lines, self.numberbatch_dim = (int(x) for x in info[0].decode('utf-8').strip("\n").split(" "))
 
             for line in tqdm(f, total=lines):
@@ -93,9 +93,38 @@ class Numberbatch(nn.Module):
         X = torch.from_numpy(np.nanmean(X, axis=2)).to(get_current_device())
         return X
 
+    def concepts_in_sentence(self, sentence):
 
 
+        """
+        Input:
+        sentence (str): input sentence
 
+        Output:
+        concepts_found (set): the set of concepts in the sentence which are available in numberbatch
+        """
+
+        concepts_found = set()
+
+        start = 0
+        sent = sentence.split()
+        while start < len(sent):
+            for end in range(len(sent), start, -1):
+                concept = sent[start:end]
+                print(concept)
+                try:
+                    self.numberbatch["_".join(concept)]
+                    print(concept)
+                    concepts_found.add("_".join(concept))
+                    start += len(concept)
+                    break
+                except KeyError:
+                    if start == end:
+                        start += 1
+                    else:
+                        pass
+
+        return concepts_found
 
 
 
