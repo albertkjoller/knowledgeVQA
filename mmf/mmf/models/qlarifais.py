@@ -1,5 +1,6 @@
 
 import torch
+import numpy as np
 from omegaconf import OmegaConf
 
 from mmf.models.interfaces.qlarifais import QlarifaisInterface
