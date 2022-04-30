@@ -116,7 +116,7 @@ class Qlarifais(BaseModel):
             embedding = output
             # finding similarities scores of embedding and answer candidates with nan as zeroes
             #logits = torch.nansum(embedding.unsqueeze(dim=1) * self.embedded_answer_vocab, dim=2)
-            logits = torch.rand(output.shape[0], 2250)
+            logits = torch.rand(output.shape[0], 2250).to('cuda' if torch.cuda.is_available() else 'cpu')
             #not_top_k_indices = torch.topk(logits, self.num_not_top_k, largest=False, dim = 1).indices
             # set not top k to 0
             #for batch, indices in enumerate(not_top_k_indices):
