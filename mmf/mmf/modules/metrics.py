@@ -179,16 +179,24 @@ class Metrics:
                 embeddings = self.numberbatch(
                     {'tokens': [self.tokenize(self.answer_vocab.idx2word(idx)) for idx in top_k_indices]})
                 # else model output is a numberbatch embedding
-                print('we have the embeddings: ', embeddings)
-                model_output['embeddings'] =  embeddings# todo
+                model_output['embeddings'] =  embeddings
 
 
             elif model_output['output_type'] == 'embeddings':
+                print('we are in the embedding')
+                # restructure
                 model_output['embeddings'] = model_output['score']
 
-                model_output['score'] = 0# todo
+                # finding similarities scores of embedding and answer candidates with nan as zeroes
+                logits = torch.nansum(model_output['embeddings'].unsqueeze(dim=1) * self.embedded_answer_vocab, dim=2)
+                not_top_k_indices = torch.topk(logits, self.num_not_top_k, largest=False, dim=1).indices
+                # set not top k to 0
+                for batch, indices in enumerate(not_top_k_indices):
+                    logits[batch][indices] = 0
+                # restructure
+                model_output['score'] = logits
 
-        except KeyError:
+        except KeyError: # todo: does this work
             pass
 
 
@@ -306,11 +314,6 @@ class NumberbatchScore(BaseMetric):
 
         self.answer_processor = registry.get(self.config.datasets + "_answer_processor")
 
-        self.answer_vocab = self.answer_processor.answer_vocab
-        # todo: update for new tokenizer in numberbatch
-        #self.embedded_answer_vocab = self.numberbatch({'tokens': [tokenize(sentence) for sentence in self.answer_vocab.word_list]})  # [batch_size, g_dim]
-        self.top_k = int(self.config.model_config[self.config.model].classifier.params.top_k)
-        #self.num_not_top_k = len(self.embedded_answer_vocab) - self.top_k # if classifier outputs embeddings
 
     def calculate(self, sample_list, model_output, *args, **kwargs):
         # from mmf.metrics.bert_score import bert_score
@@ -321,18 +324,8 @@ class NumberbatchScore(BaseMetric):
         # Numberbatch embeddings, 128x300
         #embeddings = torch.load(model_output.save_dir)
         # todo: assert if output type is defined
-        print(model_output)
-        # model output does not have dimension of numberbatch
-        if model_output['output_type'] == 'multilabel':  # model output is based on answer vocabulary
-            # find top 1 answer candidate and convert it to an embedding
-            top_k_indices = torch.topk(model_output['scores'], self.top_k, largest=True, dim=1).indices
-            embeddings = self.numberbatch({'tokens': [self.tokenize(self.answer_vocab.idx2word(idx)) for idx in top_k_indices]})
-        # else model output is a numberbatch embedding
-        print('we have the embeddings: ', embeddings)
 
-        raise NotImplementedError
-
-        batch_outputs = sample_list['scores']['embeddings']  # will be how long? 3003 or 128
+        batch_outputs = model_output['embeddings']  # will be how long? 3003 or 128
 
         # Annotator answers, 128x10
         batch_answers = sample_list[self.annotator_key]
