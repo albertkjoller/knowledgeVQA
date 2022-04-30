@@ -1087,9 +1087,9 @@ class RefinerContrastiveLoss(nn.Module):
         inputs = model_output["scores"]
 
         if model_output['output_type'] == 'embeddings': # targest are converted
-            targets = sample_list["avg_embedded_answers"]
+            targets = model_output["avg_embedded_answers"]
         else:
-            targets = sample_list["targets"]
+            targets = model_output["targets"]
 
         batch_size = inputs.size(0)
         # normalize inputs and targets
@@ -1100,7 +1100,7 @@ class RefinerContrastiveLoss(nn.Module):
         # (i,j) contains similarity betweeh the i^th decoder and j^th target
         print('inputs', inputs.shape)
         print('targets', targets.t().shape)
-        sim_mat = torch.matmul(inputs, targets)
+        sim_mat = torch.matmul(inputs, targets.t())
         print('sim mat', sim_mat.shape)
 
         loss = []
