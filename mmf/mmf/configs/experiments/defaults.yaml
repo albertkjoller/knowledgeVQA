@@ -42,7 +42,7 @@ optimizer:
 
 evaluation:
   metrics:
-    - numberbatch_score
+    #- numberbatch_score
     - accuracy
     - vqa_accuracy
     #- binary_f1
