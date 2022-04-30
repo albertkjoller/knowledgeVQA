@@ -321,7 +321,7 @@ class NumberbatchScore(BaseMetric):
         # Numberbatch embeddings, 128x300
         #embeddings = torch.load(model_output.save_dir)
         # todo: assert if output type is defined
-
+        print(model_output)
         # model output does not have dimension of numberbatch
         if model_output['output_type'] == 'multilabel':  # model output is based on answer vocabulary
             # find top 1 answer candidate and convert it to an embedding
