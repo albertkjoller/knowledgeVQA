@@ -58,7 +58,7 @@ class Qlarifais(BaseModel):
         self.num_not_top_k = len(self.embedded_answer_vocab) - int(self.config.classifier.params.top_k) # if classifier outputs embeddings
         # todo: tokenize better answer vocab
         #words = [self.answer_vocab.idx2word(idx) for idx, val in enumerate(torch.isnan(self.embedded_answer_vocab[:,0]).long()) if val == 1]
-        self.save_dir = Path(f'{self.config.cache_dir}/embeddings.pt')
+        #self.save_dir = Path(f'{self.config.cache_dir}/embeddings.pt')
 
 
         # attention
@@ -127,20 +127,15 @@ class Qlarifais(BaseModel):
                 logits[batch][indices] = 0
             #
 
-
-
         elif self.config.classifier.output_type == 'multilabel': # based on output dim
             logits = output
             # find top 1 answer candidate and convert it to an embedding
             top_k_indices = torch.topk(logits, self.config.classifier.params.top_k, largest=True, dim = 1).indices
             embeddings = self.graph_encoder({'tokens': [tokenize(self.answer_vocab.idx2word(idx)) for idx in top_k_indices]})
 
-        torch.save(embeddings, self.save_dir)
+        #torch.save(embeddings, self.save_dir)
+        output = {'output_type': self.config, 'scores': logits}
 
-        #output = {'embedding': read_object(embedding), 'scores': logits}
-        output = {'save_dir': self.save_dir, 'embeddings': embeddings, 'scores': logits}
-        #output = {'scores': {'embedding': embedding, 'scores': logits}}
-        #output = {'scores': embedding}
         return output
 
 

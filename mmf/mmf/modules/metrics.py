@@ -254,72 +254,23 @@ class NumberbatchScore(BaseMetric):
         super().__init__("bert_score")
         from mmf.utils.build import build_graph_encoder, build_processors
         from mmf.utils.configuration import get_global_config
-        # self.score_key = score_key
-        # self.target_key = target_key
+        self.score_key = score_key
+        self.target_key = target_key
         self.annotator_key = annotator_key
         self.config = get_global_config()
         self.batch_size = self.config.training.batch_size
-        # self.topk = topk
         self.numberbatch = build_graph_encoder(self.config.dataset_config.embedding_models.numberbatch)
-        self.tokenizer = registry.get(self.config.datasets + "_text_processor")
-        self.answer_processor = registry.get(self.config.datasets + "_answer_processor")
         self.cosine_sim = torch.nn.CosineSimilarity(dim=0)
+        self.tokenizer = registry.get(self.config.datasets + "_text_processor")
 
-    """
-    def sent_similarity_score(self, sent1, sent2):
-        # Apply word similarity score between all combinations of words, then find mean
+        self.answer_processor = registry.get(self.config.datasets + "_answer_processor")
 
-        if self.albert_idea:
-            avg_sent1, avg_sent2 = [np.mean([self.numberbatch[word] for word in sent])
-                                    for sent in [sent1, sent2]]
+        self.answer_vocab = self.answer_processor.answer_vocab
+        # todo: update for new tokenizer in numberbatch
+        #self.embedded_answer_vocab = self.graph_encoder({'tokens': [tokenize(sentence) for sentence in self.answer_vocab.word_list]})  # [batch_size, g_dim]
+        self.top_k = int(self.config.model_config[self.model].classifier.params.top_k)
+        #self.num_not_top_k = len(self.embedded_answer_vocab) - self.top_k # if classifier outputs embeddings
 
-            score = self.cosine_sim(avg_sent1, avg_sent2).numpy()
-
-
-        else:
-            scores = []
-            for word1 in sent1.split():
-                word1 = self.tokenizer({'text': word1})  # a sample list
-                print(word1)
-                for word2 in sent2.split():
-
-                    word2 = self.tokenizer({'text': word2})  # a sample list
-                    try:
-                        print(self.numberbatch(word1))
-                        scores.append(self.cosine_sim(self.numberbatch(word1), self.numberbatch(word2)).numpy())
-                    except KeyError:
-                        pass
-
-            score = np.mean(scores)
-
-        # return 0 if no words to calculate scores from (i.e. not in numberbatch)
-        return score if not np.isnan(score) else 0"""
-
-    def answer_to_numberbatch(self, output, answers):
-        from mmf.utils.text import tokenize
-
-        # Tokenized answers: 128x10, where each of the 10 is a list of tokens
-        tokenized_answers = {'tokens': [tokenize(answer) for answer in answers]}
-
-        # self.numberbatch({'tokens': [tokenize(answer) for answer in answers]})
-
-        # Cutting start- and end-of-sentence tokens
-        # tokenized_answers['tokens'] = tokenized_answers['tokens'][1:-1]
-        # print("tokenized_answers", tokenized_answers)
-
-        # Getting numberbatch scores for each annotation, for each in batch
-        numberbatch_annotations = self.numberbatch(tokenized_answers)
-        # print("number batch annotations", numberbatch_annotations, numberbatch_annotations.size())
-
-        # print("output", output.cpu())
-
-        # 10x1 cosine similarities, one for each annotator
-        annotation_scores = [self.cosine_sim(output.cpu(), annotation.cpu()).numpy() for annotation in
-                             numberbatch_annotations]
-
-        # print("annotationh_scores", annotation_scores, len(annotation_scores))
-
-        return np.mean(annotation_scores)
 
     def calculate(self, sample_list, model_output, *args, **kwargs):
         # from mmf.metrics.bert_score import bert_score
@@ -328,14 +279,21 @@ class NumberbatchScore(BaseMetric):
 
         # init output, expected output, and annotator answers
         # Numberbatch embeddings, 128x300
+        #embeddings = torch.load(model_output.save_dir)
+        # todo: assert if output type is defined
 
-        print('sample list', sample_list)
-        print('model output', model_output)
-        embeddings = torch.load(model_output.save_dir)
-        print('embeddings', embeddings)
-        batch_outputs = sample_list['scores']['embeddings']  # will be how long? 3003 or 128
+        # model output does not have dimension of numberbatch
+        if self.model_output['output_type'] == 'multilabel':  # based on output dim
+            logits = output
+            # find top 1 answer candidate and convert it to an embedding
+            top_k_indices = torch.topk(logits, self.top_k, largest=True, dim=1).indices
+            embeddings = self.graph_encoder(
+                {'tokens': [tokenize(self.answer_vocab.idx2word(idx)) for idx in top_k_indices]})
 
         raise NotImplementedError
+
+        batch_outputs = sample_list['scores']['embeddings']  # will be how long? 3003 or 128
+
         # Annotator answers, 128x10
         batch_answers = sample_list[self.annotator_key]
 
