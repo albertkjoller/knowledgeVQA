@@ -1,8 +1,9 @@
 
 import torch
 import numpy as np
-from omegaconf import OmegaConf
+from pathlib import Path
 
+from omegaconf import OmegaConf
 from mmf.models.interfaces.qlarifais import QlarifaisInterface
 
 from mmf.models.base_model import BaseModel
@@ -137,7 +138,7 @@ class Qlarifais(BaseModel):
         torch.save(embeddings, self.save_dir)
 
         #output = {'embedding': read_object(embedding), 'scores': logits}
-        output = {'save_dir': self.save_dir, 'embedding': embeddings, 'scores': logits}
+        output = {'save_dir': self.save_dir, 'embeddings': embeddings, 'scores': logits}
         #output = {'scores': {'embedding': embedding, 'scores': logits}}
         #output = {'scores': embedding}
         return output
