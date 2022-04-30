@@ -308,7 +308,7 @@ class NumberbatchScore(BaseMetric):
         self.annotator_key = annotator_key
         self.config = get_global_config()
         self.numberbatch = build_graph_encoder(self.config.dataset_config.embedding_models.numberbatch)
-        self.cos = nn.CosineSimilarity(dim=1)
+        self.cos = torch.nn.CosineSimilarity(dim=1)
 
     def calculate(self, sample_list, model_output, *args, **kwargs):
         # answers are averaged by numberbatch
