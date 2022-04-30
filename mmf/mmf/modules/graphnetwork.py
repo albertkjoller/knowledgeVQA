@@ -130,7 +130,7 @@ class Numberbatch(nn.Module):
                 except KeyError:
                     pass
             if X[batch][:, i] == []:
-                X[batch][:, i] = torch.zeroes(self.numberbatch_dim)
+                X[batch] = torch.zeroes(self.numberbatch_dim)
         # average embeddings
         # TODO: fix to(device) when building instead of here
         X = torch.from_numpy(np.nanmean(X, axis=2)).to(get_current_device())
