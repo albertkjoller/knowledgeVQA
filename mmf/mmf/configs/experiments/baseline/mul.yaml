@@ -5,7 +5,7 @@ includes:
     # include running experiment configs (defaults for all)
   - configs/experiments/defaults.yaml
     # type of classifier
-  - configs/experiments/baseline/embeddings.yaml
+  - configs/experiments/baseline/multilabel.yaml
 
 
 # overwrite included if necessary:
