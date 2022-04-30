@@ -315,6 +315,8 @@ class NumberbatchScore(BaseMetric):
         print('model, emb ', model_output['embeddings'].shape)
         #print(model_output['embeddings'][127:130,:])
         print(torch.abs(model_output['embeddings']).sum(dim=1) > 0)
+        print(torch.sum(torch.abs(model_output['embeddings']).sum(dim=1) > 0))
+
         #print('sample, ans', sample_list['answers'].shape)
         print('\n\n')
         print(sample_list['answers'])
