@@ -108,6 +108,11 @@ class Qlarifais(BaseModel):
 
         # for losses
         embedded_answers  = self.graph_encoder(sample_list['answers'])
+        print(embedded_answers.shape)
+        print(embedded_answers)
+
+
+
         #torch.save(embeddings, self.save_dir)
         output = {'output_type': self.config.classifier.output_type, 'embedded_answers': embedded_answers,
                   'scores': logits}
