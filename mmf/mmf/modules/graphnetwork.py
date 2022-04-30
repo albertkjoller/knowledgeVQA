@@ -129,7 +129,6 @@ class Numberbatch(nn.Module):
                     X[batch][:, i] = self.numberbatch[token]
                 except KeyError:
                     pass
-            print('batch', X[batch])
             if X[batch] == []:
                 print('yes empty batch with token', tokens)
                 X[batch] = torch.zeroes(self.numberbatch_dim)

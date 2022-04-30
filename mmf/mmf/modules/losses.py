@@ -1098,10 +1098,12 @@ class RefinerContrastiveLoss(nn.Module):
 
         # matrix containing the similarity between the inputs and targets
         # (i,j) contains similarity betweeh the i^th decoder and j^th target
-        sim_mat = torch.matmul(inputs, targets.t())
+        print('inputs', inputs.shape)
+        print('targets', targets.t().shape)
+        sim_mat = torch.matmul(inputs, targets)
+        print('sim mat', sim_mat.shape)
 
         loss = []
-        print(model_output)
         for i in range(batch_size):
             sim_ij = sim_mat[i]
             # pos_similarity contains the similarity between i^th decoder
