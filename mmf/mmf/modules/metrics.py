@@ -284,9 +284,8 @@ class NumberbatchScore(BaseMetric):
 
         # model output does not have dimension of numberbatch
         if model_output['output_type'] == 'multilabel':  # based on output dim
-            logits = output
             # find top 1 answer candidate and convert it to an embedding
-            top_k_indices = torch.topk(logits, self.top_k, largest=True, dim=1).indices
+            top_k_indices = torch.topk(model_output['scores'], self.top_k, largest=True, dim=1).indices
             embeddings = self.graph_encoder(
                 {'tokens': [tokenize(self.answer_vocab.idx2word(idx)) for idx in top_k_indices]})
 
