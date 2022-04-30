@@ -153,6 +153,7 @@ class Metrics:
         dataset_type = sample_list.dataset_type
         dataset_name = sample_list.dataset_name
 
+
         with torch.no_grad():
             for metric_name, metric_object in self.metrics.items():
                 if not metric_object.is_dataset_applicable(dataset_name):
@@ -270,7 +271,7 @@ class NumberbatchScore(BaseMetric):
         #self.embedded_answer_vocab = self.graph_encoder({'tokens': [tokenize(sentence) for sentence in self.answer_vocab.word_list]})  # [batch_size, g_dim]
         self.top_k = int(self.config.model_config[self.config.model].classifier.params.top_k)
         #self.num_not_top_k = len(self.embedded_answer_vocab) - self.top_k # if classifier outputs embeddings
-
+        from mmf.utils.text import tokenize
 
     def calculate(self, sample_list, model_output, *args, **kwargs):
         # from mmf.metrics.bert_score import bert_score
@@ -286,8 +287,7 @@ class NumberbatchScore(BaseMetric):
         if model_output['output_type'] == 'multilabel':  # based on output dim
             # find top 1 answer candidate and convert it to an embedding
             top_k_indices = torch.topk(model_output['scores'], self.top_k, largest=True, dim=1).indices
-            embeddings = self.numberbatch(
-                {'tokens': [tokenize(self.answer_vocab.idx2word(idx)) for idx in top_k_indices]})
+            embeddings = self.numberbatch({'tokens': [tokenize(self.answer_vocab.idx2word(idx)) for idx in top_k_indices]})
 
         print('we have the embeddings: ', embeddings)
 
