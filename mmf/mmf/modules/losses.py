@@ -1086,10 +1086,9 @@ class RefinerContrastiveLoss(nn.Module):
 
         inputs = model_output["scores"]
 
-        if model_output['output_type'] == 'embeddings':
-            targets = sample_list["embedded_answers"]
+        if model_output['output_type'] == 'embeddings': # targest are converted
+            targets = sample_list["avg_embedded_answers"]
         else:
-
             targets = sample_list["targets"]
 
         batch_size = inputs.size(0)

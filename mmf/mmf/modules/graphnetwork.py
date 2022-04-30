@@ -71,7 +71,6 @@ class Numberbatch(nn.Module):
                 tensor = torch.tensor(list(map(float, l.split(' ')[1:])), dtype=torch.float32)
                 self.numberbatch[word] = tensor
 
-
     def conceptualize(self, tokenized_sentence):
 
         """
@@ -82,27 +81,28 @@ class Numberbatch(nn.Module):
         concepts_found (set): the set of concepts in the sentence which are available in numberbatch
         """
 
-        concepts_found = set()
+        concepts_found = []
         start = 0
         while start < len(tokenized_sentence):
             for end in range(len(tokenized_sentence), start, -1):
                 concept = tokenized_sentence[start:end]
-                print(concept)
                 try:
                     self.numberbatch["_".join(concept)]
-                    print(concept)
-                    concepts_found.add("_".join(concept))
-                    start += len(concept)
+                    concepts_found.append("_".join(concept))
+                    start += 1
                     break
                 except KeyError:
-                    if start == end:
+                    if start == end - 1:
                         start += 1
                     else:
                         pass
+
         return concepts_found
 
 
     def forward(self, text):
+        # input can be batch with list containing tokens or list of strings
+
         batch_size = len(text)
         # initializing graph embeddings
         X = torch.ones((batch_size, self.numberbatch_dim, self.max_seq_length))
@@ -129,6 +129,8 @@ class Numberbatch(nn.Module):
                     X[batch][:, i] = self.numberbatch[token]
                 except KeyError:
                     pass
+            if X[batch][:, i] == []:
+                X[batch][:, i] = torch.zeroes(self.numberbatch_dim)
         # average embeddings
         # TODO: fix to(device) when building instead of here
         X = torch.from_numpy(np.nanmean(X, axis=2)).to(get_current_device())
