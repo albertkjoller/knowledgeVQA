@@ -321,7 +321,6 @@ class NumberbatchScore(BaseMetric):
 
     def calculate(self, sample_list, model_output, *args, **kwargs):
 
-        print(model_output)
         # answers are averaged by numberbatch
         return torch.nn.CosineSimilarity(torch.mean(model_output['embeddings'], self.graph_encoder(sample_list['answers'])), dim=1)
 

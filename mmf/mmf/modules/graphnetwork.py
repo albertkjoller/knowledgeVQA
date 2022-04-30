@@ -124,8 +124,7 @@ class Numberbatch(nn.Module):
 
             # if no token found create one empty numberbatch embedding
             if tokens == []:
-                print('yes empty batch with token', tokens)
-                X[batch][:,0] = torch.zeroes(self.numberbatch_dim)
+                X[batch][:,0] = torch.zeros(self.numberbatch_dim)
 
             for i, token in enumerate(tokens):
                 # check if token is present in numberbatch
