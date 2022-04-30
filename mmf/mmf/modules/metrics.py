@@ -96,6 +96,8 @@ class Metrics:
 
         self.metrics = self._init_metrics(metric_list)
 
+
+
     def _init_metrics(self, metric_list):
         metrics = {}
         self.required_params = {"dataset_name", "dataset_type"}
@@ -152,6 +154,8 @@ class Metrics:
 
         dataset_type = sample_list.dataset_type
         dataset_name = sample_list.dataset_name
+
+        # todo: general?
 
 
         with torch.no_grad():
@@ -252,9 +256,11 @@ class NumberbatchScore(BaseMetric):
     """
 
     def __init__(self, score_key="scores", target_key="targets", annotator_key="answers", topk=5):
-        super().__init__("bert_score")
+        super().__init__("bert_score") # todo: bert score??
         from mmf.utils.build import build_graph_encoder, build_processors
         from mmf.utils.configuration import get_global_config
+        from mmf.utils.text import tokenize
+        self.tokenize = tokenize
         self.score_key = score_key
         self.target_key = target_key
         self.annotator_key = annotator_key
@@ -271,7 +277,6 @@ class NumberbatchScore(BaseMetric):
         #self.embedded_answer_vocab = self.graph_encoder({'tokens': [tokenize(sentence) for sentence in self.answer_vocab.word_list]})  # [batch_size, g_dim]
         self.top_k = int(self.config.model_config[self.config.model].classifier.params.top_k)
         #self.num_not_top_k = len(self.embedded_answer_vocab) - self.top_k # if classifier outputs embeddings
-        from mmf.utils.text import tokenize
 
     def calculate(self, sample_list, model_output, *args, **kwargs):
         # from mmf.metrics.bert_score import bert_score
@@ -287,7 +292,7 @@ class NumberbatchScore(BaseMetric):
         if model_output['output_type'] == 'multilabel':  # based on output dim
             # find top 1 answer candidate and convert it to an embedding
             top_k_indices = torch.topk(model_output['scores'], self.top_k, largest=True, dim=1).indices
-            embeddings = self.numberbatch({'tokens': [tokenize(self.answer_vocab.idx2word(idx)) for idx in top_k_indices]})
+            embeddings = self.numberbatch({'tokens': [self.tokenize(self.answer_vocab.idx2word(idx)) for idx in top_k_indices]})
 
         print('we have the embeddings: ', embeddings)
 
