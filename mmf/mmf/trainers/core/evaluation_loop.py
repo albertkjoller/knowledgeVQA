@@ -138,6 +138,9 @@ class TrainerEvaluationLoopMixin(ABC):
                             continue
                         with torch.cuda.amp.autocast(enabled=self.training_config.fp16):
                             model_output = self.model(prepared_batch)
+                        print('evaluation loop, mo', model_output)
+                        print('batch in eval loop', prepared_batch)
+
                         report = Report(prepared_batch, model_output)
                         reporter.add_to_report(report, self.model)
                         report.detach()

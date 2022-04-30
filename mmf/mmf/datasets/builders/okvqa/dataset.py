@@ -66,9 +66,7 @@ class OKVQADataset(MMFDataset):
         else:
             image_path = sample_info["image_name"] + ".jpg"
             current_sample.image = self.image_db.from_path(image_path)["images"][0]
-        print('current sample', current_sample)
         current_sample = self.add_answer_info(sample_info, current_sample)
-        print('current sample2', current_sample)
 
 
         return current_sample
