@@ -111,7 +111,9 @@ class Numberbatch(nn.Module):
         for batch, tokens in enumerate(text):
             if len(tokens) == 1 or type(token) == str: # i.e. text is not tokenized
                 tokens = [tokens[0].split(' ')] # todo?
-            tokens = self.conceptualize(tokens.remove('[CLS]', '[SEP]')) # if bert has tokenized
+            tokens.remove('[CLS]')
+            tokens.remove('[SEP]')
+            tokens = self.conceptualize(tokens) # if bert has tokenized
             # set to nan values as default
             X[batch] *= np.nan
             for i, token in enumerate(tokens):
