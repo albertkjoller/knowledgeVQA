@@ -49,6 +49,9 @@ evaluation:
     #- roc_auc
 
 training:
+
+  detect_anomaly: True
+
   batch_size: 1 # default: 512, 128 or higher performs better (2017 tips and tricks)
   lr_scheduler: true   # Don't forget to update schedule_attributes if you update this
   max_updates: null # default: 22000, krisp uses 88000
