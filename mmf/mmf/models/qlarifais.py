@@ -116,7 +116,7 @@ class Qlarifais(BaseModel):
         logits = self.classifier(fused_features)
 
         #torch.save(embeddings, self.save_dir)
-        output = {'output_type': self.config, 'scores': logits}
+        output = {'output_type': self.config.classifier.output_type, 'scores': logits}
 
         return output
 
