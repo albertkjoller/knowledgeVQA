@@ -109,8 +109,10 @@ class Numberbatch(nn.Module):
         # todo: write other than batch?
         # looping tokens for each batch
         for batch, tokens in enumerate(text):
-            print(token)
-            if type(token) == str: # i.e. text is not tokenized
+            print(tokens)
+            if type(tokens) == str: # i.e. text is not tokenized
+                print('this is a string', tokens)
+
                 tokens = tokens.split(' ') #
 
             if '[CLS]' and '[SEP]' in tokens:

@@ -179,13 +179,15 @@ class Metrics:
             if model_output['output_type'] == 'multilabel': # model output is based on answer vocabulary
                 # find top 1 answer candidate and convert it to an embedding
                 top_k_indices = torch.topk(model_output['scores'], self.top_k, largest=True, dim=1).indices
+                print('does multilabel work?')
+                print([[self.answer_vocab.idx2word(idx)] for idx in top_k_indices])
+                # todo??
                 embeddings = self.numberbatch([[self.answer_vocab.idx2word(idx)] for idx in top_k_indices])
                 # else model output is a numberbatch embedding
                 model_output['embeddings'] =  embeddings
 
 
             elif model_output['output_type'] == 'embeddings':
-                print('we are in the embedding')
                 # restructure
                 model_output['embeddings'] = model_output['score']
 

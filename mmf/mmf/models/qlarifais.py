@@ -110,7 +110,7 @@ class Qlarifais(BaseModel):
         embedded_answers  = self.graph_encoder(sample_list['answers'])
         print(embedded_answers.shape)
         print(embedded_answers)
-
+        print(torch.mean(embedded_answers, dim = 1))
 
 
         #torch.save(embeddings, self.save_dir)
