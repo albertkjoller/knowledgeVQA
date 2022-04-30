@@ -137,7 +137,7 @@ class Qlarifais(BaseModel):
         torch.save(embeddings, self.save_dir)
 
         #output = {'embedding': read_object(embedding), 'scores': logits}
-        output = {'save_dir': self.save_dir, embedding': embeddings, 'scores': logits}
+        output = {'save_dir': self.save_dir, 'embedding': embeddings, 'scores': logits}
         #output = {'scores': {'embedding': embedding, 'scores': logits}}
         #output = {'scores': embedding}
         return output
