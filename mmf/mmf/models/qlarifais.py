@@ -109,14 +109,16 @@ class Qlarifais(BaseModel):
         # for losses
         avg_embedded_answers  = self.graph_encoder(sample_list['answers'])
         print('embedded answer in model')
-        print(embedded_answers.shape)
-        print(embedded_answers)
+        print(avg_embedded_answers.shape)
+        print(avg_embedded_answers)
         # average embedded annotator answer
-        print(torch.mean(embedded_answers, dim = 1))
+        print(torch.mean(avg_embedded_answers, dim = 1).shape)
+
+        print(torch.mean(avg_embedded_answers, dim = 1))
 
 
         #torch.save(embeddings, self.save_dir)
-        output = {'output_type': self.config.classifier.output_type, 'avg_embedded_answers': embedded_answers,
+        output = {'output_type': self.config.classifier.output_type, 'avg_embedded_answers': avg_embedded_answers,
                   'scores': logits}
 
         return output
