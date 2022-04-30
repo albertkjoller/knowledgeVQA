@@ -108,10 +108,8 @@ class Metrics:
 
             self.answer_vocab = self.answer_processor.answer_vocab
             # todo: update for new tokenizer in numberbatch
-            print(self.answer_vocab.word_list)
-            print(len(self.answer_vocab.word_list))
 
-            self.embedded_answer_vocab = self.numberbatch([[sentence] for sentence in self.answer_vocab.word_list])  # [batch_size, g_dim]
+            self.embedded_answer_vocab = self.numberbatch(self.answer_vocab.word_list)  # [batch_size, g_dim]
             print(self.embedded_answer_vocab.shape)
 
             self.top_k = int(self.config.model_config[self.config.model].classifier.params.top_k)
