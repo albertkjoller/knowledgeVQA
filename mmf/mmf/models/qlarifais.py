@@ -141,6 +141,6 @@ class read_object:
         self.embedding = embedding
 
     @property
-    def embedding(self):
+    def get_emb(self):
         return self.embedding
 
