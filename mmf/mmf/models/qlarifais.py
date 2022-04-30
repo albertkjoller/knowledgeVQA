@@ -105,23 +105,8 @@ class Qlarifais(BaseModel):
         # --- CLASSIFICATION ---
         # embeddings
         logits = self.classifier(fused_features)
-
         # average embedded annotator answer for type contrastive loss
         avg_embedded_answers  = self.graph_encoder(sample_list['answers'])
-
         output = {'output_type': self.config.classifier.output_type, 'avg_embedded_answers': avg_embedded_answers,
                   'scores': logits}
-
         return output
-
-
-class read_object:
-    def __init__(self, embedding):
-        self.embedding = embedding
-
-    def __get__(self, instance, owner):
-        self.instance
-    @property
-    def get_emb(self):
-        return self.embedding
-

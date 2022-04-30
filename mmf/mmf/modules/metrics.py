@@ -320,30 +320,10 @@ class NumberbatchScore(BaseMetric):
 
 
     def calculate(self, sample_list, model_output, *args, **kwargs):
-        # from mmf.metrics.bert_score import bert_score
 
-        # initializing answer processor
-
-        # init output, expected output, and annotator answers
-        # Numberbatch embeddings, 128x300
-        #embeddings = torch.load(model_output.save_dir)
-        # todo: assert if output type is defined
-
-        batch_outputs = model_output['embeddings']  # will be how long? 3003 or 128
-
-        # Annotator answers, 128x10
-        batch_answers = sample_list[self.annotator_key]
-
-        """
-        # [["word1", "word2"], ["word1"], ["word1"]] --> lists of split answers.
-        answers = [answer.split() for answer in answers] """
-
-        # 128x1 average numberbatch scores
-        scores = [self.answer_to_numberbatch(output, annotations) for (output, annotations) in
-                  zip(batch_outputs, batch_answers)]
-        print(scores)
-
-        return np.mean(scores)
+        print(model_output)
+        # answers are averaged by numberbatch
+        return torch.nn.CosineSimilarity(torch.mean(model_output['embeddings'], self.graph_encoder(sample_list['answers'])), dim=1)
 
 
 @registry.register_metric("accuracy")

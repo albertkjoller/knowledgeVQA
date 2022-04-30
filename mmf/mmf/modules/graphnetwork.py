@@ -109,12 +109,11 @@ class Numberbatch(nn.Module):
         # todo: write other than batch?
         # looping tokens for each batch
         for batch, tokens in enumerate(text):
-            print(tokens)
+            # if input is a string it needs tokenization
             if type(tokens) == str: # i.e. text is not tokenized
-                print('this is a string', tokens)
-
                 tokens = tokens.split(' ') #
 
+            # if bert has tokenized the text
             if '[CLS]' and '[SEP]' in tokens:
                 tokens.remove('[CLS]')
                 tokens.remove('[SEP]')
@@ -122,6 +121,12 @@ class Numberbatch(nn.Module):
             tokens = self.conceptualize(tokens) # if bert has tokenized
             # set to nan values as default
             X[batch] *= np.nan
+
+            # if no token found create one empty numberbatch embedding
+            if tokens == []:
+                print('yes empty batch with token', tokens)
+                X[batch][:,0] = torch.zeroes(self.numberbatch_dim)
+
             for i, token in enumerate(tokens):
                 # check if token is present in numberbatch
                 try:
@@ -129,11 +134,7 @@ class Numberbatch(nn.Module):
                     X[batch][:, i] = self.numberbatch[token]
                 except KeyError:
                     pass
-            if X[batch] == []:
-                print('yes empty batch with token', tokens)
-                X[batch] = torch.zeroes(self.numberbatch_dim)
         # average embeddings
-        # TODO: fix to(device) when building instead of here
         X = torch.from_numpy(np.nanmean(X, axis=2)).to(get_current_device())
         return X
 
