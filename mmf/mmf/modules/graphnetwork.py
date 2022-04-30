@@ -79,7 +79,7 @@ class Numberbatch(nn.Module):
         X = torch.ones((batch_size, self.numberbatch_dim, self.max_seq_length))
         # todo: write other than batch?
         # looping tokens for each batch
-        for batch, tokens in enumerate(question_tokens):
+        for batch, tokens in enumerate(text):
             if len(tokens) == 1: # i.e. text is not tokenized
                 tokens = [tokens[0].split(' ')] # todo?
             tokens = conceptualize(tokens.remove('[CLS]', '[SEP]')) # if bert has tokenized
