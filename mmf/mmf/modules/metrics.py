@@ -324,6 +324,8 @@ class NumberbatchScore(BaseMetric):
         print('\n\n')
         print('mo', model_output)
         print('sl', sample_list)
+        print('num answers', len(sample_list['answers']))
+        print(sample_list['answers'])
         return torch.mean(self.cos(model_output['embeddings'], self.numberbatch(sample_list['answers'])))
 
 
