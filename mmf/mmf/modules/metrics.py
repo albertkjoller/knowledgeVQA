@@ -164,6 +164,7 @@ class Metrics:
 
             metrics[key] = metric_instance
             self.required_params.update(metrics[key].required_params)
+            print('req params in metric', self.required_params)
 
         return metrics
 
