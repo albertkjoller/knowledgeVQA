@@ -166,6 +166,7 @@ class Report(OrderedDict):
             if isinstance(self[key], torch.Tensor):
                 self[key] = torch.cat((self[key], report[key]), dim=0)
 
+            # also add if list
             elif isinstance(self[key], list):
                 self[key] += report[key]
 
