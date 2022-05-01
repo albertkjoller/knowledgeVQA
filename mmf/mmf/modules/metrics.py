@@ -185,7 +185,7 @@ class Metrics:
 
             elif model_output['output_type'] == 'embeddings':
                 # restructure
-                model_output['embeddings'] = model_output['score']
+                model_output['embeddings'] = model_output['scores']
 
                 # finding similarities scores of embedding and answer candidates with nan as zeroes
                 logits = torch.nansum(model_output['embeddings'].unsqueeze(dim=1) * self.embedded_answer_vocab, dim=2)
