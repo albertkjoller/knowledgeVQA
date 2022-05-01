@@ -245,7 +245,7 @@ class BaseMetric:
 
     def __init__(self, name, *args, **kwargs):
         self.name = name
-        self.required_params = ["scores", "targets"]
+        self.required_params = ["scores", "targets", "answers"]
         # the set of datasets where this metric will be applied
         # an empty set means it will be applied on *all* datasets
         self._dataset_names = set()
@@ -312,6 +312,7 @@ class NumberbatchScore(BaseMetric):
 
     def calculate(self, sample_list, model_output, *args, **kwargs):
         # answers are averaged by numberbatch
+        print(model_output)
         print('model, emb ', model_output['embeddings'].shape)
         #print(model_output['embeddings'][127:130,:])
         print(torch.abs(model_output['embeddings']).sum(dim=1) > 0)

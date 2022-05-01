@@ -94,6 +94,9 @@ class TrainerEvaluationLoopMixin(ABC):
                 # add prediction_report is used for set-level metrics
                 combined_report.prediction_report = reporter.report
 
+
+
+
                 combined_report.metrics = self.metrics(combined_report, combined_report)
 
                 # Since update_meter will reduce the metrics over GPUs, we need to
