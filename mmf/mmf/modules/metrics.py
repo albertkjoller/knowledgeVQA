@@ -164,7 +164,6 @@ class Metrics:
 
             metrics[key] = metric_instance
             self.required_params.update(metrics[key].required_params)
-            print('req params in metric', self.required_params)
 
         return metrics
 
@@ -310,23 +309,13 @@ class NumberbatchScore(BaseMetric):
         self.config = get_global_config()
         self.numberbatch = build_graph_encoder(self.config.dataset_config.embedding_models.numberbatch)
         self.cos = torch.nn.CosineSimilarity(dim=1)
-        # todo: then not necessary in metric class
+        # adding necessary params
         self.required_params = ["scores", "answers", "avg_embedded_answers"]
 
 
 
     def calculate(self, sample_list, model_output, *args, **kwargs):
         # answers are averaged by numberbatch
-        #print(model_output)
-        #print('model, emb ', model_output['embeddings'].shape)
-        #print(model_output['embeddings'][127:130,:])
-        #print(torch.abs(model_output['embeddings']).sum(dim=1) > 0)
-        #print('tf summed', torch.sum(torch.abs(model_output['embeddings']).sum(dim=1) > 0))
-        #print('\n\n')
-        #print('mo', model_output)
-        #print('sl', sample_list)
-        print('num answers', len(sample_list['answers']))
-        print(sample_list['answers'])
         return torch.mean(self.cos(model_output['embeddings'], self.numberbatch(sample_list['answers'])))
 
 
