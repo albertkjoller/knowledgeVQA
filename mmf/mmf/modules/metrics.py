@@ -118,7 +118,7 @@ class Metrics:
 
     def _init_metrics(self, metric_list):
         metrics = {}
-        self.required_params = {"dataset_name", "dataset_type", "answers"}
+        self.required_params = {"dataset_name", "dataset_type"}
         for metric in metric_list:
             params = {}
             dataset_names = []
@@ -309,6 +309,10 @@ class NumberbatchScore(BaseMetric):
         self.config = get_global_config()
         self.numberbatch = build_graph_encoder(self.config.dataset_config.embedding_models.numberbatch)
         self.cos = torch.nn.CosineSimilarity(dim=1)
+        # todo: then not necessary in metric class
+        self.required_params = ["scores", "answers", "avg_embedded_answers"]
+
+
 
     def calculate(self, sample_list, model_output, *args, **kwargs):
         # answers are averaged by numberbatch
@@ -317,9 +321,9 @@ class NumberbatchScore(BaseMetric):
         #print(model_output['embeddings'][127:130,:])
         print(torch.abs(model_output['embeddings']).sum(dim=1) > 0)
         print('tf summed', torch.sum(torch.abs(model_output['embeddings']).sum(dim=1) > 0))
-        for idx, emb in enumerate(model_output['embeddings']):
-            print('idx', idx)
-            print('emb', emb)
+        #for idx, emb in enumerate(model_output['embeddings']):
+        #    print('idx', idx)
+        #    print('emb', emb)
         #print('sample, ans', sample_list['answers'].shape)
         print('\n\n')
         print('mo', model_output)
