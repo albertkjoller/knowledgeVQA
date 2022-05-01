@@ -118,7 +118,7 @@ class Metrics:
 
     def _init_metrics(self, metric_list):
         metrics = {}
-        self.required_params = {"dataset_name", "dataset_type"}
+        self.required_params = {"dataset_name", "dataset_type", "answers"}
         for metric in metric_list:
             params = {}
             dataset_names = []
