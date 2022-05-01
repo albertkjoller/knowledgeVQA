@@ -69,7 +69,7 @@ class TrainerEvaluationLoopMixin(ABC):
                                 moved_report, self.metrics.required_params
                             )
                             combined_report.batch_size += moved_report.batch_size
-
+                        print('required params', self.metrics.required_params)
                         # Each node generates a separate copy of predict JSON from the
                         # report, which will be used to evaluate dataset-level metrics
                         # (such as mAP in object detection or CIDEr in image captioning)
