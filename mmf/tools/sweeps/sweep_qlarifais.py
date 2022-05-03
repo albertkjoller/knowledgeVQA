@@ -5,6 +5,27 @@
 import lib as sweep
 from lib import hyperparam
 
+'''
+
+python tools/sweeps/sweep_qlarifais.py \
+--resume_finished \
+--resume_failed \
+--checkpoints_dir /Users/arond.jacobsen/Documents/GitHub/explainableVQA/mmf/tools/sweeps/save \
+-t -1 \
+-g 8 \
+-n 2 \
+--constraint some_constraint \
+--comment "test run" \
+--partition some_partition \
+-p my_job \
+--backend slurm
+
+
+
+'''
+
+
+
 
 def get_grid(args):
     # For list of args, run `python tools/sweeps/{script_name}.py --help`.

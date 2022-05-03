@@ -50,7 +50,7 @@ evaluation:
 
 training:
 
-  detect_anomaly: True TODO:??
+  detect_anomaly: true #TODO:??
   # Level of logging, only logs which are >= to current level will be logged
   logger_level: info
   batch_size: 128 # default: 512, 128 or higher performs better (2017 tips and tricks)
