@@ -194,7 +194,7 @@ class Metrics:
                 for batch, indices in enumerate(not_top_k_indices):
                     logits[batch][indices] = 0
                 # restructure
-                model_output['score'] = logits
+                model_output['scores'] = logits
 
         except KeyError: # todo: does this work
             pass
