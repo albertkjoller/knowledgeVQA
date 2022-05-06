@@ -315,6 +315,10 @@ def launch_train(args, config):
                     stdout = train_proc.stdout.read().decode("utf-8")
                     print(stdout, file=train_log_h)
                     try:
+
+                        print(int(stdout.rstrip().split()[-1]))
+                        raise NotImplementedError
+
                         job_id = int(stdout.rstrip().split()[-1])
                         return job_id
                     except IndexError:
