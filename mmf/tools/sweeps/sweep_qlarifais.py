@@ -8,19 +8,31 @@ from lib import hyperparam
 '''
 
 python tools/sweeps/sweep_qlarifais.py \
+--backend lsf \
 --resume_finished \
 --resume_failed \
---checkpoints_dir /Users/arond.jacobsen/Documents/GitHub/explainableVQA/mmf/tools/sweeps/save \
+--checkpoints_dir /Users/arond.jacobsen/Desktop/test \
 -t -1 \
+-g 8 \
+-n 2 \
+--constraint some_constraint \
+--comment "test run" \
+-q my_job \
+
+
+
+python tools/sweeps/sweep_visual_bert.py \
+--resume_finished \
+--resume_failed \
+--checkpoints_dir /work3/s194262/save \
+-t 1 \
 -g 8 \
 -n 2 \
 --constraint some_constraint \
 --comment "test run" \
 --partition some_partition \
 -p my_job \
---backend slurm
-
-
+--backend slurm \
 
 '''
 

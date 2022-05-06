@@ -13,6 +13,7 @@ def get_args(argv=None):
     parser.add_argument(
         "-p",
         "--prefix",
+        "-q",
         required=True,
         help="save checkpoints and logs in <checkpoints-dir>/<prefix>.<save_dir_key>",
     )
@@ -117,7 +118,7 @@ def get_args(argv=None):
         )
 
     parser.add_argument(
-        "--backend", choices=["slurm", "fblearner"], default=default_backend
+        "--backend", choices=["slurm", "fblearner", 'lsf'], default=default_backend
     )
 
     # FBLearner params
@@ -149,7 +150,7 @@ def get_args(argv=None):
         "--sequential", action="store_true", help="schedule jobs to run sequentially"
     )
     parser.add_argument(
-        "--time", default="4320", help="expected job duration in minutes"
+        "--time", "-W", default="4320", help="expected job duration in minutes"
     )
     parser.add_argument("--mem", "--mem", help="memory to request")
     parser.add_argument("--gpu-type", default="volta")
@@ -239,5 +240,7 @@ def main(get_grid, postprocess_hyperparams):
         from .slurm import main as backend_main
     elif args.backend == "fblearner":
         from .fblearner import main as backend_main
+    elif args.backend == "lsf":
+        from .lsf import main as backend_main
 
     backend_main(get_grid, postprocess_hyperparams, args)
