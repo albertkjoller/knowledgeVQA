@@ -11,21 +11,20 @@ import socket
 def get_args(argv=None):
     parser = argparse.ArgumentParser("Script for launching hyperparameter sweeps")
     parser.add_argument(
-        "-p",
-        "--prefix",
+        "-prefix",
+        required=True,
+        help="save checkpoints and logs in <checkpoints-dir>/<prefix>.<save_dir_key>",
+    )
+    parser.add_argument(
         "-q",
         required=True,
         help="save checkpoints and logs in <checkpoints-dir>/<prefix>.<save_dir_key>",
     )
     parser.add_argument(
         "-t",
-        "--num_trials",
         required=True,
         type=int,
         help="number of random hyperparam configurations to try (-1 for grid search)",
-    )
-    parser.add_argument(
-        "-g", "--num_gpus", type=int, required=True, help="number of GPUs per node"
     )
     parser.add_argument(
         "-n",
@@ -33,6 +32,11 @@ def get_args(argv=None):
         type=int,
         default=1,
         help="number of nodes for distributed training",
+    )
+    parser.add_argument(
+        "-gpus",
+        default="num=1",
+        help="number of gpus for distributed training",
     )
     parser.add_argument(
         "--model_type",
@@ -135,8 +139,6 @@ def get_args(argv=None):
     parser.add_argument(
         "--salloc", action="store_true", help="run agaist current allocation"
     )
-    parser.add_argument("--partition", help="partition to run on", default="learnfair")
-    parser.add_argument("--reservation", help="reservation to run on")
     parser.add_argument(
         "--exclusive", action="store_true", help="if set, get exclusive host"
     )
@@ -150,16 +152,9 @@ def get_args(argv=None):
         "--sequential", action="store_true", help="schedule jobs to run sequentially"
     )
     parser.add_argument(
-        "--time", "-W", default="4320", help="expected job duration in minutes"
+		"-W", default="4320", help="expected job duration in minutes"
     )
-    parser.add_argument("--mem", "--mem", help="memory to request")
-    parser.add_argument("--gpu-type", default="volta")
-    parser.add_argument(
-        "--constraint",
-        metavar="CONSTRAINT",
-        help="gpu constraint, if any. e.g. 'volta'",
-    )
-    parser.add_argument("--comment", help="comment string")
+    parser.add_argument("-R", help="memory to request")
     parser.add_argument(
         "--snapshot_code",
         action="store_true",

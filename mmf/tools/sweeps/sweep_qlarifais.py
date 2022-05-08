@@ -7,32 +7,21 @@ from lib import hyperparam
 
 '''
 
-python tools/sweeps/sweep_qlarifais.py \
+
+
+python mmf/tools/sweeps/sweep_visual_bert.py \
 --backend lsf \
 --resume_finished \
 --resume_failed \
---checkpoints_dir /Users/arond.jacobsen/Desktop/test \
+--checkpoints_dir /Users/arond.jacobsen/Documents/GitHub/explainableVQA/mmf/tools/sweeps/save \
+-prefix test_run \
 -t -1 \
--g 8 \
--n 2 \
---constraint some_constraint \
---comment "test run" \
--q my_job \
+-n 1 \
+-q gpuv100 \
+-gpus "num=1" \
+-R "rusage[mem=128G]" \
+-W 05:00 \
 
-
-
-python tools/sweeps/sweep_visual_bert.py \
---resume_finished \
---resume_failed \
---checkpoints_dir /work3/s194262/save \
--t 1 \
--g 8 \
--n 2 \
---constraint some_constraint \
---comment "test run" \
---partition some_partition \
--p my_job \
---backend slurm \
 
 '''
 

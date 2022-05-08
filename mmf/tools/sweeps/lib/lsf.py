@@ -17,7 +17,7 @@ from mmf.utils.general import get_mmf_root
 def main(get_grid, postprocess_hyperparams, args):
     if args.local:
         args.num_nodes = 1
-
+    args.num_gpus = args.gpus.split('=')[-1]
     # compute all possible hyperparameter configurations
     grid = get_grid(args)
     grid_product = list(itertools.product(*[hp.values for hp in grid]))
@@ -43,7 +43,7 @@ def main(get_grid, postprocess_hyperparams, args):
         if args.sequential and not args.local and job_id is not None:
             args.dep = job_id
 
-        if i == args.num_trials - 1:
+        if i == args.t - 1:
             break
 
 
@@ -99,10 +99,10 @@ def launch_train(args, config):
     save_dir_key = save_dir_key.replace(",", "_")
     num_total_gpus = args.num_nodes * args.num_gpus
     save_dir = os.path.join(
-        args.checkpoints_dir, f"{args.prefix}.{save_dir_key}.ngpu{num_total_gpus}"
+        args.checkpoints_dir, f"{args.prefix}{save_dir_key}.ngpu{num_total_gpus}"
     )
     tensorboard_logdir = os.path.join(
-        args.tensorboard_logdir, f"{args.prefix}.{save_dir_key}.ngpu{num_total_gpus}"
+        args.tensorboard_logdir, f"{args.prefix}{save_dir_key}.ngpu{num_total_gpus}"
     )
 
     # create save directory if it doesn"t exist
@@ -142,7 +142,7 @@ def launch_train(args, config):
 
     # generate train command
     train_cmd = [
-        "python",
+        "python3",
         "-u",
         os.path.join(get_mmf_root(), "..", "mmf_cli", "run.py"),
     ]
@@ -178,13 +178,16 @@ def launch_train(args, config):
         ), "distributed training cannot be combined with --local"
         if not dry_run("start training locally"):
             if "CUDA_VISIBLE_DEVICES" not in env:
-                env["CUDA_VISIBLE_DEVICES"] = ",".join(map(str, range(args.num_gpus)))
+                env["CUDA_VISIBLE_DEVICES"] = ",".join(map(str, range(args.num_gpus * args.num_gpus)))
             env["NCCL_DEBUG"] = "INFO"
             train_proc = subprocess.Popen(train_cmd, env=env)
             train_proc.wait()
     else:
+
+        # creating log files
         train_log = os.path.join(save_dir, "train.log")
-        train_stderr = os.path.join(save_dir, "train.stderr.%J")  # %j = slurm job id
+        train_stdout = os.path.join(save_dir, "output_file_%J.out")  # %j = lsf job id
+        train_stderr = os.path.join(save_dir, "error_file_%J.err")  # %j = lsf job id
 
         # set environment
         if args.num_nodes > 1:
@@ -193,102 +196,79 @@ def launch_train(args, config):
         else:
             env["NCCL_SOCKET_IFNAME"] = ""
 
+        # todo should be similar to slurms srun command with &
         bsub_cmd = [
             "bsub",
             "-J",
-            f"{args.prefix}.{save_dir_key}",
-            "-o",
-            train_log,
-            "--error",
-            train_stderr,
-            "-oo",
-            train_log,
-            "--unbuffered",
+            f"{save_dir_key}",
+            # "-o",
+            # train_stdout,
+            # "-e",
+            # train_stderr
         ]
         if args.salloc:
             bsub_cmd += [
-                "--nodes",
-                str(args.num_nodes),
                 "-n",
-                str(args.num_nodes),
+                str(args.n),
             ]
-        bsub_cmd += train_cmd
-        bsub_cmd_str = " ".join(map(shlex.quote, bsub_cmd)) + " &"
 
-        # build command
+        # modified
+        run_cmd = train_cmd
+        run_cmd_str = " ".join(map(shlex.quote, run_cmd))
+
+        # where we are currently building the command
         if not args.salloc:
             excluded_hosts = os.environ.get("EXCLUDED_HOSTS", None)
             included_hosts = os.environ.get("INCLUDED_HOSTS", None)
-            gres = f"gpu:{args.gpu_type}:{args.num_gpus}"
 
-            bsub_cmd = [
-                "bsub",
-                "-J",
-                f"{args.prefix}.{save_dir_key}",
-                "--gres",
-                gres,
-                "--nodes",
-                str(args.num_nodes),
-                "--ntasks-per-node",
-                "1",
-                "--cpus-per-task",
-                str(int(8 * args.num_gpus)),
-                "-o",
-                train_log,
-                "--error",
-                train_stderr,
-                "-oo",
-                train_log,
-                # "--no-requeue",
-                "--signal",
-                "B:USR1@180",
-            ]
-            if args.constraint:
-                bsub_cmd += ["-C", args.constraint]
+            # general bsub commands
+            bsub_cmd_str = '#BSUB -J {}\n'.format(f"{args.prefix}.{save_dir_key}")
+            bsub_cmd_str += '#BSUB -o {}\n'.format(train_stdout)
+            bsub_cmd_str += '#BSUB -e {}\n'.format(train_stderr)
+            bsub_cmd_str += "#BSUB -n {}\n".format(str(args.num_nodes))
+            bsub_cmd += "#BSUB -q {}\n".format(args.q)
+            bsub_cmd_str += "#BSUB -gpu {}\n".format(str(args.gpus))
+            bsub_cmd_str += "#BSUB -W {}\n".format(args.W)
+            bsub_cmd_str +=  "#BSUB -R\n".format(args.R)
 
-            if args.partition:
-                bsub_cmd += ["-q", args.partition]
-            if args.reservation:
-                bsub_cmd += ["--reservation", args.reservation]
+            bsub_cmd_str += "#BSUB -B\n"
+            bsub_cmd_str += "#BSUB -N\n"
+
+            '''
             if args.exclusive:
-                bsub_cmd += ["-e"]
-            if args.comment:
-                comment = args.comment
-                if args.snapshot_code:
-                    comment += f", Code Location: {destination}"
-                bsub_cmd += ["--comment", comment]
-
-            if args.snapshot_code:
-                bsub_cmd += ["--comment", f"Code Location: {destination}"]
-
+                bsub_cmd += ["\n#BSUB -e"]
             if args.dep is not None:
-                bsub_cmd.extend(["-D", str(args.dep)])
-            if args.time is not None:
-                bsub_cmd.extend(["-W", args.time])
-            if args.mem is not None:
-                bsub_cmd += ["-R", f"rusage[mem= {args.mem}]"]
-            else:
-                bsub_cmd += ["--mem-per-cpu", "7G"]
-            bsub_cmd += ["-x", excluded_hosts] if excluded_hosts is not None else []
-            bsub_cmd += ["-w", included_hosts] if included_hosts is not None else []
+                bsub_cmd.extend(["\n#BSUB -D", str(args.dep)])
 
-            wrapped_cmd = (
-                requeue_support()
-                + "\n"
-                + bsub_cmd_str
-                + " \n wait $! \n sleep 610 & \n wait $!"
-            )
+            # todo
+            bsub_cmd += ["\n#BSUB -x", excluded_hosts] if excluded_hosts is not None else []
+            bsub_cmd += ["\n#BSUB -w", included_hosts] if included_hosts is not None else []
+            '''
 
-            bsub_cmd += ["--wrap", wrapped_cmd]
-            bsub_cmd_str = " ".join(map(shlex.quote, bsub_cmd))
+            # add extra
+            extra_cmd_str = add_extra()
+            #extra_cmd_str = "".join(map(shlex.quote, extra_cmd))
+
+            #bsub_cmd_str = ' '.join(map(shlex.quote, bsub_cmd))
+
+
+            bsub_cmd_str = '#!/bin/sh\n{}\n\n{}\n\n{}\n\n\nwait $! \nsleep 610 & \nwait $!'.format(bsub_cmd_str, extra_cmd_str, run_cmd_str)
+            bsub_cmd += run_cmd
+            #bsub_cmd += extra_cmd
+
+            # updating job .sh file to be submitted
+            f = open("sweep_var.sh", "w")
+            f.close() # cleans it
+            with open('sweep_var.sh', 'a') as file:
+                file.write(bsub_cmd_str)
+
         else:
-            # todo ??
             bsub_cmd = bsub_cmd
             bsub_cmd_str = bsub_cmd_str
 
         if args.dry_run:
             dry_run("start remote training")
-            dry_run(f"- log stdout to: {train_log}")
+            dry_run(f"- log stdout to: {train_stdout}")
             dry_run(f"- log stderr to: {train_stderr}")
             dry_run(f"- run command: {bsub_cmd_str}")
             bsub_cmd += ["--test-only"]
@@ -298,28 +278,29 @@ def launch_train(args, config):
                 stdout = train_proc.stdout.read().decode("utf-8")
                 print(stdout)
         else:
+            # logging most recent git commit
             with open(train_log, "a") as train_log_h:
-                # log most recent git commit
                 git_commit = subprocess.check_output(
                     "git log | head -n 1", shell=True, encoding="utf-8"
                 )
                 print(git_commit.rstrip(), file=train_log_h)
                 if args.baseline_model:
                     print(f"baseline model: {args.baseline_model}", file=train_log_h)
+
+            # submitting job
             with open(train_log, "a") as train_log_h:
+
                 print(f"running command: {bsub_cmd_str}\n")
-                print(f"running command: {bsub_cmd_str}\n", file=train_log_h)
+                print(f"running command: {bsub_cmd_str}\n", file=train_log_h)  # adding to log file
+
                 with subprocess.Popen(
-                    bsub_cmd, stdout=subprocess.PIPE, env=env
+                    'bsub<sweep_var.sh', stdout=subprocess.PIPE, env=env
                 ) as train_proc:
-                    stdout = train_proc.stdout.read().decode("utf-8")
+                    # todo: does this work
+                    stdout, stderr = train_proc.communicate()
                     print(stdout, file=train_log_h)
                     try:
-
-                        print(int(stdout.rstrip().split()[-1]))
-                        raise NotImplementedError
-
-                        job_id = int(stdout.rstrip().split()[-1])
+                        job_id = int(stdout.rstrip().split()[1][1:-1])
                         return job_id
                     except IndexError:
                         return None
@@ -377,6 +358,11 @@ def get_random_port():
     return port
 
 
+def add_extra():
+    return 'nvidia-smi\nmodule load cuda/11.1\nsource vqa2/bin/activate\ncd mmf\n'
+
+
+'''
 def requeue_support():
     return """
         trap_handler () {
@@ -390,9 +376,8 @@ def requeue_support():
              scontrol requeue $SLURM_JOB_ID
            fi
         }
-
-
         # Install signal handler
         trap 'trap_handler USR1' USR1
         trap 'trap_handler TERM' TERM
     """
+ '''
