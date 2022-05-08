@@ -223,7 +223,7 @@ def launch_train(args, config):
 
             # complete joined string
             bsub_cmd_str = '#!/bin/sh\n{}\n\n{}\n\n{}\n\n\nwait $! \nsleep 610 & \nwait $!'.format(bsub_cmd_str, extra_cmd_str, run_cmd_str)
-ß
+
 
             # updating job .sh file to be submitted
             f = open("sweep_var.sh", "w")
