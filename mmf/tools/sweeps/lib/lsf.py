@@ -223,8 +223,7 @@ def launch_train(args, config):
 
             # complete joined string
             bsub_cmd_str = '#!/bin/sh\n{}\n\n{}\n\n{}\n\n\nwait $! \nsleep 610 & \nwait $!'.format(bsub_cmd_str, extra_cmd_str, run_cmd_str)
-            bsub_cmd += run_cmd
-
+ß
 
             # updating job .sh file to be submitted
             f = open("sweep_var.sh", "w")
@@ -238,7 +237,6 @@ def launch_train(args, config):
             dry_run(f"- log stdout to: {train_stdout}")
             dry_run(f"- log stderr to: {train_stderr}")
             dry_run(f"- run command: {bsub_cmd_str}")
-            bsub_cmd += ["--test-only"]
             with subprocess.Popen(
                 bsub_cmd, stdout=subprocess.PIPE, env=env
             ) as train_proc:

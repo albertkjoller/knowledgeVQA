@@ -8,12 +8,12 @@ from lib import hyperparam
 '''
 
 python mmf/tools/sweeps/sweep_visual_bert.py \
---baseline_model mmf/models/qlarifais.py \
+--baseline_model /zhome/96/8/147177/Desktop/explainableVQA/mmf/mmf/models/qlarifais.py \
 --backend lsf \
 --resume_failed \
 --checkpoints_dir /work3/s194262/save/sweeps \
 --run_type train_val \
---config configs/experiments/baseline/mul.yaml \
+--config /zhome/96/8/147177/Desktop/explainableVQA/mmf/mmf/configs/experiments/baseline/mul.yaml \
 -prefix testrun \
 -t -1 \
 -n 1 \
