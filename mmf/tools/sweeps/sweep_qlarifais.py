@@ -7,7 +7,7 @@ from lib import hyperparam
 
 '''
 
-python mmf/tools/sweeps/sweep_visual_bert.py \
+python mmf/tools/sweeps/sweep_qlarifais.py \
 --baseline_model /zhome/96/8/147177/Desktop/explainableVQA/mmf/mmf/models/qlarifais.py \
 --backend lsf \
 --resume_failed \
@@ -35,7 +35,7 @@ def get_grid(args):
     hp = []
 
     # input commands
-    hp.extend([hyperparam("run_type", args.run_type), hyperparam("config", args.config)])
+    hp.extend([hyperparam("run_type", args.run_type), hyperparam("config", args.config), hyperparam("model", "qlarifais", save_dir_key=lambda val: val)])
 
     # general hyperparams
     hp.extend([hyperparam("optimizer.params.lr", [0.001, 0.0001], save_dir_key=lambda val: f"lr{val}")])
