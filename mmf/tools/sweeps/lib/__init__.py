@@ -140,9 +140,6 @@ def get_args(argv=None):
     parser.add_argument(
         "--run_type", help="e", default="train_val"
     )
-    parser.add_argument(
-        "--config", help="experiment folder config file", default=None
-    )
 
 
 
