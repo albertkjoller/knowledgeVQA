@@ -47,7 +47,7 @@ def plot_example(input,
         if not os.path.exists(save_dir):
             os.makedirs(save_dir)
         ext = os.path.splitext(save_path)[1].strip('.')
-        plt.savefig(save_path, format=ext, bbox_inches='tight')
+        plt.savefig(save_path, format=ext, bbox_inches='tight', dpi=500)
 
     # Show plot if desired.
     if show_plot:

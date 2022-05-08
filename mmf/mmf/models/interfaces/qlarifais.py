@@ -9,6 +9,7 @@ import pandas as pd
 from pathlib import Path
 from typing import Type, Union
 
+import pdb
 import torch
 import torchvision.datasets.folder as tv_helpers
 from omegaconf import DictConfig
@@ -68,20 +69,13 @@ class QlarifaisInterface(nn.Module):
         """
         sample = Sample()
 
-        if isinstance(image, str):
-            if image.startswith("http"):
-                temp_file = tempfile.NamedTemporaryFile()
-                download(image, *os.path.split(temp_file.name), disable_tqdm=True)
-                image = tv_helpers.default_loader(temp_file.name)
-                temp_file.close()
-            else:
-                image = tv_helpers.default_loader(image)
+        self.image_tensor = image = self.processor_dict["image_processor"](image).unsqueeze(0)
+        self.image_tensor.requires_grad_(True)
 
-        image = self.processor_dict["image_processor"](image)
-        text = self.processor_dict["text_processor"]({"text": text})
+        self.text = text = self.processor_dict["text_processor"]({"text": text})
         answer = self.processor_dict["answer_processor"]
 
-        sample.image = image
+        sample.image = self.image_tensor.squeeze(0)
         sample.text = text["text"]
         
         if "input_ids" in text:

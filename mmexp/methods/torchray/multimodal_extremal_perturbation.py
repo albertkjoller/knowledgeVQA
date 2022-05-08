@@ -62,10 +62,10 @@ DUAL_VARIANT = "dual"
 def multi_extremal_perturbation(
     model,
     input_img,
-    image_path,
+    image_object,
     input_text,
     target,
-    areas=[0.1],
+    areas=[0.12],
     perturbation=BLUR_PERTURBATION,
     max_iter=800,
     num_levels=8,
@@ -134,7 +134,8 @@ def multi_extremal_perturbation(
 
 
     if len(input_img.shape) != 4:
-        raise ValueError(f"Image tensor is suppose to be 4 dimensional")
+        input_img = input_img.unsqueeze(0)
+        #raise ValueError(f"Image tensor is suppose to be 4 dimensional")
 
     if len(input_text) == 0:
         raise ValueError(f"Empty text")
@@ -229,12 +230,7 @@ def multi_extremal_perturbation(
             x = torch.flip(x, dims=(3,))
 
         # Evaluate the model on the masked data.
-        y = model.classify(image_path, input_text, explain=True)
-
-        # update text
-        if t % 402 == 0 and max_iter >= 800:
-            Result = explain_text(input_text, torch.squeeze(x, 0), model)
-            Not_hateful, Hateful = text_rebuilder(input_text, Result)
+        y = model.classify(image_object, input_text, explain=True)
 
         # Get reward.
         reward = reward_func(y, target, variant=variant)
