@@ -12,6 +12,7 @@
 # Pretrained model files (too large)
 *.pth
 *.ckpt
+checkpoints/
 
 # HPC files to ignore
 vqa/
