@@ -1,0 +1,19 @@
+
+model_config:
+  qlarifais:
+    g_dim: 300
+    fusion:
+      # [triple_modality_arithmetic, double_two_modality_arithmetic, double_two_modality_ama]
+      type: double_two_modality_arithmetic
+      params:
+        operation: multiply
+        i_dim: ${model_config.qlarifais.i_dim} # image dim
+        q_dim: ${model_config.qlarifais.q_dim} # question dim
+        g_dim: ${model_config.qlarifais.g_dim} # question dim
+        guided_dim: none # to be used later in attention module
+        norm: weight # [weight, batch, layer, none]
+        act: ReLU # activation function
+        # TODO: optimization parameters:
+        h_dim: 2048  # hidden dim as input in classifier
+        dropout: 0 # avoid overfitting
+

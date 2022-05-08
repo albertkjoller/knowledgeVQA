@@ -1,20 +1,10 @@
-env:
-  save_dir: ${env.part_save_dir}/embedding
-
-includes:
-    # include running experiment configs (defaults for all)
-  - configs/experiments/defaults.yaml
-
-# overwrite included if necessary:
 
 model_config:
   qlarifais:
-
+    # loss based on embedding output
     losses:
       #- type: cross_entropy, target dim needs to be adjusted
       - type: refiner_contrastive_loss # binary cross-entropy loss since each question has multiple answers (MGFAN with ref.)
-
-
     classifier:
       type: simple
       output_type: embeddings # i.e. numberbatch embedding
@@ -23,9 +13,9 @@ model_config:
         # input dim is the output of the fusion module
         in_dim: ${model_config.qlarifais.fusion.params.h_dim}
         out_dim: 300 # numberbatch output size
+        norm: weight # [weight, batch, layer, none]
+        act: ReLU # activation function
         # todo: optimization parameters:
         h_dim: 300 # mean of input and output w.r.t. mlp
         num_non_linear_layers: 2 # activation functions
-        norm: weight # [weight, batch, layer, none]
-        act: ReLU # activation function
         dropout: 0.3 # avoid overfitting, or keep all information?

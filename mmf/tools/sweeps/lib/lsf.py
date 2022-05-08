@@ -10,7 +10,7 @@ import shutil
 import subprocess
 from collections import OrderedDict
 from glob import glob
-
+import sys
 from mmf.utils.general import get_mmf_root
 
 
@@ -19,7 +19,7 @@ def main(get_grid, postprocess_hyperparams, args):
         args.num_nodes = 1
     args.num_gpus = args.gpus.split('=')[-1]
     # compute all possible hyperparameter configurations
-    grid = get_grid(args)
+    grid = get_grid(args) # model sweep gets its input
     grid_product = list(itertools.product(*[hp.values for hp in grid]))
 
     # randomly shuffle configurations
@@ -86,7 +86,7 @@ def launch_train(args, config):
         # Currently hash is just the current time in ISO format.
         code_snapshot_hash = datetime.datetime.now().isoformat()
         destination = copy_all_python_files(
-            ".", "slurm_snapshot_code", code_snapshot_hash
+            ".", "lsf_snapshot_code", code_snapshot_hash
         )
 
     # compute save_dir
@@ -196,23 +196,7 @@ def launch_train(args, config):
         else:
             env["NCCL_SOCKET_IFNAME"] = ""
 
-        # todo should be similar to slurms srun command with &
-        bsub_cmd = [
-            "bsub",
-            "-J",
-            f"{save_dir_key}",
-            # "-o",
-            # train_stdout,
-            # "-e",
-            # train_stderr
-        ]
-        if args.salloc:
-            bsub_cmd += [
-                "-n",
-                str(args.n),
-            ]
-
-        # modified
+        # command to run the model
         run_cmd = train_cmd
         run_cmd_str = " ".join(map(shlex.quote, run_cmd))
 
@@ -225,46 +209,29 @@ def launch_train(args, config):
             bsub_cmd_str = '#BSUB -J {}\n'.format(f"{args.prefix}.{save_dir_key}")
             bsub_cmd_str += '#BSUB -o {}\n'.format(train_stdout)
             bsub_cmd_str += '#BSUB -e {}\n'.format(train_stderr)
-            bsub_cmd_str += "#BSUB -n {}\n".format(str(args.num_nodes))
-            bsub_cmd += "#BSUB -q {}\n".format(args.q)
-            bsub_cmd_str += "#BSUB -gpu {}\n".format(str(args.gpus))
+            bsub_cmd_str += "#BSUB -n {}\n".format(args.num_nodes)
+            bsub_cmd_str += "#BSUB -q {}\n".format(args.q)
+            bsub_cmd_str += "#BSUB -gpu '{}'\n".format(str(args.gpus))
             bsub_cmd_str += "#BSUB -W {}\n".format(args.W)
-            bsub_cmd_str +=  "#BSUB -R\n".format(args.R)
+            bsub_cmd_str +=  "#BSUB -R '{}'\n".format(args.R)
 
             bsub_cmd_str += "#BSUB -B\n"
             bsub_cmd_str += "#BSUB -N\n"
 
-            '''
-            if args.exclusive:
-                bsub_cmd += ["\n#BSUB -e"]
-            if args.dep is not None:
-                bsub_cmd.extend(["\n#BSUB -D", str(args.dep)])
-
-            # todo
-            bsub_cmd += ["\n#BSUB -x", excluded_hosts] if excluded_hosts is not None else []
-            bsub_cmd += ["\n#BSUB -w", included_hosts] if included_hosts is not None else []
-            '''
-
-            # add extra
+            # extra commands between bsub and run
             extra_cmd_str = add_extra()
-            #extra_cmd_str = "".join(map(shlex.quote, extra_cmd))
 
-            #bsub_cmd_str = ' '.join(map(shlex.quote, bsub_cmd))
-
-
+            # complete joined string
             bsub_cmd_str = '#!/bin/sh\n{}\n\n{}\n\n{}\n\n\nwait $! \nsleep 610 & \nwait $!'.format(bsub_cmd_str, extra_cmd_str, run_cmd_str)
             bsub_cmd += run_cmd
-            #bsub_cmd += extra_cmd
+
 
             # updating job .sh file to be submitted
             f = open("sweep_var.sh", "w")
             f.close() # cleans it
-            with open('sweep_var.sh', 'a') as file:
-                file.write(bsub_cmd_str)
-
-        else:
-            bsub_cmd = bsub_cmd
-            bsub_cmd_str = bsub_cmd_str
+            with open('sweep_var.sh', 'a') as f:
+                f.write(bsub_cmd_str)
+                f.close()
 
         if args.dry_run:
             dry_run("start remote training")
@@ -289,15 +256,11 @@ def launch_train(args, config):
 
             # submitting job
             with open(train_log, "a") as train_log_h:
-
                 print(f"running command: {bsub_cmd_str}\n")
                 print(f"running command: {bsub_cmd_str}\n", file=train_log_h)  # adding to log file
-
-                with subprocess.Popen(
-                    'bsub<sweep_var.sh', stdout=subprocess.PIPE, env=env
-                ) as train_proc:
-                    # todo: does this work
-                    stdout, stderr = train_proc.communicate()
+                # submitting job
+                with subprocess.Popen(["bsub<sweep_var.sh"], shell=True, stdout=subprocess.PIPE, env=env) as training_process:
+                    stdout, stderr = training_process.communicate()
                     print(stdout, file=train_log_h)
                     try:
                         job_id = int(stdout.rstrip().split()[1][1:-1])
@@ -357,27 +320,7 @@ def get_random_port():
     random.setstate(old_state)
     return port
 
-
+# extra parameters in submission file
 def add_extra():
     return 'nvidia-smi\nmodule load cuda/11.1\nsource vqa2/bin/activate\ncd mmf\n'
 
-
-'''
-def requeue_support():
-    return """
-        trap_handler () {
-           echo "Caught signal: " $1
-           # SIGTERM must be bypassed
-           if [ "$1" = "TERM" ]; then
-               echo "bypass sigterm"
-           else
-             # Submit a new job to the queue
-             echo "Requeuing " $SLURM_JOB_ID
-             scontrol requeue $SLURM_JOB_ID
-           fi
-        }
-        # Install signal handler
-        trap 'trap_handler USR1' USR1
-        trap 'trap_handler TERM' TERM
-    """
- '''

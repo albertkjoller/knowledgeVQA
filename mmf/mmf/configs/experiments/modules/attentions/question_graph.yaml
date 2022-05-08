@@ -1,0 +1,31 @@
+
+
+model_config:
+  qlarifais:
+    attention:
+      use: true
+      type: question_graph_guided
+      params:
+        type: triple_one_way_top_down # TODO: only one way
+        fusion:
+          # [triple_modality_arithmetic, double_two_modality_arithmetic, double_two_modality_ama]
+          type: triple_modality_arithmetic
+          params:
+            operation: multiply
+            i_dim: ${model_config.qlarifais.i_dim} # image dim
+            q_dim: ${model_config.qlarifais.q_dim} # question dim
+            g_dim: ${model_config.qlarifais.g_dim} # question dim
+            guided_dim: 0 # used as variable in fusion module
+            # TODO: optimization parameters:
+            h_dim: 2048  # hidden dim as input in classifier
+            norm: weight # [weight, batch, layer, none]
+            act: ReLU # activation function
+            dropout: 0 # avoid overfitting
+        norm: softmax # [softmax, sigmoid]
+
+
+
+
+
+
+

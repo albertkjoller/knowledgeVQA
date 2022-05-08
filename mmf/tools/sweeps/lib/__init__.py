@@ -135,6 +135,17 @@ def get_args(argv=None):
         default="fair_research_and_engineering",
     )
 
+    # LSF params
+
+    parser.add_argument(
+        "--run_type", help="e", default="train_val"
+    )
+    parser.add_argument(
+        "--config", help="experiment folder config file", default=None
+    )
+
+
+
     # Slurm params
     parser.add_argument(
         "--salloc", action="store_true", help="run agaist current allocation"

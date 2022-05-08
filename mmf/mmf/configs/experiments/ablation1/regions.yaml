@@ -1,25 +1,19 @@
-# include running experiment configs
-includes:
-  - configs/experiments/defaults.yaml
-    # TODO: include optimized fusion module
-  - configs/experiments/pilot/numberbatch.yaml
 
 env:
   save_dir: ${env.part_save_dir}/regions
 
 
 
-model_config:
-  qlarifais:
-    # models from grid-feats-vqa
-    # taken from: https://github.com/facebookresearch/grid-feats-vqa
-    image_encoder:
-      type: grid_feats_vqa
-      params:
-        name: grid_feats_vqa
-        # specify backbone and type of features
-        # choices: [R-50-(grid or updn), X-101-grid, X-152-(grid or challenge(MoVie+GridFeat))]
-        backbone_features: ./mmf/configs/other/feat_configs/R-50-updn.yaml
-        pretrained: true
-        zero_init_residual: false
-      resize: average_pooling
+includes:
+    # include running experiment configs (defaults for all)
+  - configs/experiments/defaults.yaml
+    # graph module
+  - configs/experiments/modules/graphs/numberbatch.yaml
+    # image featurizer
+  - configs/experiments/modules/featurizers/grids.yaml
+    # TODO: what is the optimized?
+    # classifier
+  - configs/experiments/modules/classifiers/multilabel.yaml
+    # fusion module
+  - configs/experiments/modules/fusions/double_two_modality_arithmetic.yaml
+
