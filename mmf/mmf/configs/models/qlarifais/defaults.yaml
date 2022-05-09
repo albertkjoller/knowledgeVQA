@@ -3,7 +3,7 @@ model_config:
   qlarifais:
 
     dataset_name: ${datasets} # used to get answer vocabulary
-    vocab_file: ${dataset_config.${datasets}.answer_processor.params.vocab_file}
+    vocab_file: ${dataset_config.${datasets}.processors.answer_processor.params.vocab_file}
     cache_dir: ${env.cache_dir}
     i_dim: 2048
     q_dim: 768
