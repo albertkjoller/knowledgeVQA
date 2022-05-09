@@ -18,7 +18,7 @@ from mmf.common.registry import registry
 from mmf.models.base_model import BaseModel
 from mmf.utils.text import VocabDict
 from networkx import convert_node_labels_to_integers
-from torch_geometric.nn import BatchNorm, GCNConv, RGCNConv, SAGEConv
+#from torch_geometric.nn import BatchNorm, GCNConv, RGCNConv, SAGEConv
 from tqdm import tqdm
 from mmf.utils.configuration import get_mmf_cache_dir
 import gzip
