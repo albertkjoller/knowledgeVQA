@@ -111,7 +111,7 @@ def launch_train(args, config):
             os.makedirs(save_dir)
 
         # copy baseline model
-        checkpoint_last = os.path.join(save_dir, "current.ckpt")
+        checkpoint_last = os.path.join(save_dir, "baseline_model.ckpt")
         if (
             args.baseline_model
             and not os.path.exists(checkpoint_last)
