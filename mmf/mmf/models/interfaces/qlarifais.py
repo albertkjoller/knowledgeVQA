@@ -5,9 +5,11 @@
 
 import os
 import tempfile
+import pandas as pd
 from pathlib import Path
 from typing import Type, Union
 
+import pdb
 import torch
 import torchvision.datasets.folder as tv_helpers
 from omegaconf import DictConfig
@@ -25,10 +27,11 @@ BaseModelType = Type[BaseModel]
 
 
 class QlarifaisInterface(nn.Module):
-    def __init__(self, model: BaseModelType, config: DictConfig):
+    def __init__(self, model: BaseModelType, config: DictConfig, path_to_torch_cache: str):
         super().__init__()
         self.model = model
         self.config = config
+        self.path_to_torch_cache = path_to_torch_cache
         self.init_processors()
 
     def forward(self, *args, **kwargs):
@@ -36,7 +39,13 @@ class QlarifaisInterface(nn.Module):
 
     def init_processors(self):
         config = self.config.dataset_config.okvqa 
-        extra_params = {"data_dir": config.data_dir}
+        
+        # update data path
+        data_dir = pd.Series(config.data_dir.split("/"))
+        torch_string_index = data_dir[data_dir == 'torch'].index[-1]
+        data_dir = Path(self.path_to_torch_cache) / ("/").join(data_dir[torch_string_index:])
+        
+        extra_params = {"data_dir": data_dir.as_posix()}
         self.processor_dict = build_processors(config.processors, **extra_params)
 
     def classify(
@@ -44,6 +53,7 @@ class QlarifaisInterface(nn.Module):
         image: ImageType,
         text: str,
         top_k = None,
+        explain = False,
     ):
         """Classifies a given image and text in it wrt. multi-class output defined 
         by MMF answer-txt-file.
@@ -59,20 +69,13 @@ class QlarifaisInterface(nn.Module):
         """
         sample = Sample()
 
-        if isinstance(image, str):
-            if image.startswith("http"):
-                temp_file = tempfile.NamedTemporaryFile()
-                download(image, *os.path.split(temp_file.name), disable_tqdm=True)
-                image = tv_helpers.default_loader(temp_file.name)
-                temp_file.close()
-            else:
-                image = tv_helpers.default_loader(image)
+        self.image_tensor = image = self.processor_dict["image_processor"](image).unsqueeze(0)
+        self.image_tensor.requires_grad_(True)
 
-        image = self.processor_dict["image_processor"](image)
-        text = self.processor_dict["text_processor"]({"text": text})
+        self.text = text = self.processor_dict["text_processor"]({"text": text})
         answer = self.processor_dict["answer_processor"]
 
-        sample.image = image
+        sample.image = self.image_tensor.squeeze(0)
         sample.text = text["text"]
         
         if "input_ids" in text:
@@ -90,8 +93,10 @@ class QlarifaisInterface(nn.Module):
             top_k = [(p.item(), answer.idx2word(indices[0][idx].item())) for (idx, p) in enumerate(confidence[0])]        
             probs, answers = list(zip(*top_k))
             return probs, answers
+        
+        elif explain:
+            return scores
             
         else:
             confidence, index = torch.max(scores, dim=1)
-            label = answer.idx2word(index)            
-            return {"label": label, "confidence": confidence.item()}
+            return {"label": index.item(), "confidence": confidence.item()}

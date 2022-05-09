@@ -24,5 +24,6 @@ mmf_run config='configs/experiments/baseline/mul.yaml' \
     env.data_dir=/work3/s194253/torch/mmf/data \
     env.cache_dir=/work3/s194253/torch/mmf \
     env.save_dir=/work3/s194253/save/models/temporary \
+    training.max_updates=1 \
     training.max_epochs=None \
     trainer.params.gpus=1 \

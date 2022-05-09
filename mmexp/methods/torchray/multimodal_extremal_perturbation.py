@@ -21,17 +21,14 @@ __all__ = [
 ]
 """
 
-import math
-import matplotlib
+
 from tqdm import tqdm
 
 #matplotlib.use("Agg") #TODO: remove or keep?
 import matplotlib.pyplot as plt
 import numpy as np
-from sklearn.linear_model import Ridge, lars_path
 
 import torch
-import torch.nn.functional as F
 import torch.optim as optim
 
 from torchray.utils import imsmooth, imsc
@@ -43,9 +40,7 @@ from torchray.attribution.extremal_perturbation import (
     contrastive_reward,
 )
 
-from PIL import Image
-from torchray.utils import imsc
-from torchvision import transforms
+
 
 BLUR_PERTURBATION = "blur"
 """Blur-type perturbation for :class:`Perturbation`."""
@@ -63,23 +58,14 @@ DUAL_VARIANT = "dual"
 """Combined game for :func:`extremal_perturbation`."""
 
 
-def image2tensor(image_path):
-    # convert image to torch tensor with shape (1 * 3 * 224 * 224)
-    img = Image.open(image_path)
-    p = transforms.Compose([transforms.Scale((224, 224))])
-
-    img, i = imsc(p(img), quiet=False)
-    return torch.reshape(img, (1, 3, 224, 224))
-
-
 # --------------------------explainer of both image & text----------------------------
 def multi_extremal_perturbation(
     model,
     input_img,
-    image_path,
+    image_object,
     input_text,
     target,
-    areas=[0.1],
+    areas=[0.12],
     perturbation=BLUR_PERTURBATION,
     max_iter=800,
     num_levels=8,
@@ -148,7 +134,8 @@ def multi_extremal_perturbation(
 
 
     if len(input_img.shape) != 4:
-        raise ValueError(f"Image tensor is suppose to be 4 dimensional")
+        input_img = input_img.unsqueeze(0)
+        #raise ValueError(f"Image tensor is suppose to be 4 dimensional")
 
     if len(input_text) == 0:
         raise ValueError(f"Empty text")
@@ -243,12 +230,7 @@ def multi_extremal_perturbation(
             x = torch.flip(x, dims=(3,))
 
         # Evaluate the model on the masked data.
-        y = model.classify(image_path, input_text, explain=True)
-
-        # update text
-        if t % 402 == 0 and max_iter >= 800:
-            Result = explain_text(input_text, torch.squeeze(x, 0), model)
-            Not_hateful, Hateful = text_rebuilder(input_text, Result)
+        y = model.classify(image_object, input_text, explain=True)
 
         # Get reward.
         reward = reward_func(y, target, variant=variant)
