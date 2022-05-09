@@ -34,13 +34,8 @@ class Qlarifais(BaseModel):
         model = super().from_pretrained(model_name, *args, **kwargs)
         config = load_pretrained_model(model_name)["full_config"]
         OmegaConf.set_struct(config, True)
-<<<<<<< HEAD
         return QlarifaisInterface(model, config, path_to_torch_cache)
     
-=======
-        return QlarifaisInterface(model, config)
-
->>>>>>> 2782e35b9137a538540edaec79e38d2bbffc4153
     @classmethod
     def config_path(cls):
         # Relative to user dir root
@@ -117,7 +112,7 @@ class Qlarifais(BaseModel):
         logits = self.classifier(fused_features)
         # average embedded annotator answer for type contrastive loss
         avg_embedded_answers  = self.graph_encoder(sample_list['answers'])
-        if self.config.classifier.output_type == 'embeddings'
+        if self.config.classifier.output_type == 'embeddings':
             prediction_scores = torch.nansum(logits.unsqueeze(dim=1) * self.embedded_answer_vocab, dim=2)
         else:
             prediction_scores = logits
