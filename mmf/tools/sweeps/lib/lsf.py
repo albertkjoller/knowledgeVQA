@@ -141,16 +141,16 @@ def launch_train(args, config):
         return
 
     # generate train command
-    '''
+
     train_cmd = [
         "python3",
         "-u",
         os.path.join(get_mmf_root(), "..", "mmf_cli", "run.py"),
     ]
-    '''
-    train_cmd = [
-        "mmf_run", "config={}".format(args.config), "model", args.model_type.split('/')[-1][:-5], "run_type", args.run_type # , the dataset
-    ]
+
+    #train_cmd = [
+    #    "mmf_run", "config={}".format(args.config), "model", args.model_type.split('/')[-1][:-5], "run_type", args.run_type # , the dataset
+    #]
 
 
 
