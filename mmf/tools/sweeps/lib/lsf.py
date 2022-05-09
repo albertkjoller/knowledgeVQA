@@ -160,6 +160,10 @@ def launch_train(args, config):
     #    train_cmd.extend(["config", args.config])
     train_cmd.extend(["checkpoint.resume", "True"])
     train_cmd.extend(["env.save_dir", save_dir])
+    train_cmd.extend(["env.cache_dir", args.cache_dir])
+    train_cmd.extend(["env.data_dir", args.data_dir])
+
+
     if args.tensorboard:
         train_cmd.extend(["training.tensorboard", "1"])
         train_cmd.extend(["env.tensorboard_logdir", tensorboard_logdir])

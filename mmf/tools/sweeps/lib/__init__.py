@@ -44,6 +44,19 @@ def get_args(argv=None):
         default="aicommerce__multimodal_model",
         help="registered model type",
     )
+
+    # todo:
+    parser.add_argument(
+        "--cache_dir",
+        default="",
+        help="",
+    )
+    parser.add_argument(
+        "--data_dir",
+        default="",
+        help="",
+    )
+
     parser.add_argument(
         "--oncall", type=str, default="ai_commerce", help="oncall team "
     )

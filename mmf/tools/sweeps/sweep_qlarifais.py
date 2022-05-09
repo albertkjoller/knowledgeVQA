@@ -12,6 +12,8 @@ python mmf/tools/sweeps/sweep_qlarifais.py \
 --backend lsf \
 --resume_failed \
 --checkpoints_dir /work3/s194262/save/sweeps \
+--cache_dir /work3/s194262/torch/mmf \
+--data_dir /work3/s194262/torch/mmf/data\
 --run_type train_val \
 --config /zhome/96/8/147177/Desktop/explainableVQA/mmf/mmf/configs/experiments/baseline/mul.yaml \
 -prefix testrun \
@@ -29,6 +31,8 @@ python mmf/tools/sweeps/sweep_qlarifais.py \
 --backend lsf \
 --resume_failed \
 --checkpoints_dir /Users/arond.jacobsen/Documents/GitHub/explainableVQA/mmf/save \
+--cache_dir
+--data_dir
 --run_type train_val \
 --config /Users/arond.jacobsen/Documents/GitHub/explainableVQA/mmf/mmf/configs/experiments/baseline/mul.yaml \
 -prefix testrun \
