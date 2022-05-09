@@ -57,6 +57,11 @@ class Qlarifais(BaseModel):
             # initiating attention module
             self.attention_module = build_attention_module(self.config.attention.params)
 
+        #self.answer_processor = registry.get(self.config.datasets + "_answer_processor")
+        #self.answer_vocab = self.answer_processor.answer_vocab
+        self.answer_vocab = registry.get(self.config.datasets + "_answer_processor").answer_vocab
+        self.embedded_answer_vocab = self.numberbatch(self.answer_vocab.word_list)
+
     def forward(self, sample_list):
 
         # --- QUESTION EMBEDDINGS ---
@@ -107,6 +112,12 @@ class Qlarifais(BaseModel):
         logits = self.classifier(fused_features)
         # average embedded annotator answer for type contrastive loss
         avg_embedded_answers  = self.graph_encoder(sample_list['answers'])
-        output = {"output_type": self.config.classifier.output_type, "avg_embedded_answers": avg_embedded_answers,
-                  "scores": logits}
+        if self.config.classifier.output_type == 'embeddings'
+            prediction_scores = torch.nansum(logits.unsqueeze(dim=1) * self.embedded_answer_vocab, dim=2)
+        else:
+            prediction_scores = logits
+
+        output = {"scores": logits, "output_type": self.config.classifier.output_type,
+                  "avg_embedded_answers": avg_embedded_answers, 'prediction_scores': prediction_scores}
+
         return output

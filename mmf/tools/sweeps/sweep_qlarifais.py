@@ -16,7 +16,7 @@ python mmf/tools/sweeps/sweep_qlarifais.py \
 --data_dir /work3/s194262/torch/mmf/data \
 --run_type train_val \
 --config /zhome/96/8/147177/Desktop/explainableVQA/mmf/mmf/configs/experiments/baseline/mul.yaml \
--prefix testrun \
+-prefix mul \
 -t -1 \
 -n 1 \
 -q gpua100 \
@@ -63,8 +63,13 @@ def get_grid(args):
     # experiment specific hyperparams
     if args.config.split('/')[-2] == 'baseline':
         hp.extend([hyperparam('model_config.qlarifais.fusion.params.dropout', [0.1, 0.2],
-                              save_dir_key=lambda val: f"lr{val}")])
+                              save_dir_key=lambda val: f"do{val}")])
+        # tilføj hidden dim
+
+
     # todo: seed if test
+    # set
+    # random seeds
 
     return hp
 

@@ -1,0 +1,16 @@
+
+
+includes:
+    # include running experiment configs (defaults for all)
+  - configs/experiments/defaults.yaml
+    # TODO: what is the optimized?
+    # fusion module
+  - configs/experiments/baseline/mul.yaml
+
+
+model_config:
+  qlarifais:
+    fusion:
+      params:
+        h_dim: 5000  # hidden dim as input in classifier
+        dropout: 0.2 # avoid overfitting
