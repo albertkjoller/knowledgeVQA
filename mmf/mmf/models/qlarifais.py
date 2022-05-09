@@ -35,7 +35,7 @@ class Qlarifais(BaseModel):
         config = load_pretrained_model(model_name)["full_config"]
         OmegaConf.set_struct(config, True)
         return QlarifaisInterface(model, config, path_to_torch_cache)
-    
+
     @classmethod
     def config_path(cls):
         # Relative to user dir root
@@ -59,7 +59,7 @@ class Qlarifais(BaseModel):
 
         #self.answer_processor = registry.get(self.config.datasets + "_answer_processor")
         #self.answer_vocab = self.answer_processor.answer_vocab
-        self.answer_vocab = registry.get(self.config.datasets + "_answer_processor").answer_vocab
+        self.answer_vocab = registry.get(self.config.dataset_name + "_answer_processor").answer_vocab
         self.embedded_answer_vocab = self.graph_encoder(self.answer_vocab.word_list)
 
     def forward(self, sample_list):

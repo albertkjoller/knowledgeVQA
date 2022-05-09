@@ -8,5 +8,5 @@ includes:
   - configs/experiments/modules/fusions/two_modality_arithmetic.yaml
     # TODO: what is the optimized?
     # classifier
-  - configs/experiments/modules/classifiers/multilabel.yaml
+  - configs/experiments/modules/classifiers/embeddings.yaml
 
