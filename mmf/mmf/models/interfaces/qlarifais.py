@@ -83,6 +83,7 @@ class QlarifaisInterface(nn.Module):
 
         sample_list = SampleList([sample])
         sample_list = sample_list.to(next(self.model.parameters()).device)
+        sample_list['answers'] = 'empty'    
         
         output = self.model(sample_list)
         scores = nn.functional.softmax(output["scores"], dim=1)                      

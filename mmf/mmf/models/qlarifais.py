@@ -12,6 +12,7 @@ from mmf.utils.checkpoint import load_pretrained_model
 from mmf.utils.configuration import get_mmf_cache_dir
 from mmf.utils.text import *
 
+
 from mmf.utils.build import (
     build_image_encoder,
     build_text_encoder,
