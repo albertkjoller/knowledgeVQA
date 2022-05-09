@@ -1,11 +1,12 @@
 #!/bin/sh
-#BSUB -J test_run.visual_bert.bs256.s1.adam_w.lr1e-05.mu22000.fbFalse
-#BSUB -o /Users/arond.jacobsen/Documents/GitHub/explainableVQA/mmf/tools/sweeps/save/test_runvisual_bert.bs256.s1.adam_w.lr1e-05.mu22000.fbFalse.ngpu1/output_file_%J.out
-#BSUB -e /Users/arond.jacobsen/Documents/GitHub/explainableVQA/mmf/tools/sweeps/save/test_runvisual_bert.bs256.s1.adam_w.lr1e-05.mu22000.fbFalse.ngpu1/error_file_%J.err
+#BSUB -J testrun.qlarifais.lr0.0001.lr0.2
+#BSUB -o /Users/arond.jacobsen/Documents/GitHub/explainableVQA/mmf/save/testrunqlarifais.lr0.0001.lr0.2.ngpu1/output_file_%J.out
+#BSUB -e /Users/arond.jacobsen/Documents/GitHub/explainableVQA/mmf/save/testrunqlarifais.lr0.0001.lr0.2.ngpu1/error_file_%J.err
 #BSUB -n 1
-#BSUB -gpu num=1
+#BSUB -q gpua100
+#BSUB -gpu 'num=1:mode=exclusive_process'
 #BSUB -W 05:00
-#BSUB -R
+#BSUB -R 'rusage[mem=128G]'
 #BSUB -B
 #BSUB -N
 
@@ -16,7 +17,7 @@ source vqa2/bin/activate
 cd mmf
 
 
-python3 -u /Users/arond.jacobsen/Documents/GitHub/explainableVQA/mmf/mmf/../mmf_cli/run.py distributed.world_size 1 checkpoint.resume True env.save_dir /Users/arond.jacobsen/Documents/GitHub/explainableVQA/mmf/tools/sweeps/save/test_runvisual_bert.bs256.s1.adam_w.lr1e-05.mu22000.fbFalse.ngpu1 run_type train_val config projects/visual_bert/configs/vqa2/defaults.yaml training.num_workers 5 dataset vqa2 model visual_bert training.batch_size 256 training.seed 1 scheduler.type warmup_cosine scheduler.params.num_warmup_steps 2000 scheduler.params.num_training_steps 22000 optimizer.type adam_w optimizer.params.lr 1e-05 optimizer.params.eps 1e-08 training.max_updates 22000 training.log_format json training.pin_memory True training.log_interval 1000 training.checkpoint_interval 1000 training.evaluation_interval 4000 training.find_unused_parameters True model_config.visual_bert.freeze_base False
+python3 -u /Users/arond.jacobsen/Documents/GitHub/explainableVQA/mmf/mmf/../mmf_cli/run.py distributed.world_size 1 checkpoint.resume True env.save_dir /Users/arond.jacobsen/Documents/GitHub/explainableVQA/mmf/save/testrunqlarifais.lr0.0001.lr0.2.ngpu1 run_type train_val config /Users/arond.jacobsen/Documents/GitHub/explainableVQA/mmf/mmf/configs/experiments/baseline/mul.yaml model qlarifais dataset okvqa optimizer.params.lr 0.0001 model_config.qlarifais.fusion.params.dropout 0.2
 
 
 wait $! 
