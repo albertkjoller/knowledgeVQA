@@ -5,8 +5,8 @@
 import lib as sweep
 from lib import hyperparam
 
+# todo: adjust
 '''
-
 python mmf/tools/sweeps/sweep_qlarifais.py \
 --baseline_model /zhome/96/8/147177/Desktop/explainableVQA/mmf/mmf/models/qlarifais.py \
 --backend lsf \
@@ -23,8 +23,9 @@ python mmf/tools/sweeps/sweep_qlarifais.py \
 -gpus "num=1:mode=exclusive_process" \
 -R "rusage[mem=128G]" \
 -W 05:00 \
+'''
 
-
+'''
 # on mac
 python mmf/tools/sweeps/sweep_qlarifais.py \
 --baseline_model /Users/arond.jacobsen/Documents/GitHub/explainableVQA/mmf/mmf/models/qlarifais.py \
