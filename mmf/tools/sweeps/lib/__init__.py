@@ -151,7 +151,7 @@ def get_args(argv=None):
     # LSF params
 
     parser.add_argument(
-        "--run_type", help="e", default="train_val"
+        "--run_type", choices = ['train', 'train_val', 'test'], help="running type in mmf", default="train_val"
     )
 
 

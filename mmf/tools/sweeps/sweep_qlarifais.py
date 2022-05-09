@@ -13,7 +13,7 @@ python mmf/tools/sweeps/sweep_qlarifais.py \
 --resume_failed \
 --checkpoints_dir /work3/s194262/save/sweeps \
 --cache_dir /work3/s194262/torch/mmf \
---data_dir /work3/s194262/torch/mmf/data\
+--data_dir /work3/s194262/torch/mmf/data \
 --run_type train_val \
 --config /zhome/96/8/147177/Desktop/explainableVQA/mmf/mmf/configs/experiments/baseline/mul.yaml \
 -prefix testrun \
@@ -58,7 +58,7 @@ def get_grid(args):
                hyperparam("model", "qlarifais", save_dir_key=lambda val: val), hyperparam("dataset", "okvqa")])
 
     # general hyperparams
-    hp.extend([hyperparam("optimizer.params.lr", [0.0001], save_dir_key=lambda val: f"lr{val}")])
+    hp.extend([hyperparam("optimizer.params.lr", [0.0001, 0.001], save_dir_key=lambda val: f"lr{val}")])
 
     # experiment specific hyperparams
     if args.config.split('/')[-2] == 'baseline':
