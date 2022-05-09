@@ -112,7 +112,7 @@ class Qlarifais(BaseModel):
         logits = self.classifier(fused_features)
         # average embedded annotator answer for type contrastive loss
         avg_embedded_answers  = self.graph_encoder(sample_list['answers'])
-        if self.config.classifier.output_type == 'embeddings'
+        if self.config.classifier.output_type == 'embeddings':
             prediction_scores = torch.nansum(logits.unsqueeze(dim=1) * self.embedded_answer_vocab, dim=2)
         else:
             prediction_scores = logits
