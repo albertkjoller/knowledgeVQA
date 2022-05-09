@@ -18,7 +18,7 @@ python mmf/tools/sweeps/sweep_qlarifais.py \
 --cache_dir /work3/s194262/torch/mmf \
 --data_dir /work3/s194262/torch/mmf/data \
 -t -1 \
--n 1 \
+-n 4 \
 -q gpuv100 \
 -gpus "num=1:mode=exclusive_process" \
 -R "rusage[mem=128G]" \
