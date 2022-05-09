@@ -152,9 +152,7 @@ def launch_train(args, config):
     #    "mmf_run", "config={}".format(args.config), "model", args.model_type.split('/')[-1][:-5], "run_type", args.run_type # , the dataset
     #]
 
-
-
-    train_cmd.extend(["distributed.world_size", int(args.num_nodes * args.num_gpus)])
+    train_cmd.extend(["distributed.world_size", args.num_nodes * args.num_gpus])
     if args.num_nodes > 1:
         train_cmd.extend(["distributed.port", int(get_random_port())])
 
@@ -186,7 +184,7 @@ def launch_train(args, config):
         ), "distributed training cannot be combined with --local"
         if not dry_run("start training locally"):
             if "CUDA_VISIBLE_DEVICES" not in env:
-                env["CUDA_VISIBLE_DEVICES"] = ",".join(map(str, range(args.num_gpus * args.num_gpus)))
+                env["CUDA_VISIBLE_DEVICES"] = ",".join(map(str, range(args.num_nodes * args.num_gpus)))
             env["NCCL_DEBUG"] = "INFO"
             train_proc = subprocess.Popen(train_cmd, env=env)
             train_proc.wait()
