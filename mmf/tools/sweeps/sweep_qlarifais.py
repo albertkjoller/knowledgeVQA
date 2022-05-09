@@ -64,7 +64,7 @@ def get_grid(args):
 
     # general hyperparams
     # learning rate (lr)
-    hp.extend([hyperparam("optimizer.params.lr", [1e-4, 1e-3], save_dir_key=lambda val: f"lr{val}")])
+    #hp.extend([hyperparam("optimizer.params.lr", [1e-4, 1e-3], save_dir_key=lambda val: f"lr{val}")])
     # weight decay (wd)
     #hp.extend([hyperparam("optimizer.params.weight_decay", [1e-5, 1e-7, 1e-8, 1e-10], save_dir_key=lambda val: f"wd{val}")])
     # todo: scheduler?
@@ -72,7 +72,8 @@ def get_grid(args):
     # we keep batch size, epochs(only look at best validation)...??
 
     # experiment specific hyperparams
-    if args.config.split('/')[-2] == 'baseline':
+    # baseline experiment (vary fusion modules)
+    if args.config.split('/')[-2] == 'baseline1':
         # fusion dropout (fdo)
         hp.extend([hyperparam('model_config.qlarifais.fusion.params.dropout', [0.1, 0.2],
                               save_dir_key=lambda val: f"fdo{val}")])
@@ -80,7 +81,7 @@ def get_grid(args):
         #hp.extend([hyperparam('model_config.qlarifais.fusion.params.h_dim', [2048, 5000],
         #           save_dir_key=lambda val: f"fhd{val}")])
 
-
+    # pilot experiment (vary fusion modules by included Numberbatch)
     if args.config.split('/')[-2] == 'pilot':
         # fusion dropout (fdo)
         hp.extend([hyperparam('model_config.qlarifais.fusion.params.dropout', [0.1, 0.2],
