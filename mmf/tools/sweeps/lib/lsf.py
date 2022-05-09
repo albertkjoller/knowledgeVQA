@@ -99,10 +99,10 @@ def launch_train(args, config):
     save_dir_key = save_dir_key.replace(",", "_")
     num_total_gpus = args.num_nodes * args.num_gpus
     save_dir = os.path.join(
-        args.checkpoints_dir, f"{args.prefix}{save_dir_key}.ngpu{num_total_gpus}"
+        args.checkpoints_dir, f"{args.prefix}/{save_dir_key}"
     )
     tensorboard_logdir = os.path.join(
-        args.tensorboard_logdir, f"{args.prefix}{save_dir_key}.ngpu{num_total_gpus}"
+        args.tensorboard_logdir, f"{args.prefix}/{save_dir_key}"
     )
 
     # create save directory if it doesn"t exist
@@ -148,9 +148,6 @@ def launch_train(args, config):
         os.path.join(get_mmf_root(), "..", "mmf_cli", "run.py"),
     ]
 
-    #train_cmd = [
-    #    "mmf_run", "config={}".format(args.config), "model", args.model_type.split('/')[-1][:-5], "run_type", args.run_type # , the dataset
-    #]
 
     train_cmd.extend(["distributed.world_size", str(args.num_nodes * args.num_gpus)])
     if args.num_nodes > 1:

@@ -35,11 +35,19 @@ class Qlarifais(BaseModel):
         config = load_pretrained_model(model_name)["full_config"]
         OmegaConf.set_struct(config, True)
         return QlarifaisInterface(model, config, path_to_torch_cache)
-    
+
     @classmethod
     def config_path(cls):
         # Relative to user dir root
         return "configs/models/qlarifais/defaults.yaml"
+
+    # Do indirect path stuff with mmf
+    def mmf_indirect(path):
+        if os.path.exists(path):
+            return path
+        else:
+            path = os.path.join(get_mmf_cache_dir(), "data/datasets", path)
+            return path
 
     def build(self):
 
@@ -59,7 +67,8 @@ class Qlarifais(BaseModel):
 
         #self.answer_processor = registry.get(self.config.datasets + "_answer_processor")
         #self.answer_vocab = self.answer_processor.answer_vocab
-        self.answer_vocab = registry.get(self.config.datasets + "_answer_processor").answer_vocab
+        #self.answer_vocab = registry.get(self.config.dataset_name + "_answer_processor").answer_vocab
+        self.answer_vocab = VocabDict(mmf_indirect(config.vocab_file))
         self.embedded_answer_vocab = self.graph_encoder(self.answer_vocab.word_list)
 
     def forward(self, sample_list):

@@ -56,6 +56,8 @@ class Numberbatch(nn.Module):
         self.numberbatch = {}
         self.device = get_current_device()
 
+        # todo: write that we are loading and have finished loading numberbatch
+
         with open(mmf_indirect(self.config.filepath), 'rb') as f:
 
             info = f.readlines(1)
