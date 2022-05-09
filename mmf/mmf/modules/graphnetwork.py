@@ -22,6 +22,7 @@ from torch_geometric.nn import BatchNorm, GCNConv, RGCNConv, SAGEConv
 from tqdm import tqdm
 from mmf.utils.configuration import get_mmf_cache_dir
 import gzip
+from mmf.utils.general import get_current_device, updir
 
 
 
@@ -53,11 +54,11 @@ class Numberbatch(nn.Module):
 
         self.max_seq_length = self.config.max_seq_length
         self.numberbatch = {}
+        self.device = get_current_device()
 
         with open(mmf_indirect(self.config.filepath), 'rb') as f:
 
             info = f.readlines(1)
-
             lines, self.numberbatch_dim = (int(x) for x in info[0].decode('utf-8').strip("\n").split(" "))
 
             for line in tqdm(f, total=lines):
@@ -66,19 +67,65 @@ class Numberbatch(nn.Module):
 
                 # create tensor-dictionary
                 word = l.split(' ')[0]
+                #tensor = torch.tensor(list(map(float, l.split(' ')[1:])), dtype=torch.float32)
                 tensor = torch.tensor(list(map(float, l.split(' ')[1:])), dtype=torch.float32)
                 self.numberbatch[word] = tensor
 
-    def forward(self, sample_list):
+    def conceptualize(self, tokenized_sentence):
 
-        question_tokens = sample_list['tokens']
-        batch_size = len(question_tokens)
+        """
+        Input:
+        sentence (str): input sentence
+
+        Output:
+        concepts_found (set): the set of concepts in the sentence which are available in numberbatch
+        """
+
+        concepts_found = []
+        start = 0
+        while start < len(tokenized_sentence):
+            for end in range(len(tokenized_sentence), start, -1):
+                concept = tokenized_sentence[start:end]
+                try:
+                    self.numberbatch["_".join(concept)]
+                    concepts_found.append("_".join(concept))
+                    start += 1
+                    break
+                except KeyError:
+                    if start == end - 1:
+                        start += 1
+                    else:
+                        pass
+
+        return concepts_found
+
+
+    def forward(self, text):
+        # input can be batch with list containing tokens or list of strings
+
+        batch_size = len(text)
         # initializing graph embeddings
         X = torch.ones((batch_size, self.numberbatch_dim, self.max_seq_length))
+        # todo: write other than batch?
         # looping tokens for each batch
-        for batch, tokens in enumerate(question_tokens):
+        for batch, tokens in enumerate(text):
+            # if input is a string it needs tokenization
+            if type(tokens) == str: # i.e. text is not tokenized
+                tokens = tokens.split(' ') #
+
+            # if bert has tokenized the text
+            if '[CLS]' and '[SEP]' in tokens:
+                tokens.remove('[CLS]')
+                tokens.remove('[SEP]')
+
+            tokens = self.conceptualize(tokens) # if bert has tokenized
             # set to nan values as default
             X[batch] *= np.nan
+
+            # if no token found create one empty numberbatch embedding
+            if tokens == []:
+                X[batch][:,0] = torch.zeros(self.numberbatch_dim)
+
             for i, token in enumerate(tokens):
                 # check if token is present in numberbatch
                 try:
@@ -87,15 +134,8 @@ class Numberbatch(nn.Module):
                 except KeyError:
                     pass
         # average embeddings
-        X = torch.from_numpy(np.nanmean(X, axis=2))
-        print('here:', X)
-
+        X = torch.from_numpy(np.nanmean(X, axis=2)).to(get_current_device())
         return X
-
-
-
-
-
 
 
 

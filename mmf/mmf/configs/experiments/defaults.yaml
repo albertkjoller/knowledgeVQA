@@ -16,6 +16,13 @@ dataset_config:
           vocab_file: okvqa/defaults/annotations/annotations/answer_vocab_count10.txt
     dump_output_dir: ${env.save_dir}
     dump_pred_info: false
+  embedding_models:
+    numberbatch: # [numberbatch, krisp]
+      type: numberbatch
+      # downloaded from: <https://github.com/commonsense/conceptnet-numberbatch>
+      filepath: okvqa/defaults/graph/numberbatch-en.txt
+      max_seq_length: ${dataset_config.${datasets}.processors.text_processor.params.max_seq_length}
+
 
 scheduler:
   type: warmup_cosine
@@ -35,13 +42,17 @@ optimizer:
 
 evaluation:
   metrics:
+    - numberbatch_score
     - accuracy
     - vqa_accuracy
-    #- bert_score
     #- binary_f1
     #- roc_auc
 
 training:
+
+  detect_anomaly: true #TODO:??
+  # Level of logging, only logs which are >= to current level will be logged
+  logger_level: info
   batch_size: 128 # default: 512, 128 or higher performs better (2017 tips and tricks)
   lr_scheduler: true   # Don't forget to update schedule_attributes if you update this
   max_updates: null # default: 22000, krisp uses 88000
@@ -68,7 +79,7 @@ trainer:
     gpus: 1 # TODO: what works best
     logger: true
     progress_bar_refresh_rate: 0.1
-    val_check_interval: 5000 # checkpointing
+    val_check_interval: 5000 # checkpointing every 5000 update
 
 
 

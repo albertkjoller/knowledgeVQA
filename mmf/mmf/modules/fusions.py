@@ -82,8 +82,10 @@ class TwoModalityArithmetic(nn.Module):
 
         # if the image features are of shape [batch, k, i_dim]
         #   - i.e. fusion is used in the attention module
+
         if len(i.size()) == 3:
             q = q.unsqueeze(1)
+
 
         i_proj = self.i_proj(i) # [batch, k, num_hid]
         q_proj = self.q_proj(q)
@@ -192,10 +194,10 @@ class DoubleTwoModalityArithmetic(nn.Module):
         # initializing layers
         # e.g. image and question
         config.guided_dim = config.q_dim # small adjustment
-        self.i_q1_proj = TwoModalityArithmetic(config.params)
+        self.i_q1_proj = TwoModalityArithmetic(config)
         # e.g. image and graph
         config.guided_dim = config.g_dim # small adjustment
-        self.i_q2_proj = TwoModalityArithmetic(config.params)
+        self.i_q2_proj = TwoModalityArithmetic(config)
 
         self.nonlinear = FCNet([int(config.h_dim), int(config.h_dim)], dropout=int(config.dropout),
                             norm=config.norm, act=config.act)
@@ -203,21 +205,13 @@ class DoubleTwoModalityArithmetic(nn.Module):
 
     def forward(self, i, q1, q2):
 
-        # if the image features are of shape [batch, k, i_dim]
-        #   - i.e. fusion is used in the attention module
-        if len(i.size()) == 3:
-            q1 = q1.unsqueeze(1)
-            q2 = q2.unsqueeze(1)
-
         # [batch, k, num_hid]
         i_q1_proj = self.i_q1_proj(i, q1)
         i_q2_proj = self.i_q2_proj(i, q2)
-
         if self.operation == 'multiply':
             joint_repr = i_q1_proj * i_q2_proj
         elif self.operation == 'add':
             joint_repr = i_q1_proj + i_q2_proj
-
 
         joint_feature = self.nonlinear(joint_repr)
 
@@ -232,22 +226,16 @@ class DoubleTwoModalityAMA(nn.Module):
         norm_layer = get_norm(config.norm)
         # initializing layers
         # e.g. image and question
-        config.guided_dim = config.params.q_dim  # small adjustment
-        self.i_q1_proj = TwoModalityAMA(config.params)
+        config.guided_dim = config.q_dim  # small adjustment
+        self.i_q1_proj = TwoModalityAMA(config)
         # e.g. image and graph
-        config.guided_dim = config.params.g_dim  # small adjustment
-        self.i_q2_proj = TwoModalityAMA(config.params)
+        config.guided_dim = config.g_dim  # small adjustment
+        self.i_q2_proj = TwoModalityAMA(config)
 
         self.nonlinear = FCNet([int(config.h_dim), int(config.h_dim)], dropout=int(config.dropout),
                                norm=config.norm, act=config.act)
 
     def forward(self, i, q1, q2):
-
-        # if the image features are of shape [batch, k, i_dim]
-        #   - i.e. fusion is used in the attention module
-        if len(i.size()) == 3:
-            q1 = q1.unsqueeze(1)
-            q2 = q2.unsqueeze(1)
 
         # [batch, k, num_hid]
         i_q1_proj = self.i_q1_proj(i, q1)

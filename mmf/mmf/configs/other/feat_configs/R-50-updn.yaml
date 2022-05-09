@@ -2,4 +2,4 @@ _BASE_: "Base-RCNN-updn.yaml"
 MODEL:
   WEIGHTS: "detectron2://ImageNetPretrained/MSRA/R-50.pkl"
   RESNETS:
-    DEPTH: 50
+    DEPTH: 100

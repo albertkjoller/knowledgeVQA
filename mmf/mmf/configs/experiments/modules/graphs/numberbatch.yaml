@@ -1,0 +1,13 @@
+
+
+model_config:
+  qlarifais:
+    graph_encoder:
+      use: true
+      type: numberbatch # [numberbatch, krisp]
+      g_dim: ${model_config.qlarifais.g_dim}
+      # downloaded from: <https://github.com/commonsense/conceptnet-numberbatch>
+      filepath: okvqa/defaults/graph/numberbatch-en.txt
+      max_seq_length: ${dataset_config.${datasets}.processors.text_processor.params.max_seq_length}
+
+

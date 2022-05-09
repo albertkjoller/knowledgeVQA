@@ -152,9 +152,7 @@ class Report(OrderedDict):
 
         return self.apply_fn(fn, fields)
 
-    def accumulate_tensor_fields_and_loss(
-        self, report: "Report", field_list: List[str]
-    ):
+    def accumulate_tensor_fields_and_loss(self, report: "Report", field_list: List[str]):
         for key in field_list:
             if key == "__prediction_report__":
                 continue
@@ -164,8 +162,13 @@ class Report(OrderedDict):
                     + "might not work as expected."
                 )
                 continue
+
             if isinstance(self[key], torch.Tensor):
                 self[key] = torch.cat((self[key], report[key]), dim=0)
+
+            # also add if list
+            elif isinstance(self[key], list):
+                self[key] += report[key]
 
         self._accumulate_loss(report)
 

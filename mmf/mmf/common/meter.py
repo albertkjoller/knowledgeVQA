@@ -68,7 +68,6 @@ class Meter:
             the current meter
 
         Usage::
-
         >>> meter = Meter()
         >>> report = Report(prepared_batch, model_output)
         >>> meter.update_from_report(report)

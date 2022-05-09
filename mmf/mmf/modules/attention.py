@@ -32,12 +32,12 @@ class DualOneWayTopDown(nn.Module):
         self.fusion_module = build_fusion_module(config.fusion)
         # to one dim
         self.transform = norm_layer(nn.Linear(config.fusion.params.h_dim, 1), dim=None)
+        # e.g. softmax or sigmoid
         self.norm = get_norm(config.norm)
 
     def forward(self, i, q):
 
         attention = self.norm(self.transform(self.fusion_module(i, q)))
-
         return attention
 
 
@@ -55,8 +55,15 @@ class TripleOneWayTopDown(nn.Module):
     def forward(self, i, q1, q2):
 
         attention = self.norm(self.transform(self.fusion_module(i, q1, q2)))
-
+        print(attention.shape)
         return attention
+
+
+
+
+
+
+
 
 
 

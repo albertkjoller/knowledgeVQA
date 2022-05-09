@@ -45,6 +45,7 @@ Example config for above metric::
 """
 
 import collections
+import sys
 import warnings
 from typing import Dict
 
@@ -62,6 +63,8 @@ from sklearn.metrics import (
 from sklearn.preprocessing import MultiLabelBinarizer
 from torch import Tensor
 import numpy as np
+from tqdm import tqdm
+
 
 def _convert_to_one_hot(expected, output):
     # This won't get called in case of multilabel, only multiclass or binary
@@ -92,6 +95,26 @@ class Metrics:
             metric_list = [metric_list]
 
         self.metrics = self._init_metrics(metric_list)
+
+        # todo:
+        from mmf.utils.configuration import get_global_config
+        self.config = get_global_config()
+        if self.config.model == 'qlarifais': # todo: more general?
+            from mmf.utils.build import build_graph_encoder, build_processors
+            from mmf.utils.text import tokenize
+            self.tokenize = tokenize
+            self.numberbatch = build_graph_encoder(self.config.dataset_config.embedding_models.numberbatch)
+            self.answer_processor = registry.get(self.config.datasets + "_answer_processor")
+
+            self.answer_vocab = self.answer_processor.answer_vocab
+            # todo: update for new tokenizer in numberbatch
+
+            self.embedded_answer_vocab = self.numberbatch(self.answer_vocab.word_list)  # [batch_size, g_dim]
+
+            self.top_k = int(self.config.model_config[self.config.model].classifier.params.top_k)
+            self.num_not_top_k = len(self.embedded_answer_vocab) - self.top_k # if classifier outputs embeddings
+
+
 
     def _init_metrics(self, metric_list):
         metrics = {}
@@ -150,6 +173,33 @@ class Metrics:
         dataset_type = sample_list.dataset_type
         dataset_name = sample_list.dataset_name
 
+        # todo: general?
+        try:
+            if model_output['output_type'] == 'multilabel': # model output is based on answer vocabulary
+                # find top k answer candidate and convert it to an embedding
+                top_k_indices = torch.topk(model_output['scores'], self.top_k, largest=True, dim=1).indices
+                # meaning the numberbatch embeddings
+                embeddings = self.numberbatch([[self.answer_vocab.idx2word(idx)] for idx in top_k_indices])
+                model_output['embeddings'] =  embeddings
+
+
+            elif model_output['output_type'] == 'embeddings':
+                # restructure
+                model_output['embeddings'] = model_output['scores']
+
+                # finding similarities scores of embedding and answer candidates with nan as zeroes
+                logits = torch.nansum(model_output['embeddings'].unsqueeze(dim=1) * self.embedded_answer_vocab, dim=2)
+                not_top_k_indices = torch.topk(logits, self.num_not_top_k, largest=False, dim=1).indices
+                # set not top k to 0
+                for batch, indices in enumerate(not_top_k_indices):
+                    logits[batch][indices] = 0
+                # restructure
+                model_output['scores'] = logits
+
+        except KeyError: # todo: does this work
+            pass
+
+
         with torch.no_grad():
             for metric_name, metric_object in self.metrics.items():
                 if not metric_object.is_dataset_applicable(dataset_name):
@@ -195,7 +245,7 @@ class BaseMetric:
 
     def __init__(self, name, *args, **kwargs):
         self.name = name
-        self.required_params = ["scores", "targets"]
+        self.required_params = ["scores", "targets", "answers"]
         # the set of datasets where this metric will be applied
         # an empty set means it will be applied on *all* datasets
         self._dataset_names = set()
@@ -240,98 +290,33 @@ class BaseMetric:
     def is_dataset_applicable(self, dataset_name):
         return len(self._dataset_names) == 0 or dataset_name in self._dataset_names
 
-@registry.register_metric("bert_score")
-class BertScore(BaseMetric):
+
+@registry.register_metric("numberbatch_score")
+class NumberbatchScore(BaseMetric):
     """
-    Metric for calculating the Bert score, as seen in:
-    https://datascience.fm/top-evaluation-metrics-for-nlp-models/
-    https://pypi.org/project/bert-score/
+    Avg. cosine similarity between all combinations of annotator/topKpredicted answers.
     """
 
-    def __init__(self, score_key="scores", target_key="targets", topk=1):
-        super().__init__("bert_score")
+    def __init__(self, score_key="scores", target_key="targets", annotator_key="answers", topk=5):
+        super().__init__("bert_score") # todo: bert score??
+        from mmf.utils.build import build_graph_encoder, build_processors
+        from mmf.utils.configuration import get_global_config
+        from mmf.utils.text import tokenize
+        self.tokenize = tokenize
         self.score_key = score_key
         self.target_key = target_key
-        self.topk = topk
+        self.annotator_key = annotator_key
+        self.config = get_global_config()
+        self.numberbatch = build_graph_encoder(self.config.dataset_config.embedding_models.numberbatch)
+        self.cos = torch.nn.CosineSimilarity(dim=1)
+        # adding necessary params
+        self.required_params = ["scores", "answers", "avg_embedded_answers"]
+
+
 
     def calculate(self, sample_list, model_output, *args, **kwargs):
-        from mmf.metrics.bert_score import bert_score
-
-        output = model_output[self.score_key]
-        expected = sample_list[self.target_key]
-        """
-        output_text = model_output['text']
-        print("-" * 30)
-        print("-" * 30)
-        output_batch_size = model_output['batch_size']
-        print("output_batch_size", output_batch_size)
-        print("-" * 30)
-
-
-
-        print("-" * 30)
-        print("-" * 30)
-        expected_batch_size = sample_list['batch_size']
-        print("expected_batch_size", expected_batch_size)
-        print("-" * 30)
-
-        print("samplelist keys", sample_list.keys())
-        print("-" * 30)
-        print("model_output keys", model_output.keys())
-        print("-" * 30)
-        print("EXPECTED", expected)
-        print("-" * 30)
-        print("OUtPUT", output)
-        print("-" * 30)
-        print("-"*30)
-        print("expected shape", tf.shape(expected))
-        print("-" * 30)
-        print("output shape", tf.shape(output))
-        print("-" * 30)
-        print("output.argmax()", torch.argmax(output, dim=1))
-        print("-" * 30)
-        print("expected.argmax()", torch.argmax(expected, dim=1))
-        print("-" * 30)
-        print("output.max()", torch.max(output, dim=1))
-        print("-" * 30)
-        print("expected.max()", torch.max(expected, dim=1))
-        print("-" * 30)"""
-
-        # Vector of length batch_size:
-        actual_ids = torch.argmax(expected, dim=1)
-        pred_ids = torch.argmax(output, dim=1)
-        # every index can be translated into a class
-        # so should be converted into list of same length, with class-text instead. --> idx2text
-        # (should be able to import from other metric)
-
-        answer_processor = registry.get(sample_list.dataset_name + "_answer_processor")
-
-        pred_answers = [answer_processor.idx2word(answer_id) for answer_id in pred_ids]
-        actual_answers = [answer_processor.idx2word(answer_id) for answer_id in actual_ids]
-
-        scores = [bert_score(*pair, min_max_mean="max", lang='en', rescale_with_baseline=True) for pair in list(zip(pred_answers, actual_answers))]
-
-        # expected, should be 10 answers each, but don't think it is??
-
-        # then, for element in range(batch_size) calculate BERTscore(class, [list of 10 annotator answers], lang='en')
-        # mean of said list.
-
-        #candidates = output_text
-        #references = [expected_text] # Der skal være ekstra bracket rundt om da de skal være samme læmngde
-
-        #P_max, R_max, F1_max = bert_score(candidates, references, min_max_mean="max", lang='en', rescale_with_baseline=True)
-
-        #P_min, R_min, F1_min = bert_score(candidates, references, min_max_mean="min", lang='en', rescale_with_baseline=True)
-
-        #P_mean, R_mean, F1_mean = bert_score(candidates, references, min_max_mean="mean", lang='en', rescale_with_baseline=True)
-
-        #print("F1max, min, mean", F1_max, F1_min, F1_mean)
-
-        print("RETURNING;", np.mean(scores))
-
-        return np.mean(scores)
-
-
+        # answers are averaged by numberbatch
+        return torch.mean(self.cos(model_output['embeddings'], self.numberbatch(sample_list['answers'])))
 
 
 @registry.register_metric("accuracy")
@@ -491,7 +476,6 @@ class VQAAccuracy(BaseMetric):
         one_hots.scatter_(1, output.view(-1, 1), 1)
         scores = one_hots * expected
         accuracy = torch.sum(scores) / expected.size(0)
-
 
         return accuracy
 
@@ -776,9 +760,7 @@ class TextVQAAccuracy(BaseMetric):
 
         batch_size = sample_list.context_tokens.size(0)
         pred_answers = model_output["scores"].argmax(dim=-1)
-        print("pred_answers", pred_answers)
         context_tokens = sample_list.context_tokens.cpu().numpy()
-        print("context_tokens", context_tokens)
         answers = sample_list.get(self.gt_key).cpu().numpy()
         answer_space_size = answer_processor.get_true_vocab_size()
 
@@ -803,9 +785,6 @@ class TextVQAAccuracy(BaseMetric):
             pred_answer = " ".join(answer_words).replace(" 's", "'s")
             gt_answers = byte_tensor_to_object(answers[idx])
             predictions.append({"pred_answer": pred_answer, "gt_answers": gt_answers})
-
-
-        print("predictions", predictions)
 
         accuracy = self.evaluator.eval_pred_list(predictions)
         accuracy = torch.tensor(accuracy).to(sample_list.context_tokens.device)
@@ -999,6 +978,8 @@ class F1PrecisionRecall(BaseMetric):
         scores = model_output["scores"]
         expected = sample_list["targets"]
 
+        print("F1!! Is multilabel?", self._multilabel)
+
         if self._multilabel:
             output = torch.sigmoid(scores)
             output = torch.round(output)
@@ -1018,6 +999,9 @@ class F1PrecisionRecall(BaseMetric):
             "recall": expected.new_tensor(value_tuple[1], dtype=torch.float),
             "f1": expected.new_tensor(value_tuple[2], dtype=torch.float),
         }
+
+        print("f1 prec rec", value)
+
         return value
 
 
@@ -1090,7 +1074,7 @@ class ROC_AUC(BaseMetric):
 
         output = torch.nn.functional.softmax(model_output["scores"], dim=-1)
         expected = sample_list["targets"]
-        expected = self.mlb.fit_transform(expected) # TODO: working for okvqa now
+        expected = self.mlb.fit_transform(expected)  # TODO: working for okvqa now
         expected = _convert_to_one_hot(expected, output)
         value = roc_auc_score(expected.cpu(), output.cpu(), **self._sk_kwargs)
         return expected.new_tensor(value, dtype=torch.float)
@@ -1283,8 +1267,8 @@ class RecallAtK_ret(BaseMetric):
             torch.logical_and(
                 labels[:, None] <= top_k_ids, top_k_ids < labels[:, None] + factor
             )
-            .long()
-            .max(dim=1)[0]
+                .long()
+                .max(dim=1)[0]
         )
         return hits
 

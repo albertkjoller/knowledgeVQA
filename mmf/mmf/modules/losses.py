@@ -244,11 +244,13 @@ class LogitBinaryCrossEntropy(nn.Module):
             torch.FloatTensor: Float value for loss.
 
         """
+
         scores = model_output["scores"]
         targets = sample_list["targets"]
         loss = F.binary_cross_entropy_with_logits(scores, targets, reduction="mean")
 
         return loss * targets.size(1)
+
 
 
 @registry.register_loss("triple_logit_bce")
@@ -772,6 +774,8 @@ class ContrastiveLoss(nn.Module):
     def __init__(self):
         super().__init__()
 
+
+
     def forward(self, sample_list: Dict[str, Tensor], model_output: Dict[str, Tensor]):
         assert (
             "embedding_1" in model_output and "embedding_2" in model_output
@@ -1079,8 +1083,13 @@ class RefinerContrastiveLoss(nn.Module):
         self.epsilon = epsilon
 
     def forward(self, sample_list, model_output):
-        targets = sample_list["targets"]
+
         inputs = model_output["scores"]
+
+        if model_output['output_type'] == 'embeddings': # targest are converted
+            targets = model_output["avg_embedded_answers"]
+        else:
+            targets = model_output["targets"]
 
         batch_size = inputs.size(0)
         # normalize inputs and targets
@@ -1089,10 +1098,10 @@ class RefinerContrastiveLoss(nn.Module):
 
         # matrix containing the similarity between the inputs and targets
         # (i,j) contains similarity betweeh the i^th decoder and j^th target
+        # each batch is multiplied on all of targets, i.e. [batch_size, batch_size(sim per batch)]
         sim_mat = torch.matmul(inputs, targets.t())
 
         loss = []
-
         for i in range(batch_size):
             sim_ij = sim_mat[i]
             # pos_similarity contains the similarity between i^th decoder
@@ -1102,7 +1111,7 @@ class RefinerContrastiveLoss(nn.Module):
             # neg_pair_ contains all the batch samples whose similarity with i^th
             #  decoder is better than a threshold corrected similarity between
             # i^th decoder and i^th target
-
+            # true for all pairs above
             neg_pair_ = torch.masked_select(
                 sim_ij, sim_ij > pos_similarity - self.similarity_threshold
             )

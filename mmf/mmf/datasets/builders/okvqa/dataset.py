@@ -66,8 +66,9 @@ class OKVQADataset(MMFDataset):
         else:
             image_path = sample_info["image_name"] + ".jpg"
             current_sample.image = self.image_db.from_path(image_path)["images"][0]
-
         current_sample = self.add_answer_info(sample_info, current_sample)
+
+
         return current_sample
 
     def add_answer_info(self, sample_info, sample):
@@ -76,6 +77,8 @@ class OKVQADataset(MMFDataset):
             answer_processor_arg = {"answers": answers}
             processed_soft_copy_answers = self.answer_processor(answer_processor_arg)
 
+            # adding annotator answers to samplelist
+            sample.answers = answers
             sample.targets = processed_soft_copy_answers["answers_scores"]
 
         return sample

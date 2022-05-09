@@ -9,7 +9,6 @@ from torch import nn
 from torch.nn.utils.weight_norm import weight_norm
 
 
-
 # get_norm, act, FCnet taken from <https://github.com/SinghJasdeep/Attention-on-Attention-for-VQA/blob/master/fc.py>
 #    - attention on attention paper (Pythia)
 # normalization
@@ -171,47 +170,6 @@ class ReLUWithWeightNormFC(nn.Module):
 
     def forward(self, x):
         return self.layers(x)
-
-
-
-# qlarifais
-class Classifier(nn.Module):
-    def __init__(self, config):
-        super().__init__()
-        if config.type == "simple":
-            self.module = SimpleClassifier(config.params)
-        else:
-            raise NotImplementedError("Unknown classifier type: %s" % classifier_type)
-
-    def forward(self, *args, **kwargs):
-        return self.module(*args, **kwargs)
-
-
-class SimpleClassifier(nn.Module):
-    def __init__(self, config):
-        super().__init__()
-
-        norm_layer = get_norm(config.norm)
-        act_layer = get_act(config.act)
-        layers = []
-        # appending first layer
-        layers.append(FCNet([int(config.in_dim), int(config.h_dim)], dropout=int(config.dropout),
-                            norm=config.norm, act=config.act))
-        # skipping first as it is initialized above
-        for i in range(int(config.num_non_linear_layers)-1):
-            layers.append(FCNet([int(config.h_dim), int(config.h_dim)], dropout=int(config.dropout),
-                            norm=config.norm, act=config.act))
-
-        # final linear layer, resize to output dim
-        layers.append(norm_layer(nn.Linear(int(config.h_dim), int(config.out_dim)), dim=None))
-
-        self.main = nn.Sequential(*layers)
-
-    def forward(self, x):
-        logits = self.main(x)
-        return logits
-
-
 
 
 

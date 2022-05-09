@@ -11,20 +11,20 @@ import socket
 def get_args(argv=None):
     parser = argparse.ArgumentParser("Script for launching hyperparameter sweeps")
     parser.add_argument(
-        "-p",
-        "--prefix",
+        "-prefix",
+        required=True,
+        help="save checkpoints and logs in <checkpoints-dir>/<prefix>.<save_dir_key>",
+    )
+    parser.add_argument(
+        "-q",
         required=True,
         help="save checkpoints and logs in <checkpoints-dir>/<prefix>.<save_dir_key>",
     )
     parser.add_argument(
         "-t",
-        "--num_trials",
         required=True,
         type=int,
         help="number of random hyperparam configurations to try (-1 for grid search)",
-    )
-    parser.add_argument(
-        "-g", "--num_gpus", type=int, required=True, help="number of GPUs per node"
     )
     parser.add_argument(
         "-n",
@@ -34,11 +34,29 @@ def get_args(argv=None):
         help="number of nodes for distributed training",
     )
     parser.add_argument(
+        "-gpus",
+        default="num=1",
+        help="number of gpus for distributed training",
+    )
+    parser.add_argument(
         "--model_type",
         type=str,
         default="aicommerce__multimodal_model",
         help="registered model type",
     )
+
+    # todo:
+    parser.add_argument(
+        "--cache_dir",
+        default="",
+        help="",
+    )
+    parser.add_argument(
+        "--data_dir",
+        default="",
+        help="",
+    )
+
     parser.add_argument(
         "--oncall", type=str, default="ai_commerce", help="oncall team "
     )
@@ -117,7 +135,7 @@ def get_args(argv=None):
         )
 
     parser.add_argument(
-        "--backend", choices=["slurm", "fblearner"], default=default_backend
+        "--backend", choices=["slurm", "fblearner", 'lsf'], default=default_backend
     )
 
     # FBLearner params
@@ -130,12 +148,18 @@ def get_args(argv=None):
         default="fair_research_and_engineering",
     )
 
+    # LSF params
+
+    parser.add_argument(
+        "--run_type", choices = ['train', 'train_val', 'test'], help="running type in mmf", default="train_val"
+    )
+
+
+
     # Slurm params
     parser.add_argument(
         "--salloc", action="store_true", help="run agaist current allocation"
     )
-    parser.add_argument("--partition", help="partition to run on", default="learnfair")
-    parser.add_argument("--reservation", help="reservation to run on")
     parser.add_argument(
         "--exclusive", action="store_true", help="if set, get exclusive host"
     )
@@ -149,16 +173,9 @@ def get_args(argv=None):
         "--sequential", action="store_true", help="schedule jobs to run sequentially"
     )
     parser.add_argument(
-        "--time", default="4320", help="expected job duration in minutes"
+		"-W", default="4320", help="expected job duration in minutes"
     )
-    parser.add_argument("--mem", "--mem", help="memory to request")
-    parser.add_argument("--gpu-type", default="volta")
-    parser.add_argument(
-        "--constraint",
-        metavar="CONSTRAINT",
-        help="gpu constraint, if any. e.g. 'volta'",
-    )
-    parser.add_argument("--comment", help="comment string")
+    parser.add_argument("-R", help="memory to request")
     parser.add_argument(
         "--snapshot_code",
         action="store_true",
@@ -239,5 +256,7 @@ def main(get_grid, postprocess_hyperparams):
         from .slurm import main as backend_main
     elif args.backend == "fblearner":
         from .fblearner import main as backend_main
+    elif args.backend == "lsf":
+        from .lsf import main as backend_main
 
     backend_main(get_grid, postprocess_hyperparams, args)

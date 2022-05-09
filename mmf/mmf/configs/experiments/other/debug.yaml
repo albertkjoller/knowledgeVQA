@@ -10,9 +10,10 @@ evaluation:
   metrics:
     - accuracy
     - vqa_accuracy
-    - bert_score
+    - numberbatch_score
     #- binary_f1
     #- roc_auc
+
 
 
 
@@ -23,10 +24,25 @@ model_config:
       params:
         operation: multiply
         i_dim: ${model_config.qlarifais.i_dim} # image dim
-        q_dim: ${model_config.qlarifais.q_dim} # question dim
+        guided_dim: ${model_config.qlarifais.q_dim} # question dim
         # TODO: optimization parameters:
         h_dim: 2048  # hidden dim as input in classifier
         norm: weight # [weight, batch, layer, none]
+        act: ReLU # activation function: [ReLu, Leaky_ReLu...]
+        dropout: 0.1 # avoid overfitting:
+
+    classifier:
+      type: simple
+      output_type: embedding # i.e. numberbatch embedding
+      params:
+        top_k: 3
+        # input dim is the output of the fusion module
+        in_dim: ${model_config.qlarifais.fusion.params.h_dim}
+        out_dim: 300 # numberbatch output size
+        # todo: optimization parameters:
+        h_dim: 300 # mean of input and output w.r.t. mlp
+        num_non_linear_layers: 2 # activation functions
+        norm: weight # [weight, batch, layer, none]
         act: ReLU # activation function
-        dropout: 0.1 # avoid overfitting
+        dropout: 0.4 # avoid overfitting, or keep all information?
 

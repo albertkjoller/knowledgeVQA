@@ -1,27 +1,17 @@
-# include running experiment configs
-includes:
-  - configs/experiments/defaults.yaml
-    # TODO: include optimized fusion from graph module, e.g., OR just define it in numberbatch
-  - configs/experiments/pilot/numberbatch.yaml
 
 env:
   save_dir: ${env.part_save_dir}/grids
 
 
-model_config:
-  qlarifais:
-    # models from grid-feats-vqa: https://github.com/facebookresearch/grid-feats-vqa
-    image_encoder:
-      type: grid_feats_vqa
-      params:
-        name: grid_feats_vqa
-        # specify backbone and type of features
-        model: R-50-grid.yaml # choices: [R-50-(grid or updn), X-101-grid, X-152-(grid or challenge(MoVie+GridFeat))]
-        output_dir: ${env.save_dir}
-        pretrained: true
-        pool_type: avg
-        zero_init_residual: false
-        num_output_features: 1
-      # how to resize features
-      resize: average_pooling
-      num_features: 49 # based on okvqa image dim, 224x224 and grid feats 32x32 sized stride (i.e. 224^2/32^2 = 7*7
+includes:
+    # include running experiment configs (defaults for all)
+  - configs/experiments/defaults.yaml
+    # graph module
+  - configs/experiments/modules/graphs/numberbatch.yaml
+    # image featurizer
+  - configs/experiments/modules/featurizers/grids.yaml
+    # TODO: what is the optimized?
+    # classifier
+  - configs/experiments/modules/classifiers/multilabel.yaml
+    # fusion module
+  - configs/experiments/modules/fusions/double_two_modality_arithmetic.yaml

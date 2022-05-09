@@ -69,7 +69,6 @@ class TrainerEvaluationLoopMixin(ABC):
                                 moved_report, self.metrics.required_params
                             )
                             combined_report.batch_size += moved_report.batch_size
-
                         # Each node generates a separate copy of predict JSON from the
                         # report, which will be used to evaluate dataset-level metrics
                         # (such as mAP in object detection or CIDEr in image captioning)
@@ -93,6 +92,9 @@ class TrainerEvaluationLoopMixin(ABC):
                 ), "Please check if your validation set is empty!"
                 # add prediction_report is used for set-level metrics
                 combined_report.prediction_report = reporter.report
+
+
+
 
                 combined_report.metrics = self.metrics(combined_report, combined_report)
 
@@ -138,6 +140,7 @@ class TrainerEvaluationLoopMixin(ABC):
                             continue
                         with torch.cuda.amp.autocast(enabled=self.training_config.fp16):
                             model_output = self.model(prepared_batch)
+
                         report = Report(prepared_batch, model_output)
                         reporter.add_to_report(report, self.model)
                         report.detach()

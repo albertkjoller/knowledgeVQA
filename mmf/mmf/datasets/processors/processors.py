@@ -633,6 +633,8 @@ class VQAAnswerProcessor(BaseProcessor):
         for idx, token in enumerate(tokens):
             answers_indices[idx] = self.answer_vocab.word2idx(token)
 
+        self.answers_indices = answers_indices
+
         answers_scores = self.compute_answers_scores(answers_indices)
 
         return {
