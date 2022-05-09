@@ -17,7 +17,7 @@ from mmf.utils.general import get_mmf_root
 def main(get_grid, postprocess_hyperparams, args):
     if args.local:
         args.num_nodes = 1
-    args.num_gpus = args.gpus.split('=')[-1]
+    args.num_gpus = int(args.gpus.split('=')[1][:1])
     # compute all possible hyperparameter configurations
     grid = get_grid(args) # model sweep gets its input
     grid_product = list(itertools.product(*[hp.values for hp in grid]))

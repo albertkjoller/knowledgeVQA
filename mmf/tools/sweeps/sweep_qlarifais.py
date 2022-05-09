@@ -23,6 +23,21 @@ python mmf/tools/sweeps/sweep_qlarifais.py \
 -W 05:00 \
 
 
+# on mac
+python mmf/tools/sweeps/sweep_qlarifais.py \
+--baseline_model /Users/arond.jacobsen/Documents/GitHub/explainableVQA/mmf/mmf/models/qlarifais.py \
+--backend lsf \
+--resume_failed \
+--checkpoints_dir /Users/arond.jacobsen/Documents/GitHub/explainableVQA/mmf/save \
+--run_type train_val \
+--config /Users/arond.jacobsen/Documents/GitHub/explainableVQA/mmf/mmf/configs/experiments/baseline/mul.yaml \
+-prefix testrun \
+-t -1 \
+-n 1 \
+-q gpua100 \
+-gpus "num=1:mode=exclusive_process" \
+-R "rusage[mem=128G]" \
+-W 05:00 \
 '''
 
 
