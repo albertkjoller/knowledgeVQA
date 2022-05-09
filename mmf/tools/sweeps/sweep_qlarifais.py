@@ -19,7 +19,7 @@ python mmf/tools/sweeps/sweep_qlarifais.py \
 --data_dir /work3/s194262/torch/mmf/data \
 -t -1 \
 -n 4 \
--q gpua100 \
+-q gpuv100 \
 -gpus "num=1:mode=exclusive_process" \
 -R "rusage[mem=128G]" \
 -W 05:00 \
@@ -64,7 +64,7 @@ def get_grid(args):
 
     # general hyperparams
     # learning rate (lr)
-    hp.extend([hyperparam("optimizer.params.lr", [0.0001, 0.001], save_dir_key=lambda val: f"lr{val}")])
+    hp.extend([hyperparam("optimizer.params.lr", [1e-4, 1e-3], save_dir_key=lambda val: f"lr{val}")])
     # weight decay (wd)
     #hp.extend([hyperparam("optimizer.params.weight_decay", [1e-5, 1e-7, 1e-8, 1e-10], save_dir_key=lambda val: f"wd{val}")])
     # todo: scheduler?

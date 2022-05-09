@@ -9,6 +9,7 @@ from mmf.models.interfaces.qlarifais import QlarifaisInterface
 from mmf.models.base_model import BaseModel
 from mmf.common.registry import registry
 from mmf.utils.checkpoint import load_pretrained_model
+from mmf.utils.configuration import get_mmf_cache_dir
 from mmf.utils.text import *
 from mmf.utils.configuration import get_mmf_cache_dir
 
