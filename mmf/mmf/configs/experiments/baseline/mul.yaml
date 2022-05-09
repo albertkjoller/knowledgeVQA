@@ -6,7 +6,6 @@ includes:
   - configs/experiments/defaults.yaml
     # fusion module
   - configs/experiments/modules/fusions/two_modality_arithmetic.yaml
-    # TODO: what is the optimized?
     # classifier
   - configs/experiments/modules/classifiers/embeddings.yaml
 

@@ -18,11 +18,11 @@ python mmf/tools/sweeps/sweep_qlarifais.py \
 --cache_dir /work3/s194262/torch/mmf \
 --data_dir /work3/s194262/torch/mmf/data \
 -t -1 \
--n 4 \
+-n 1 \
 -q gpuv100 \
 -gpus "num=1:mode=exclusive_process" \
 -R "rusage[mem=128G]" \
--W 05:00 \
+-W 00:05 \
 '''
 
 '''
@@ -42,7 +42,7 @@ python mmf/tools/sweeps/sweep_qlarifais.py \
 -q gpua100 \
 -gpus "num=1:mode=exclusive_process" \
 -R "rusage[mem=128G]" \
--W 05:00 \
+-W 00:05 \
 '''
 
 
@@ -56,7 +56,7 @@ def get_grid(args):
     # input commands and set up
     hp.extend([hyperparam("run_type", args.run_type, save_dir_key=lambda val: val), hyperparam("config", args.config),
                hyperparam("model", "qlarifais"), hyperparam("dataset", "okvqa"),
-               hyperparam("training.seed", 1, save_dir_key=lambda val: f"s{val}"),
+               hyperparam("training.seed", 1, save_dir_key=lambda val: f"seed{val}"),
                ])
 
 
@@ -64,33 +64,43 @@ def get_grid(args):
 
     # general hyperparams
     # learning rate (lr)
-    #hp.extend([hyperparam("optimizer.params.lr", [1e-4, 1e-3], save_dir_key=lambda val: f"lr{val}")])
-    # weight decay (wd)
-    #hp.extend([hyperparam("optimizer.params.weight_decay", [1e-5, 1e-7, 1e-8, 1e-10], save_dir_key=lambda val: f"wd{val}")])
-    # todo: scheduler?
+    hp.extend([hyperparam("optimizer.params.lr", [1e-3, 1e-4], save_dir_key=lambda val: f"lr{val}")])
+    # weight decay (wd) 0.0001
+    hp.extend([hyperparam("optimizer.params.weight_decay", [1e-4, 1e-6], save_dir_key=lambda val: f"wd{val}")])
+'''
+    # classifier hp search
+    # hidden dimension (chd)
+    #hp.extend([hyperparam("model_config.qlarifais.classifier.params.h_dim", [2500, 5000], save_dir_key=lambda val: f"chd{val}")])
+    # number of non-linear layers (cnl)
+    #hp.extend([hyperparam("model_config.qlarifais.classifier.params.num_non_linear_layers", [2, 4], save_dir_key=lambda val: f"cnl{val}")])
 
-    # we keep batch size, epochs(only look at best validation)...??
+    # dropout (cdo)
+    hp.extend([hyperparam("model_config.qlarifais.classifier.params.dropout", [0.1, 0.3], save_dir_key=lambda val: f"cdo{val}")])
 
-    # experiment specific hyperparams
-    # baseline experiment (vary fusion modules)
-    if args.config.split('/')[-2] == 'baseline1':
-        # fusion dropout (fdo)
-        hp.extend([hyperparam('model_config.qlarifais.fusion.params.dropout', [0.1, 0.2],
+
+    # experiment specific hp search
+    experiment_type = args.config.split('/')[-2] # extracting experiment folder name
+    # hp search for optimal fusion module
+    if experiment_type in ['baseline', 'pilot', 'ablation1']:
+        # these experiements vary in input
+        # dropout (fdo)
+        hp.extend([hyperparam('model_config.qlarifais.fusion.params.dropout', [0.1, 0.3],
                               save_dir_key=lambda val: f"fdo{val}")])
-        # fusion hidden dim (fhd)
-        #hp.extend([hyperparam('model_config.qlarifais.fusion.params.h_dim', [2048, 5000],
+        # fusion hidden dimension (fhd)
+        #hp.extend([hyperparam('model_config.qlarifais.fusion.params.h_dim', [2500, 5000],
         #           save_dir_key=lambda val: f"fhd{val}")])
 
-    # pilot experiment (vary fusion modules by included Numberbatch)
-    if args.config.split('/')[-2] == 'pilot':
-        # fusion dropout (fdo)
-        hp.extend([hyperparam('model_config.qlarifais.fusion.params.dropout', [0.1, 0.2],
-                              save_dir_key=lambda val: f"fdo{val}")])
-        # fusion hidden dim (fhd)
-        #hp.extend([hyperparam('model_config.qlarifais.fusion.params.h_dim', [2048, 5000],
-        #           save_dir_key=lambda val: f"fhd{val}")])
 
-    # todo add more for each experiment
+    if experiment_type in ['ablation2', 'ablation3']:
+        # these experiements do not vary in input, thus use previous optimized fusion modules
+        # dropout (ado)
+        hp.extend([hyperparam('model_config.qlarifais.attention.params.fusion.params.dropout', [0.1, 0.3],
+                              save_dir_key=lambda val: f"ado{val}")])
+        # fusion hidden dimension (ahd)
+        #hp.extend([hyperparam('model_config.qlarifais.attention.params.fusion.params.h_dim', [2500, 5000],
+        #           save_dir_key=lambda val: f"ahd{val}")])
+
+'''
 
     return hp
 

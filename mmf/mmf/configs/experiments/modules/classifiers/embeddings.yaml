@@ -15,7 +15,7 @@ model_config:
         out_dim: 300 # numberbatch output size
         norm: weight # [weight, batch, layer, none]
         act: ReLU # activation function
-        # todo: optimization parameters:
         h_dim: 300 # mean of input and output w.r.t. mlp
         num_non_linear_layers: 2 # activation functions
+        # todo: optimization parameters:
         dropout: 0.3 # avoid overfitting, or keep all information?
