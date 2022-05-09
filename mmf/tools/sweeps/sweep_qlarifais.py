@@ -34,15 +34,16 @@ def get_grid(args):
     # initialize, contain all params
     hp = []
 
-    # input commands
-    hp.extend([hyperparam("run_type", args.run_type), hyperparam("config", args.config), hyperparam("model", "qlarifais", save_dir_key=lambda val: val)])
+    # input commands and set up
+    hp.extend([hyperparam("run_type", args.run_type), hyperparam("config", args.config),
+               hyperparam("model", "qlarifais", save_dir_key=lambda val: val), hyperparam("dataset", "okvqa")])
 
     # general hyperparams
-    hp.extend([hyperparam("optimizer.params.lr", [0.001, 0.0001], save_dir_key=lambda val: f"lr{val}")])
+    hp.extend([hyperparam("optimizer.params.lr", [0.0001], save_dir_key=lambda val: f"lr{val}")])
 
     # experiment specific hyperparams
     if args.config.split('/')[-2] == 'baseline':
-        hp.extend([hyperparam('model_config.qlarifais.fusion.params.dropout', [0.1, 0.2, 0.3],
+        hp.extend([hyperparam('model_config.qlarifais.fusion.params.dropout', [0.1, 0.2],
                               save_dir_key=lambda val: f"lr{val}")])
     # todo: seed if test
 
