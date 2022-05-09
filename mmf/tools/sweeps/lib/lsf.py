@@ -149,7 +149,7 @@ def launch_train(args, config):
     ]
     '''
     train_cmd = [
-        "mmf_run", "config={}".format(args.config), "datasets", args.dataset, "model", args.model, "run_type", args.run_type
+        "mmf_run", "config={}".format(args.config), "model", args.model, "run_type", args.run_type # , the dataset
     ]
 
 
