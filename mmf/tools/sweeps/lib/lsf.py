@@ -141,11 +141,19 @@ def launch_train(args, config):
         return
 
     # generate train command
+    '''
     train_cmd = [
         "python3",
         "-u",
         os.path.join(get_mmf_root(), "..", "mmf_cli", "run.py"),
     ]
+    '''
+    train_cmd = [
+        "mmf_run", "config={}".format(args.config), "datasets", args.dataset, "model", args.model, "run_type", args.run_type
+    ]
+
+
+
     train_cmd.extend(["distributed.world_size", str(args.num_nodes * args.num_gpus)])
     if args.num_nodes > 1:
         train_cmd.extend(["distributed.port", str(get_random_port())])
