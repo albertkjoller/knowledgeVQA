@@ -68,7 +68,7 @@ class Qlarifais(BaseModel):
         #self.answer_processor = registry.get(self.config.datasets + "_answer_processor")
         #self.answer_vocab = self.answer_processor.answer_vocab
         #self.answer_vocab = registry.get(self.config.dataset_name + "_answer_processor").answer_vocab
-        self.answer_vocab = VocabDict(self.mmf_indirect(config.vocab_file))
+        self.answer_vocab = VocabDict(self.mmf_indirect(self.config.vocab_file))
         self.embedded_answer_vocab = self.graph_encoder(self.answer_vocab.word_list)
 
     def forward(self, sample_list):
