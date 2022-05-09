@@ -156,7 +156,7 @@ def launch_train(args, config):
 
     train_cmd.extend(["distributed.world_size", str(args.num_nodes * args.num_gpus)])
     if args.num_nodes > 1:
-        train_cmd.extend(["distributed.port", str(get_random_port())])
+        train_cmd.extend(["distributed.port", int(get_random_port())])
 
     if args.config is not None:
         train_cmd.extend(["config", args.config])
