@@ -51,8 +51,8 @@ if __name__ == "__main__":
         
     # obtain user input
     save_dir = input("Enter directory path of saved models ('save'-folder): ")
-    model_name = input("Enter saved model filename: ")
-    path_to_torch_cache = input("Enter the path to where your torch-cache folder is located (e.g. /work3/s194253): ")
+    model_name = input("\nEnter saved model filename: ")
+    path_to_torch_cache = input("\nEnter the path to where your torch-cache folder is located (e.g. /work3/s194253): ")
 
     model = Qlarifais.from_pretrained(f"{save_dir}/models/{model_name}", path_to_torch_cache)
     model.to(torch.device("cuda:0" if torch.cuda.is_available() else "cpu"))
@@ -86,16 +86,16 @@ if __name__ == "__main__":
             cv2.destroyWindow(f"{explainability_method}")
 
         # input question
-        question = input("Enter question: ")
+        question = input("\nEnter question: ")
         if question == 'quit()':
             break
         else:
             
-            answer = input("Enter ground truth answer (from answer list): ")
+            answer = input("\nEnter ground truth answer (from answer list): ")
             category_id = model.processor_dict['answer_processor'].word2idx(answer)
             print(f"Answer category label: {category_id}")
             
-            explainability_method = input("Enter explainability method: ")
+            explainability_method = input("\nEnter explainability method: ")
             image = load_image(img_path)
             
             #image_tensor = model.processor_dict["image_processor"](image)

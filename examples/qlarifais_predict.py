@@ -22,7 +22,7 @@ if __name__ == "__main__":
 
     def image_loader(old_img_name):
         # input image
-        img_name = input("Enter image name from '../imgs/temp' folder (e.g. 'rain.jpg'): ")
+        img_name = input("Enter image name from '../imgs/temp' folder (e.g. 'rain/rain.jpg'): ")
         if old_img_name != None:
             cv2.destroyWindow(f"{old_img_name}")
     

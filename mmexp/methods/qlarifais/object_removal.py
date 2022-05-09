@@ -28,8 +28,8 @@ class ObjectRemoval:
         print("")
         
         self.input = Path(f"./../imgs/temp/{input_image.split('/')[0]}").as_posix()
-        self.output = Path("./../imgs/removal_results").as_posix() #"/{input_image.split('.')[0]}/{self.object_name}_removed").as_posix()
-
+        self.output = Path(f"./../imgs/removal_results/{self.object_name}").as_posix() 
+        
         self.config = self.load_config()
         
     def load_classes(self,):

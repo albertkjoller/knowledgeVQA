@@ -108,7 +108,7 @@ def run_explainability(model, model_name, image, img_name, question, category_id
         OR_model.remove_object()
         
         # Load new image
-        img_path = Path(f"./../imgs/removal_results/{img_name.split('/')[-1]}").as_posix()
+        img_path = Path(f"./../imgs/removal_results/{OR_model.object_name}/{img_name.split('/')[-1]}").as_posix()
         modified_image = load_image(img_path)
 
         saliency_modified = MMGradient(model, 
