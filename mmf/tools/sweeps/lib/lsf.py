@@ -226,7 +226,7 @@ def launch_train(args, config):
             bsub_cmd_str += "#BSUB -W {}\n".format(args.W)
             bsub_cmd_str +=  "#BSUB -R '{}'\n".format(args.R)
 
-            bsub_cmd_str += "#BSUB -R 'span[hosts=1]'\n" # todo: working?
+            #bsub_cmd_str += "#BSUB -R 'span[hosts=1]'\n" # todo: working?
 
             bsub_cmd_str += "#BSUB -B\n"
             bsub_cmd_str += "#BSUB -N\n"
