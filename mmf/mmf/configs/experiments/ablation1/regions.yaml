@@ -10,10 +10,10 @@ includes:
     # graph module
   - configs/experiments/modules/graphs/numberbatch.yaml
     # image featurizer
-  - configs/experiments/modules/featurizers/grids.yaml
-    # TODO: what is the optimized?
+  - configs/experiments/modules/featurizers/regions.yaml
     # classifier
-  - configs/experiments/modules/classifiers/multilabel.yaml
+  - configs/experiments/modules/classifiers/embeddings.yaml
+    # TODO: what is the optimized?
     # fusion module
   - configs/experiments/modules/fusions/double_two_modality_arithmetic.yaml
 

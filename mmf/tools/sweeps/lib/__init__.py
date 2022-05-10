@@ -16,6 +16,12 @@ def get_args(argv=None):
         help="save checkpoints and logs in <checkpoints-dir>/<prefix>.<save_dir_key>",
     )
     parser.add_argument(
+        "--resume",
+        #required=True,
+        help="save checkpoints and logs in <checkpoints-dir>/<prefix>.<save_dir_key>",
+        default = "False"
+    )
+    parser.add_argument(
         "-q",
         required=True,
         help="save checkpoints and logs in <checkpoints-dir>/<prefix>.<save_dir_key>",

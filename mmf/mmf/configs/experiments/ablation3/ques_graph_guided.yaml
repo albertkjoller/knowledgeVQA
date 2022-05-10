@@ -12,11 +12,11 @@ includes:
   - configs/experiments/modules/graphs/numberbatch.yaml
     # attention module
   - configs/experiments/modules/attentions/question_graph.yaml
+    # classifier
+  - configs/experiments/modules/classifiers/embeddings.yaml
     # TODO: what is the optimized?
     # image featurizer
   - configs/experiments/modules/featurizers/grids.yaml
-    # classifier
-  - configs/experiments/modules/classifiers/multilabel.yaml
     # fusion module
   - configs/experiments/modules/fusions/double_two_modality_arithmetic.yaml
 
