@@ -9,37 +9,17 @@ from lib import hyperparam
 '''
 python mmf/tools/sweeps/sweep_qlarifais.py \
 --run_type train_val \
+--resume True \
 --config /zhome/96/8/147177/Desktop/explainableVQA/mmf/mmf/configs/experiments/baseline/ama.yaml \
 -prefix ama \
 --baseline_model /zhome/96/8/147177/Desktop/explainableVQA/mmf/mmf/models/qlarifais.py \
 --backend lsf \
---resume_failed \
 --checkpoints_dir /work3/s194262/save/sweeps \
 --cache_dir /work3/s194262/torch/mmf \
 --data_dir /work3/s194262/torch/mmf/data \
 -t -1 \
 -n 1 \
--q gpuv100 \
--gpus "num=1:mode=exclusive_process" \
--R "rusage[mem=128G]" \
--W 00:05 \
-'''
-
-'''
-# on mac
-python mmf/tools/sweeps/sweep_qlarifais.py \
---baseline_model /Users/arond.jacobsen/Documents/GitHub/explainableVQA/mmf/mmf/models/qlarifais.py \
---backend lsf \
---resume_failed \
---checkpoints_dir /Users/arond.jacobsen/Documents/GitHub/explainableVQA/mmf/save \
---cache_dir
---data_dir
---run_type train_val \
---config /Users/arond.jacobsen/Documents/GitHub/explainableVQA/mmf/mmf/configs/experiments/baseline/mul.yaml \
--prefix testrun \
--t -1 \
--n 1 \
--q gpua100 \
+-q gpua40 \
 -gpus "num=1:mode=exclusive_process" \
 -R "rusage[mem=128G]" \
 -W 00:05 \
@@ -59,7 +39,7 @@ def get_grid(args):
                hyperparam("training.seed", 1, save_dir_key=lambda val: f"seed{val}"),
                ])
 
-
+    '''
     # --- parameters to optimize ---
 
     # general hyperparams
@@ -67,7 +47,7 @@ def get_grid(args):
     hp.extend([hyperparam("optimizer.params.lr", [1e-3, 1e-4], save_dir_key=lambda val: f"lr{val}")])
     # weight decay (wd) 0.0001
     hp.extend([hyperparam("optimizer.params.weight_decay", [1e-4, 1e-6], save_dir_key=lambda val: f"wd{val}")])
-'''
+
     # classifier hp search
     # hidden dimension (chd)
     #hp.extend([hyperparam("model_config.qlarifais.classifier.params.h_dim", [2500, 5000], save_dir_key=lambda val: f"chd{val}")])
@@ -100,7 +80,7 @@ def get_grid(args):
         #hp.extend([hyperparam('model_config.qlarifais.attention.params.fusion.params.h_dim', [2500, 5000],
         #           save_dir_key=lambda val: f"ahd{val}")])
 
-'''
+    '''
 
     return hp
 
