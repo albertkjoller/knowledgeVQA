@@ -9,7 +9,7 @@ from lib import hyperparam
 '''
 python mmf/tools/sweeps/sweep_qlarifais.py \
 --run_type train_val \
---resume True \
+--resume False \
 --config /zhome/96/8/147177/Desktop/explainableVQA/mmf/mmf/configs/experiments/pilot/double_ama.yaml \
 -prefix double_ama \
 --baseline_model /zhome/96/8/147177/Desktop/explainableVQA/mmf/mmf/models/qlarifais.py \
@@ -21,8 +21,8 @@ python mmf/tools/sweeps/sweep_qlarifais.py \
 -n 6 \
 -q gpua100 \
 -gpus "num=1:mode=exclusive_process" \
--R "rusage[mem=128G]" \
--W 00:05 \
+-R "rusage[mem=32]" \
+-W 24:00 \
 '''
 
 
