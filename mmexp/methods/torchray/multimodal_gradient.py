@@ -7,7 +7,6 @@ Created on Wed Apr 27 15:29:22 2022
 """
 
 from .attribution.common import gradient_to_saliency, resize_saliency
-from .attribution.common import multimodal_saliency
 
 
 def multimodal_gradient(model, image_object,
