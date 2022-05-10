@@ -21,7 +21,7 @@ python mmf/tools/sweeps/sweep_qlarifais.py \
 -n 6 \
 -q gpua100 \
 -gpus "num=1:mode=exclusive_process" \
--R "rusage[mem=32]" \
+-R "rusage[mem=6GB]" \
 -W 24:00 \
 '''
 
