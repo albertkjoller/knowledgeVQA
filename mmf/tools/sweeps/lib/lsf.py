@@ -105,6 +105,14 @@ def launch_train(args, config):
         args.tensorboard_logdir, f"{args.prefix}/{save_dir_key}"
     )
 
+    # construct training commands
+    train_cmd = [
+        "python3",
+        "-u",
+        os.path.join(get_mmf_root(), "..", "mmf_cli", "run.py"),
+    ]
+
+
     # create save directory if it doesn"t exist
     if not os.path.exists(save_dir):
         if not dry_run(f"create directory: {save_dir}"):
@@ -137,22 +145,12 @@ def launch_train(args, config):
             print(f"skip failed run (override with --resume-failed): {save_dir}")
             return
 
-    elif has_started(save_dir) and args.resume == True:
-        train_cmd.extend(["checkpoint.resume", "True"])
 
-
-    elif has_started(save_dir):
-        print(f"skip in progress run: {save_dir}, folder already exists")
+    elif has_started(save_dir) and not args.resume == "True":
+        print(f"skip in progress run: {save_dir}")
         return
 
 
-
-    # construct training commands
-    train_cmd = [
-        "python3",
-        "-u",
-        os.path.join(get_mmf_root(), "..", "mmf_cli", "run.py"),
-    ]
 
     train_cmd.extend(["distributed.world_size", str(args.num_nodes * args.num_gpus)])
     if args.num_nodes > 1:
@@ -163,6 +161,8 @@ def launch_train(args, config):
     train_cmd.extend(["env.save_dir", save_dir])
     train_cmd.extend(["env.cache_dir", args.cache_dir])
     train_cmd.extend(["env.data_dir", args.data_dir])
+    if args.resume == "True":
+        train_cmd.extend(["checkpoint.resume", "True"])
 
 
     if args.tensorboard:

@@ -1,5 +1,5 @@
 env:
-  save_dir: ${env.part_save_dir}/double_ama
+  save_dir: ${env.part_save_dir}/single_mul
 
 
 includes:

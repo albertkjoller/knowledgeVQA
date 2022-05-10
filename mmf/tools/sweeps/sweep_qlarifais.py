@@ -10,16 +10,16 @@ from lib import hyperparam
 python mmf/tools/sweeps/sweep_qlarifais.py \
 --run_type train_val \
 --resume True \
---config /zhome/96/8/147177/Desktop/explainableVQA/mmf/mmf/configs/experiments/baseline/ama.yaml \
--prefix ama \
+--config /zhome/96/8/147177/Desktop/explainableVQA/mmf/mmf/configs/experiments/pilot/double_ama.yaml \
+-prefix double_ama \
 --baseline_model /zhome/96/8/147177/Desktop/explainableVQA/mmf/mmf/models/qlarifais.py \
 --backend lsf \
 --checkpoints_dir /work3/s194262/save/sweeps \
 --cache_dir /work3/s194262/torch/mmf \
 --data_dir /work3/s194262/torch/mmf/data \
 -t -1 \
--n 1 \
--q gpua40 \
+-n 6 \
+-q gpua100 \
 -gpus "num=1:mode=exclusive_process" \
 -R "rusage[mem=128G]" \
 -W 00:05 \
@@ -39,7 +39,7 @@ def get_grid(args):
                hyperparam("training.seed", 1, save_dir_key=lambda val: f"seed{val}"),
                ])
 
-    '''
+
     # --- parameters to optimize ---
 
     # general hyperparams
@@ -80,7 +80,7 @@ def get_grid(args):
         #hp.extend([hyperparam('model_config.qlarifais.attention.params.fusion.params.h_dim', [2500, 5000],
         #           save_dir_key=lambda val: f"ahd{val}")])
 
-    '''
+
 
     return hp
 
