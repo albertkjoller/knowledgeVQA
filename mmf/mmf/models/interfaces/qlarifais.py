@@ -86,7 +86,7 @@ class QlarifaisInterface(nn.Module):
         sample_list['answers'] = 'empty'    
         
         output = self.model(sample_list)
-        scores = nn.functional.softmax(output["scores"], dim=1)                      
+        scores = nn.functional.softmax(output["prediction_scores"], dim=1)                      
         
         if top_k != None:
             confidence, indices = scores.topk(5, dim=1)
