@@ -11,6 +11,7 @@ class Classifier(nn.Module):
         if config.type == "simple":
             self.module = SimpleClassifier(config.params)
         elif config.type == "numberbatch":
+            # todo
             self.module = NumberbatchClassifier(config.params)
         else:
             raise NotImplementedError("Unknown classifier type: %s" % config.type)
@@ -33,10 +34,15 @@ class SimpleClassifier(nn.Module):
         # final layer
         dims.append(int(config.out_dim))
         # FCNet initialized the whole classifier
-        self.classifier = FCNet(dims, dropout=int(config.dropout), norm=config.norm, act=config.act)
+        self.main = FCNet(dims, dropout=int(config.dropout), norm=config.norm, act=config.act)
+
+        # without activation to learn the negative values
+        self.final = nn.Linear(int(config.out_dim), int(config.out_dim))
+
 
     def forward(self, input):
-        logits = self.classifier(input)
+        logits = self.final(self.main(input))
+        #self.classifier(input)
         return logits
 
 

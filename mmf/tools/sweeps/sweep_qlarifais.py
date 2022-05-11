@@ -10,8 +10,8 @@ from lib import hyperparam
 python mmf/tools/sweeps/sweep_qlarifais.py \
 --run_type train_val \
 --resume False \
---config /zhome/96/8/147177/Desktop/explainableVQA/mmf/mmf/configs/experiments/baseline/mul.yaml \
--prefix mul \
+--config /zhome/96/8/147177/Desktop/explainableVQA/mmf/mmf/configs/experiments/pilot/double_ama.yaml \
+-prefix double_ama \
 --baseline_model /zhome/96/8/147177/Desktop/explainableVQA/mmf/mmf/models/qlarifais.py \
 --backend lsf \
 --checkpoints_dir /work3/s194262/save/sweeps \
@@ -19,9 +19,9 @@ python mmf/tools/sweeps/sweep_qlarifais.py \
 --data_dir /work3/s194262/torch/mmf/data \
 -t -1 \
 -n 6 \
--q gpua100 \
+-q gpuv100 \
 -gpus "num=1:mode=exclusive_process" \
--R "rusage[mem=4GB]" \
+-R "rusage[mem=5GB]" \
 -W 24:00 \
 '''
 
