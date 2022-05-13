@@ -145,7 +145,6 @@ def launch_train(args, config):
             print(f"skip failed run (override with --resume-failed): {save_dir}")
             return
 
-
     elif has_started(save_dir) and not args.resume == "True":
         print(f"skip in progress run: {save_dir}")
         return

@@ -1124,9 +1124,8 @@ class RefinerContrastiveLoss(nn.Module):
             # The loss is non-zero only when there exists at least one sample whose
             # target is closer to the decoded signal.
             if neg_pair_.shape[0] > 0:
-                neg_loss = torch.mean(
-                    self.similarity_threshold + neg_pair_ - pos_similarity
-                )
+                neg_loss = torch.mean(self.similarity_threshold + neg_pair_ - pos_similarity)
+                # appends a positive values, but could be negative due to threshold
                 loss.append(neg_loss)
 
         if len(loss) == 0:
