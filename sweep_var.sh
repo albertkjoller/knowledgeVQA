@@ -1,7 +1,7 @@
 #!/bin/sh
-#BSUB -J ama.train_val.seed1.lr5e-05.wd1e-06.cdo0.3.fdo0.1
-#BSUB -o /work3/s194253/save/sweeps/ama/train_val.seed1.lr5e-05.wd1e-06.cdo0.3.fdo0.1/output_file_%J.out
-#BSUB -e /work3/s194253/save/sweeps/ama/train_val.seed1.lr5e-05.wd1e-06.cdo0.3.fdo0.1/error_file_%J.err
+#BSUB -J mul.train_val.seed1.lr5e-05.wd1e-06.cdo0.3.fdo0.1
+#BSUB -o /work3/s194253/save/sweeps/mul/train_val.seed1.lr5e-05.wd1e-06.cdo0.3.fdo0.1/output_file_%J.out
+#BSUB -e /work3/s194253/save/sweeps/mul/train_val.seed1.lr5e-05.wd1e-06.cdo0.3.fdo0.1/error_file_%J.err
 #BSUB -n 6
 #BSUB -q gpuv100
 #BSUB -gpu 'num=1:mode=exclusive_process'
@@ -18,7 +18,7 @@ source /work3/s194253/envs/vqa/bin/activate
 cd mmf
 
 
-python3 -u /zhome/b8/5/147299/Desktop/explainableVQA/mmf/mmf/../mmf_cli/run.py env.save_dir /work3/s194253/save/sweeps/ama/train_val.seed1.lr5e-05.wd1e-06.cdo0.3.fdo0.1 env.cache_dir /work3/s194253/torch/mmf env.data_dir /work3/s194253/torch/mmf/data run_type train_val config /zhome/b8/5/147299/Desktop/explainableVQA/mmf/mmf/configs/experiments/baseline/ama.yaml model qlarifais dataset okvqa training.seed 1 optimizer.params.lr 5e-05 optimizer.params.weight_decay 1e-06 model_config.qlarifais.classifier.params.dropout 0.3 model_config.qlarifais.fusion.params.dropout 0.1
+python3 -u /zhome/b8/5/147299/Desktop/explainableVQA/mmf/mmf/../mmf_cli/run.py env.save_dir /work3/s194253/save/sweeps/mul/train_val.seed1.lr5e-05.wd1e-06.cdo0.3.fdo0.1 env.cache_dir /work3/s194253/torch/mmf env.data_dir /work3/s194253/torch/mmf/data env.tensorboard_logdir /work3/s194253/save/sweeps/tensorboard/mul/train_val.seed1.lr5e-05.wd1e-06.cdo0.3.fdo0.1 training.tensorboard 1 run_type train_val config /zhome/b8/5/147299/Desktop/explainableVQA/mmf/mmf/configs/experiments/baseline/mul.yaml model qlarifais dataset okvqa training.seed 1 optimizer.params.lr 5e-05 optimizer.params.weight_decay 1e-06 model_config.qlarifais.classifier.params.dropout 0.3 model_config.qlarifais.fusion.params.dropout 0.1
 
 
 wait $! 
