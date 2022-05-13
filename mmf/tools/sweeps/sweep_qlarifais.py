@@ -10,8 +10,8 @@ from lib import hyperparam
 python mmf/tools/sweeps/sweep_qlarifais.py \
 --run_type train_val \
 --resume False \
---config /zhome/96/8/147177/Desktop/explainableVQA/mmf/mmf/configs/experiments/pilot/double_ama.yaml \
--prefix double_ama \
+--config /zhome/96/8/147177/Desktop/explainableVQA/mmf/mmf/configs/experiments/baseline/ama.yaml \
+-prefix ama \
 --baseline_model /zhome/96/8/147177/Desktop/explainableVQA/mmf/mmf/models/qlarifais.py \
 --backend lsf \
 --checkpoints_dir /work3/s194262/save/sweeps \

@@ -105,6 +105,8 @@ def launch_train(args, config):
         args.tensorboard_logdir, f"{args.prefix}/{save_dir_key}"
     )
 
+
+
     # construct training commands
     train_cmd = [
         "python3",
