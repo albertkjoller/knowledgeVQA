@@ -1,3 +1,8 @@
+# Images
+imgs/explainability/
+imgs/removal_results/
+imgs/pipeline/
+
 # Jupyter Notebook
 .ipynb_checkpoints
 .spyproject/
