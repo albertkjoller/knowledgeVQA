@@ -1,23 +1,24 @@
 #!/bin/sh
-#BSUB -J testrun.qlarifais.lr0.0001.lr0.2
-#BSUB -o /Users/arond.jacobsen/Documents/GitHub/explainableVQA/mmf/save/testrunqlarifais.lr0.0001.lr0.2.ngpu1/output_file_%J.out
-#BSUB -e /Users/arond.jacobsen/Documents/GitHub/explainableVQA/mmf/save/testrunqlarifais.lr0.0001.lr0.2.ngpu1/error_file_%J.err
-#BSUB -n 1
-#BSUB -q gpua100
+#BSUB -J ama.train_val.seed1.lr5e-05.wd1e-06.cdo0.3.fdo0.1
+#BSUB -o /work3/s194253/save/sweeps/ama/train_val.seed1.lr5e-05.wd1e-06.cdo0.3.fdo0.1/output_file_%J.out
+#BSUB -e /work3/s194253/save/sweeps/ama/train_val.seed1.lr5e-05.wd1e-06.cdo0.3.fdo0.1/error_file_%J.err
+#BSUB -n 6
+#BSUB -q gpuv100
 #BSUB -gpu 'num=1:mode=exclusive_process'
-#BSUB -W 05:00
-#BSUB -R 'rusage[mem=128G]'
+#BSUB -W 24:00
+#BSUB -R 'rusage[mem=4GB]'
+#BSUB -R 'span[hosts=1]'
 #BSUB -B
 #BSUB -N
 
 
 nvidia-smi
 module load cuda/11.1
-source vqa2/bin/activate
+source /work3/s194253/envs/vqa/bin/activate
 cd mmf
 
 
-python3 -u /Users/arond.jacobsen/Documents/GitHub/explainableVQA/mmf/mmf/../mmf_cli/run.py distributed.world_size 1 checkpoint.resume True env.save_dir /Users/arond.jacobsen/Documents/GitHub/explainableVQA/mmf/save/testrunqlarifais.lr0.0001.lr0.2.ngpu1 env.cache_dir '' env.data_dir '' run_type train_val config /Users/arond.jacobsen/Documents/GitHub/explainableVQA/mmf/mmf/configs/experiments/baseline/mul.yaml model qlarifais dataset okvqa optimizer.params.lr 0.0001 model_config.qlarifais.fusion.params.dropout 0.2
+python3 -u /zhome/b8/5/147299/Desktop/explainableVQA/mmf/mmf/../mmf_cli/run.py env.save_dir /work3/s194253/save/sweeps/ama/train_val.seed1.lr5e-05.wd1e-06.cdo0.3.fdo0.1 env.cache_dir /work3/s194253/torch/mmf env.data_dir /work3/s194253/torch/mmf/data run_type train_val config /zhome/b8/5/147299/Desktop/explainableVQA/mmf/mmf/configs/experiments/baseline/ama.yaml model qlarifais dataset okvqa training.seed 1 optimizer.params.lr 5e-05 optimizer.params.weight_decay 1e-06 model_config.qlarifais.classifier.params.dropout 0.3 model_config.qlarifais.fusion.params.dropout 0.1
 
 
 wait $! 
