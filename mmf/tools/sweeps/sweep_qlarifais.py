@@ -44,7 +44,7 @@ def get_grid(args):
 
     # general hyperparams
     # learning rate (lr)
-    hp.extend([hyperparam("optimizer.params.lr", [5e-4, 5e-5], save_dir_key=lambda val: f"lr{val}")])
+    hp.extend([hyperparam("optimizer.params.lr", [5e-3, 5e-4], save_dir_key=lambda val: f"lr{val}")])
     # weight decay (wd) 0.0001
     hp.extend([hyperparam("optimizer.params.weight_decay", [1e-4, 1e-6], save_dir_key=lambda val: f"wd{val}")])
 
