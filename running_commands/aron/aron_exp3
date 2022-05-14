@@ -1,8 +1,8 @@
 python mmf/tools/sweeps/sweep_qlarifais.py \
 --run_type train_val \
 --resume False \
---config /zhome/96/8/147177/Desktop/explainableVQA/mmf/mmf/configs/experiments/ablation2/question_single_mul.yaml \
--prefix ablation2_question_single_mul \
+--config /zhome/96/8/147177/Desktop/explainableVQA/mmf/mmf/configs/experiments/ablation2/question_ama.yaml \
+-prefix ablation2_question_ama \
 --tensorboard 1 \
 --tensorboard_logdir /work3/s194262/save/sweeps/tensorboard \
 --baseline_model /zhome/96/8/147177/Desktop/explainableVQA/mmf/mmf/models/qlarifais.py \

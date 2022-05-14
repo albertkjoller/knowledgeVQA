@@ -8,7 +8,7 @@ model_config:
       params:
         type: dual_one_way_top_down
         fusion:
-          type: two_modality_arithmetic # [two_modality_arithmetic, two_modality_ama]
+          type: triple_modality_arithmetic # [triple_modality_arithmetic, two_modality_arithmetic, two_modality_ama]
           params:
             operation: multiply
             i_dim: ${model_config.qlarifais.i_dim} # image dim

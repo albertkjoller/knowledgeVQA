@@ -8,7 +8,7 @@ includes:
   - configs/experiments/defaults.yaml
     # graph module
   - configs/experiments/modules/graphs/numberbatch.yaml
-    # attention module
+    # attention module specified for graph input
   - configs/experiments/modules/attentions/graph.yaml
     # classifier
   - configs/experiments/modules/classifiers/embeddings.yaml
@@ -18,3 +18,10 @@ includes:
     # fusion module
   - configs/experiments/modules/fusions/double_two_modality_arithmetic.yaml
 
+# overwrite fusion type
+model_config:
+  qlarifais:
+    attention:
+      params:
+        fusion:
+          type: two_modality_arithmetic

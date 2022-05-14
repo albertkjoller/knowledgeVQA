@@ -1,0 +1,27 @@
+
+env:
+  save_dir: ${env.part_save_dir}/graph_guided
+
+
+includes:
+    # include running experiment configs (defaults for all)
+  - configs/experiments/defaults.yaml
+    # graph module
+  - configs/experiments/modules/graphs/numberbatch.yaml
+    # attention module specified for graph input
+  - configs/experiments/modules/attentions/graph.yaml
+    # classifier
+  - configs/experiments/modules/classifiers/embeddings.yaml
+    # TODO: what is the optimized?
+    # image featurizer
+  - configs/experiments/modules/featurizers/grids.yaml
+    # fusion module
+  - configs/experiments/modules/fusions/double_two_modality_arithmetic.yaml
+
+# overwrite fusion type
+model_config:
+  qlarifais:
+    attention:
+      params:
+        fusion:
+          type: two_modality_ama
