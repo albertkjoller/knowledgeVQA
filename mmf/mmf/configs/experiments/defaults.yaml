@@ -10,12 +10,24 @@ env:
 dataset_config:
   okvqa:
     processors:
+      # detectron2 input type
+      image_processor:
+        params:
+          transforms:
+            - type: NormalizeBGR255
+              params:
+                mean: [ 0.406, 0.456,0.485 ]
+                std: [ 0.14380469, 0.12145835,0.12221994 ]
+
+
+
       answer_processor:
         params:
           # overwrite vocabulary, improved answer vocab based on krisp
           vocab_file: okvqa/defaults/annotations/annotations/answer_vocab_count10.txt
     dump_output_dir: ${env.save_dir}
     dump_pred_info: false
+
   embedding_models:
     numberbatch: # [numberbatch, krisp]
       type: numberbatch

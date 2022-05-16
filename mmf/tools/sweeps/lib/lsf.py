@@ -154,8 +154,12 @@ def launch_train(args, config):
 
     # if runtype is test
     if args.resume_file is not None and args.run_type == 'test':
-        train_cmd.extend(["checkpoint.resume", os.path.join(save_dir, args.resume_file)])
+        # if not then it is null
+        train_cmd.extend(["checkpoint.resume_file", os.path.join(save_dir, args.resume_file)])
 
+    # this will resume from the current.ckpt
+    if args.resume == "True":
+        train_cmd.extend(["checkpoint.resume", "True"])
 
 
     #train_cmd.extend(["distributed.world_size", str(args.num_nodes * args.num_gpus)])
@@ -169,8 +173,6 @@ def launch_train(args, config):
     train_cmd.extend(["env.save_dir", save_dir])
     train_cmd.extend(["env.cache_dir", args.cache_dir])
     train_cmd.extend(["env.data_dir", args.data_dir])
-    if args.resume == "True":
-        train_cmd.extend(["checkpoint.resume", "True"])
 
 
     if args.tensorboard:

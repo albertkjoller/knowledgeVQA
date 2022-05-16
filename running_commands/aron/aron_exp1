@@ -20,27 +20,40 @@ python mmf/tools/sweeps/sweep_qlarifais.py \
 -W 24:00 \
 
 
-# test
+# --- the best model ---
 
-python mmf/tools/sweeps/sweep_qlarifais.py \
---run_type test \
---resume_file best.ckpt
---resume False \
---config /zhome/96/8/147177/Desktop/explainableVQA/mmf/mmf/configs/experiments/baseline/ama.yaml \
--prefix baseline_ama \
---tensorboard 1 \
---tensorboard_logdir /work3/s194262/save/sweeps/tensorboard \
---baseline_model /zhome/96/8/147177/Desktop/explainableVQA/mmf/mmf/models/qlarifais.py \
---backend lsf \
---checkpoints_dir /work3/s194262/save/sweeps \
---cache_dir /work3/s194262/torch/mmf \
---data_dir /work3/s194262/torch/mmf/data \
--t -1 \
--n 6 \
--q gpua100 \
--gpus "num=1:mode=exclusive_process" \
--R "rusage[mem=4GB]" \
--W 24:00 \
+# use the .sh train file in repo folder to submit job, adjust the running command
+
+# to train the model:
+# todo: optimizer values (and in the config files)
+mmf_run config='configs/experiments/baseline/ama.yaml' \
+    datasets=okvqa \
+    model=qlarifais \
+    run_type=train_val \
+    env.data_dir=/work3/s194262/torch/mmf/data \
+    env.cache_dir=/work3/s194262/torch/mmf \
+    env.save_dir=/work3/s194262/save/models/ama \
+    training.tensorboard 1 \
+    checkpoint.max_to_keep -1 \
+    optimizer.lr 5e-4 \
+    optimizer.weight_decay 1e-6 \
+
+
+# to test the model:
+# todo: resume_file, optimizer values (and in the config files)
+mmf_run config='configs/experiments/baseline/ama.yaml' \
+    datasets=okvqa \
+    model=qlarifais \
+    run_type=test \
+    env.data_dir=/work3/s194262/torch/mmf/data \
+    env.cache_dir=/work3/s194262/torch/mmf \
+    env.save_dir=/work3/s194262/save/models/ama \
+    checkpoint.resume_file /work3/s194262/save/models/ama/models/model_14000.ckpt \
+    training.tensorboard 1 \
+    optimizer.lr 5e-4 \
+    optimizer.weight_decay 1e-6 \
+
+
 
 
 
