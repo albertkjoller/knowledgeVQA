@@ -155,6 +155,7 @@ class NormalizeBGR255(BaseProcessor):
             )
 
     def __call__(self, image):
+        image = np.asarray(image)
         if self.to_bgr255:
             image = image[[2, 1, 0]] * 255
         image = transforms.functional.normalize(image, mean=self.mean, std=self.std)

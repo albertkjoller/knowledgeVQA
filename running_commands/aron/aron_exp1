@@ -33,10 +33,10 @@ mmf_run config='configs/experiments/baseline/ama.yaml' \
     env.data_dir=/work3/s194262/torch/mmf/data \
     env.cache_dir=/work3/s194262/torch/mmf \
     env.save_dir=/work3/s194262/save/models/ama \
-    training.tensorboard 1 \
-    checkpoint.max_to_keep -1 \
-    optimizer.lr 5e-4 \
-    optimizer.weight_decay 1e-6 \
+    training.tensorboard=1 \
+    checkpoint.max_to_keep=-1 \
+    optimizer.lr=5e-4 \
+    optimizer.weight_decay=1e-6 \
 
 
 # to test the model:
@@ -48,10 +48,10 @@ mmf_run config='configs/experiments/baseline/ama.yaml' \
     env.data_dir=/work3/s194262/torch/mmf/data \
     env.cache_dir=/work3/s194262/torch/mmf \
     env.save_dir=/work3/s194262/save/models/ama \
-    checkpoint.resume_file /work3/s194262/save/models/ama/models/model_14000.ckpt \
-    training.tensorboard 1 \
-    optimizer.lr 5e-4 \
-    optimizer.weight_decay 1e-6 \
+    checkpoint.resume_file=/work3/s194262/save/models/ama/models/model_14000.ckpt \
+    training.tensorboard=1 \
+    optimizer.lr=5e-4 \
+    optimizer.weight_decay=1e-6 \
 
 
 
