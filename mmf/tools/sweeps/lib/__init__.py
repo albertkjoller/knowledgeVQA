@@ -160,6 +160,10 @@ def get_args(argv=None):
         "--run_type", choices = ['train', 'train_val', 'test'], help="running type in mmf", default="train_val"
     )
 
+    parser.add_argument(
+        "--resume_file", help="which pretrain file to resume from, e.g. best.ckpt", default=None
+    )
+
 
 
     # Slurm params

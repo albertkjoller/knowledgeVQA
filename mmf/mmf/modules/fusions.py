@@ -42,7 +42,7 @@ from mmf.modules.layers import (get_norm, get_act, FCNet)
 class Fusion_Module(nn.Module):
     def __init__(self, config):
         super().__init__()
-        # two imputs
+        # two inputs
         if config.type == "two_modality_arithmetic":
             self.module = TwoModalityArithmetic(config.params)
         elif config.type == "two_modality_ama":

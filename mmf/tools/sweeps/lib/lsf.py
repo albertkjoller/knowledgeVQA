@@ -147,9 +147,14 @@ def launch_train(args, config):
             print(f"skip failed run (override with --resume-failed): {save_dir}")
             return
 
-    elif has_started(save_dir) and not args.resume == "True":
+    # if folder is created, i.e. experiment could already be running, and run_type is not test
+    elif has_started(save_dir) and not args.run_type == "test":
         print(f"skip in progress run: {save_dir}")
         return
+
+    # if runtype is test
+    if args.resume_file is not None and args.run_type == 'test':
+        train_cmd.extend(["checkpoint.resume", os.path.join(save_dir, args.resume_file)])
 
 
 
@@ -159,6 +164,8 @@ def launch_train(args, config):
 
     #if args.config is not None:
     #    train_cmd.extend(["config", args.config])
+
+
     train_cmd.extend(["env.save_dir", save_dir])
     train_cmd.extend(["env.cache_dir", args.cache_dir])
     train_cmd.extend(["env.data_dir", args.data_dir])
