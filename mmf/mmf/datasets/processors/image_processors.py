@@ -4,6 +4,7 @@ import collections
 import math
 import random
 import warnings
+import numpy as np
 
 import torch
 from mmf.common.constants import INCEPTION_IMAGE_NORMALIZE
