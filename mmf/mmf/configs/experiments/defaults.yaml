@@ -18,8 +18,8 @@ dataset_config:
               params:
                 mean: [ 0.406, 0.456,0.485 ]
                 std: [ 0.14380469, 0.12145835,0.12221994 ]
-
-
+                to_bgr255: true
+                pad_size: -1
 
       answer_processor:
         params:
