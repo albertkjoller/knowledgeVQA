@@ -143,8 +143,8 @@ class ResizeShortest(BaseProcessor):
 @registry.register_processor("NormalizeBGR255")
 class NormalizeBGR255(BaseProcessor):
     def __init__(self, *args, **kwargs):
-        from torchvision import transforms
-        self.convert_to_tensor = transforms.ToTensor()
+        #from torchvision import transforms
+        #self.convert_to_tensor = transforms.ToTensor()
 
         self.mean = kwargs["mean"]
         self.std = kwargs["std"]
@@ -159,7 +159,7 @@ class NormalizeBGR255(BaseProcessor):
             )
 
     def __call__(self, image):
-        image = self.convert_to_tensor(image)
+        #image = self.convert_to_tensor(image)
         if self.to_bgr255:
             image = image[[2, 1, 0]] * 255
         image = transforms.functional.normalize(image, mean=self.mean, std=self.std)

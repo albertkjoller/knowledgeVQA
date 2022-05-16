@@ -14,6 +14,14 @@ dataset_config:
       image_processor:
         params:
           transforms:
+            - type: Resize
+              params:
+                size: [ 256, 256 ]
+            - type: CenterCrop
+              params:
+                size: [ 224, 224 ]
+            - ToTensor
+            - GrayScaleTo3Channels
             - type: NormalizeBGR255
               params:
                 mean: [ 0.406, 0.456,0.485 ]
