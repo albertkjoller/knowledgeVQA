@@ -3,8 +3,9 @@ model_config:
   qlarifais:
     # loss based on embedding output
     losses:
-      #- type: cross_entropy, target dim needs to be adjusted
-      - type: refiner_contrastive_loss # binary cross-entropy loss since each question has multiple answers (MGFAN with ref.)
+      #- type: cross_entropy # target dim needs to be adjusted
+      #- type: binary cross-entropy loss # each question has multiple answers (MGFAN with ref.)
+      - type: refiner_contrastive_loss
     classifier:
       type: simple
       output_type: embeddings # i.e. numberbatch embedding
@@ -18,4 +19,4 @@ model_config:
         h_dim: 300 # mean of input and output w.r.t. mlp
         num_non_linear_layers: 2 # activation functions
         # todo: optimization parameters:
-        dropout: 0.3 # avoid overfitting, or keep all information?
+        dropout: 0.1 # avoid overfitting, or keep all information?

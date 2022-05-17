@@ -70,7 +70,7 @@ def get_grid(args):
         #hp.extend([hyperparam('model_config.qlarifais.fusion.params.h_dim', [2500, 5000],
         #           save_dir_key=lambda val: f"fhd{val}")])
 
-
+    # optimal fusion module has been chosen, now sweep it in attention
     if experiment_type in ['ablation2', 'ablation3']:
         # these experiements do not vary in input, thus use previous optimized fusion modules
         # dropout (ado)

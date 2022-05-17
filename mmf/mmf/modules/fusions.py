@@ -67,14 +67,15 @@ class TwoModalityArithmetic(nn.Module):
         super().__init__()
         self.operation = config.operation
         norm_layer = get_norm(config.norm)
+
         # initializing layers
-        self.i_proj = FCNet([int(config.i_dim), int(config.h_dim)], dropout=int(config.dropout),
+        self.i_proj = FCNet([config.i_dim, config.h_dim], dropout=config.dropout,
                             norm=config.norm, act=config.act)
 
-        self.q_proj = FCNet([int(config.guided_dim), int(config.h_dim)], dropout=int(config.dropout),
+        self.q_proj = FCNet([config.guided_dim, config.h_dim], dropout=config.dropout,
                             norm=config.norm, act=config.act)
 
-        self.nonlinear = FCNet([int(config.h_dim), int(config.h_dim)], dropout=int(config.dropout),
+        self.nonlinear = FCNet([config.h_dim, config.h_dim], dropout=config.dropout,
                             norm=config.norm, act=config.act)
 
 
@@ -111,19 +112,19 @@ class TwoModalityAMA(nn.Module):
         norm_layer = get_norm(config.norm)
 
         # linear layers
-        self.alpha = norm_layer(nn.Linear(int(config.i_dim), int(config.h_dim)), dim=None)
-        self.beta = norm_layer(nn.Linear(int(config.h_dim), int(config.h_dim)), dim=None)
+        self.alpha = norm_layer(nn.Linear(config.i_dim, config.h_dim), dim=None)
+        self.beta = norm_layer(nn.Linear(config.h_dim, config.h_dim), dim=None)
         # non-linear layers for question feature
-        self.fc_add = FCNet([int(config.guided_dim), int(config.h_dim)], dropout=int(config.dropout),
+        self.fc_add = FCNet([config.guided_dim, config.h_dim], dropout=config.dropout,
                             norm=config.norm, act=config.act)
         # question transformed to image dimension
-        self.fc_mul = FCNet([int(config.guided_dim), int(config.i_dim)], dropout=int(config.dropout),
+        self.fc_mul = FCNet([config.guided_dim, config.i_dim], dropout=config.dropout,
                             norm=config.norm, act=config.act)
         # non-linear for question and image features
-        self.fc_mul_add = FCNet([int(config.i_dim), int(config.h_dim)], dropout=int(config.dropout),
+        self.fc_mul_add = FCNet([config.i_dim, config.h_dim], dropout=config.dropout,
                             norm=config.norm, act=config.act)
 
-        self.nonlinear = FCNet([int(config.h_dim), int(config.h_dim)], dropout=int(config.dropout),
+        self.nonlinear = FCNet([config.h_dim, config.h_dim], dropout=config.dropout,
                             norm=config.norm, act=config.act)
 
     def forward(self, i, q):
@@ -146,16 +147,16 @@ class TripleModalityArithmetic(nn.Module):
         self.operation = config.operation
         norm_layer = get_norm(config.norm)
         # initializing layers
-        self.i_proj = FCNet([int(config.i_dim), int(config.h_dim)], dropout=int(config.dropout),
+        self.i_proj = FCNet([config.i_dim, config.h_dim], dropout=config.dropout,
                             norm=config.norm, act=config.act)
 
-        self.q_proj = FCNet([int(config.q_dim), int(config.h_dim)], dropout=int(config.dropout),
+        self.q_proj = FCNet([config.q_dim, config.h_dim], dropout=config.dropout,
                             norm=config.norm, act=config.act)
 
-        self.g_proj = FCNet([int(config.g_dim), int(config.h_dim)], dropout=int(config.dropout),
+        self.g_proj = FCNet([config.g_dim, config.h_dim], dropout=config.dropout,
                             norm=config.norm, act=config.act)
 
-        self.nonlinear = FCNet([int(config.h_dim), int(config.h_dim)], dropout=int(config.dropout),
+        self.nonlinear = FCNet([config.h_dim, config.h_dim], dropout=config.dropout,
                             norm=config.norm, act=config.act)
 
 
@@ -199,7 +200,7 @@ class DoubleTwoModalityArithmetic(nn.Module):
         config.guided_dim = config.g_dim # small adjustment
         self.i_q2_proj = TwoModalityArithmetic(config)
 
-        self.nonlinear = FCNet([int(config.h_dim), int(config.h_dim)], dropout=int(config.dropout),
+        self.nonlinear = FCNet([config.h_dim, config.h_dim], dropout=config.dropout,
                             norm=config.norm, act=config.act)
 
 
@@ -232,7 +233,7 @@ class DoubleTwoModalityAMA(nn.Module):
         config.guided_dim = config.g_dim  # small adjustment
         self.i_q2_proj = TwoModalityAMA(config)
 
-        self.nonlinear = FCNet([int(config.h_dim), int(config.h_dim)], dropout=int(config.dropout),
+        self.nonlinear = FCNet([config.h_dim, config.h_dim], dropout=config.dropout,
                                norm=config.norm, act=config.act)
 
     def forward(self, i, q1, q2):

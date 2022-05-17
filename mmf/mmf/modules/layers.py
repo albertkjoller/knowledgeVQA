@@ -66,6 +66,7 @@ class FCNet(nn.Module):
         norm_layer = get_norm(norm)
         act_layer = get_act(act)
 
+
         layers = []
         for i in range(len(dims)-2):
             in_dim = dims[i]

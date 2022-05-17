@@ -27,17 +27,17 @@ class SimpleClassifier(nn.Module):
         act_layer = get_act(config.act)
         # defining layers
         # initial input layer
-        dims = [int(config.in_dim)]
+        dims = [config.in_dim]
         # defining extra layers if defined in config
-        for i in range(int(config.num_non_linear_layers)-1):
+        for i in range(config.num_non_linear_layers-1):
             dims.append(int(config.h_dim))
         # final layer
-        dims.append(int(config.out_dim))
+        dims.append(config.out_dim)
         # FCNet initialized the whole classifier
-        self.main = FCNet(dims, dropout=int(config.dropout), norm=config.norm, act=config.act)
+        self.main = FCNet(dims, dropout=config.dropout, norm=config.norm, act=config.act)
 
         # without activation to learn the negative values
-        self.final = nn.Linear(int(config.out_dim), int(config.out_dim))
+        self.final = nn.Linear(config.out_dim, config.out_dim)
 
 
     def forward(self, input):

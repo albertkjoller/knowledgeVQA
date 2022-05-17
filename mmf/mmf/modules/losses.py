@@ -876,11 +876,7 @@ class BCEAndKLLoss(nn.Module):
 
 
 def calc_ms_loss(pair, base, param, multiplier):
-    return (
-        1.0
-        / param
-        * torch.log(1 + torch.sum(torch.exp(multiplier * param * (pair - base))))
-    )
+    return (1.0/ param * torch.log(1 + torch.sum(torch.exp(multiplier * param * (pair - base)))))
 
 
 @registry.register_loss("refiner_ms")
@@ -924,7 +920,7 @@ class RefinerMSLoss(nn.Module):
         targets = sample_list["targets"]
         inputs = model_output["scores"]
         n = inputs.size(0)
-        sim_mat = torch.matmul(inputs, targets.t())
+        sim_mat = torch.matmul(inputs, targets.t()) # not normalized
         loss = []
 
         for i in range(n):
@@ -1098,11 +1094,12 @@ class RefinerContrastiveLoss(nn.Module):
 
         # matrix containing the similarity between the inputs and targets
         # (i,j) contains similarity betweeh the i^th decoder and j^th target
-        # each batch is multiplied on all of targets, i.e. [batch_size, batch_size(sim per batch)]
-        sim_mat = torch.matmul(inputs, targets.t())
+        # each batch is multiplied on all of targets, i.e. dims = [batch_size, batch_size(sim per batch)]
+        sim_mat = torch.matmul(inputs, targets.t()) # dot product
 
         loss = []
         for i in range(batch_size):
+            # current batch
             sim_ij = sim_mat[i]
             # pos_similarity contains the similarity between i^th decoder
             # and i^th target
@@ -1111,10 +1108,11 @@ class RefinerContrastiveLoss(nn.Module):
             # neg_pair_ contains all the batch samples whose similarity with i^th
             #  decoder is better than a threshold corrected similarity between
             # i^th decoder and i^th target
-            # true for all pairs above
+            # i.e. we expect every sample in the batch to be distinct
             neg_pair_ = torch.masked_select(
                 sim_ij, sim_ij > pos_similarity - self.similarity_threshold
             )
+            # in masked_select, the second input chooses which values to keep
 
             # remove the pos_pair from the neg_pair list
             neg_pair_ = torch.masked_select(
@@ -1125,7 +1123,6 @@ class RefinerContrastiveLoss(nn.Module):
             # target is closer to the decoded signal.
             if neg_pair_.shape[0] > 0:
                 neg_loss = torch.mean(self.similarity_threshold + neg_pair_ - pos_similarity)
-                # appends a positive values, but could be negative due to threshold
                 loss.append(neg_loss)
 
         if len(loss) == 0:

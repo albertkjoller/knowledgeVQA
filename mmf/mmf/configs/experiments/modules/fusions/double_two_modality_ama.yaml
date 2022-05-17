@@ -16,4 +16,3 @@ model_config:
         # TODO: optimization parameters:
         h_dim: 5000  # hidden dim as input in classifier
         dropout: 0 # avoid overfitting
-

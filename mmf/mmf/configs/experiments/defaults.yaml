@@ -68,7 +68,6 @@ evaluation:
     #- roc_auc
 
 training:
-
   detect_anomaly: true #TODO:??
   # Level of logging, only logs which are >= to current level will be logged
   logger_level: info
@@ -93,12 +92,6 @@ checkpoint:
   # Will save only the last max_to_keep; if -1, saves all eligible checkpoints
   max_to_keep: 1
 
-trainer:
-  params:
-    gpus: 1 # TODO: what works best
-    logger: true
-    progress_bar_refresh_rate: 0.1
-    val_check_interval: 5000 # checkpointing every 5000 update
 
 
 
