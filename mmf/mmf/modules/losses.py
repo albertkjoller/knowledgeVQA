@@ -876,6 +876,7 @@ class BCEAndKLLoss(nn.Module):
 
 
 def calc_ms_loss(pair, base, param, multiplier):
+    # params is the sign, e.g. -1 or 1
     return (1.0/ param * torch.log(1 + torch.sum(torch.exp(multiplier * param * (pair - base)))))
 
 
@@ -941,7 +942,7 @@ class RefinerMSLoss(nn.Module):
             pos_loss = calc_ms_loss(pos_pair, self.base, self.beta, -1)
             neg_loss = calc_ms_loss(neg_pairs, self.base, self.alpha, 1)
             loss.append(pos_loss + neg_loss)
-        if n > 0:
+        if n > 0: # n is batch size
             loss = sum(loss) / n
         else:
             loss = inputs.new_zeros(1, requires_grad=True)
@@ -1114,7 +1115,7 @@ class RefinerContrastiveLoss(nn.Module):
             )
             # in masked_select, the second input chooses which values to keep
 
-            # remove the pos_pair from the neg_pair list
+            # remove the pos_pair from the neg_pair list is they are within epsilon margin to the target
             neg_pair_ = torch.masked_select(
                 neg_pair_, abs(neg_pair_ - pos_similarity) > self.epsilon
             )
@@ -1122,7 +1123,9 @@ class RefinerContrastiveLoss(nn.Module):
             # The loss is non-zero only when there exists at least one sample whose
             # target is closer to the decoded signal.
             if neg_pair_.shape[0] > 0:
+                # similarity threshold is the margin
                 neg_loss = torch.mean(self.similarity_threshold + neg_pair_ - pos_similarity)
+                # this: neg_pair_ - pos_similarity, will be zero or more
                 loss.append(neg_loss)
 
         if len(loss) == 0:
