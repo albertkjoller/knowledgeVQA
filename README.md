@@ -8,11 +8,9 @@ Mention OK-VQA!
   <img src="https://github.com/albertkjoller/explainableVQA/blob/main/imgs/pipeline/baseline.png" alt="drawing" width="600"/>
 </p>
 
-The project is built as an instance of the [MMXAI module](https://gitlab.doc.ic.ac.uk/g207004202/explainable-multimodal-classification) that is based on the [MMF-framework](https://github.com/facebookresearch/mmf).
+<!-- The project is built as an instance of the [MMXAI module](https://gitlab.doc.ic.ac.uk/g207004202/explainable-multimodal-classification) that is based on the [MMF-framework](https://github.com/facebookresearch/mmf). -->
 
 ## Setup
-
-###TODO: Describe that we use mmf-modular framework and mmxai modular framework
 
 Note: this project was carried out with access to GPU cores, for which reason the setup for reproducibility will also require access to GPU.
 
@@ -40,11 +38,16 @@ Install the MMF-module.
 
 Install specific dependencies used for this project...
 
-    pip install torch==1.8.0+cu111 torchvision torchaudio torchtext -f https://download.pytorch.org/whl/torch_stable.html
-
-    pip install torch-scatter==2.0.8 torch-sparse==0.6.12 torch-cluster==1.5.9 torch-spline-conv torch-geometric -f https://data.pyg.org/whl/torch-1.8.0+cu111.html
+#### GPU (Only Linux)
+    pip install torch==1.8.0+cu111 torchvision==0.9.0+cu111 torchaudio==0.8.0 torchtext==0.9.0 -f https://download.pytorch.org/whl/torch_stable.html
 
     pip install detectron2 -f https://dl.fbaipublicfiles.com/detectron2/wheels/cu111/torch1.8/index.html
+
+#### CPU (MacOS or Linux)
+    pip install torch==1.8.0 torchvision==0.9.0 torchaudio==0.8.0 torchtext==0.9.0 -f https://download.pytorch.org/whl/torch_stable.html
+
+    pip install “git+https://github.com/facebookresearch/detectron2.git@ffff8ac”
+
 
 And that's it! Now, you should be able to reproduce the findings of this project!
 	
@@ -80,15 +83,3 @@ Of course, exploiting the complete functionality of the MMF-framework requires d
         env.data_dir={where_you_want_to_store_the_data}/torch/mmf/data \
         env.save_dir={where_you_want_to_save_the_model}/save/models/{and_the_save_name} \
         trainer.params.gpus=1 \
-
-# fast run (Phillip) example (REMOVE LATER!):
-mmf_run config='configs/experiments/baseline/mul.yaml' \
-    datasets=okvqa \
-    model=qlarifais \
-    run_type=train_val \
-    env.data_dir=/work3/s194253/torch/mmf/data \
-    env.cache_dir=/work3/s194253/torch/mmf \
-    env.save_dir=/work3/s194253/save/models/fast_training \
-    training.max_updates=1 \
-    training.max_epochs=None \
-    trainer.params.gpus=1 \

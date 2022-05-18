@@ -9,6 +9,7 @@ imgs/pipeline/
 
 # Pythonpath
 *.pyc
+phoc/
 
 # MacOS
 .DS_Store
