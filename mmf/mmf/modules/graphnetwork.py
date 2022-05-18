@@ -141,6 +141,7 @@ class Numberbatch(nn.Module):
                     pass
         # average embeddings
         X = torch.from_numpy(np.nanmean(X, axis=2)).to(get_current_device())
+        # applying l2 norm to get a unit vector
         X = F.normalize(X)
         return X
 
