@@ -53,25 +53,29 @@ class Numberbatch(nn.Module):
         self.config = config
 
         self.max_seq_length = self.config.max_seq_length
-        self.numberbatch = {}
-        self.device = get_current_device()
+        try:
+            if self.numberbatch == dict():
+                pass
+        except AttributeError:
+            self.numberbatch = {}
+            self.device = get_current_device()
 
-        # todo: write that we are loading and have finished loading numberbatch
+            # todo: write that we are loading and have finished loading numberbatch
 
-        with open(mmf_indirect(self.config.filepath), 'rb') as f:
+            with open(mmf_indirect(self.config.filepath), 'rb') as f:
 
-            info = f.readlines(1)
-            lines, self.numberbatch_dim = (int(x) for x in info[0].decode('utf-8').strip("\n").split(" "))
+                info = f.readlines(1)
+                lines, self.numberbatch_dim = (int(x) for x in info[0].decode('utf-8').strip("\n").split(" "))
 
-            for line in tqdm(f, total=lines):
-                l = line.decode('utf-8')
-                l = l.strip("\n")
+                for line in tqdm(f, total=lines):
+                    l = line.decode('utf-8')
+                    l = l.strip("\n")
 
-                # create tensor-dictionary
-                word = l.split(' ')[0]
-                #tensor = torch.tensor(list(map(float, l.split(' ')[1:])), dtype=torch.float32)
-                tensor = torch.tensor(list(map(float, l.split(' ')[1:])), dtype=torch.float32)
-                self.numberbatch[word] = tensor
+                    # create tensor-dictionary
+                    word = l.split(' ')[0]
+                    #tensor = torch.tensor(list(map(float, l.split(' ')[1:])), dtype=torch.float32)
+                    tensor = torch.tensor(list(map(float, l.split(' ')[1:])), dtype=torch.float32)
+                    self.numberbatch[word] = tensor
 
     def conceptualize(self, tokenized_sentence):
 
@@ -137,6 +141,7 @@ class Numberbatch(nn.Module):
                     pass
         # average embeddings
         X = torch.from_numpy(np.nanmean(X, axis=2)).to(get_current_device())
+        X = F.normalize(X)
         return X
 
 
