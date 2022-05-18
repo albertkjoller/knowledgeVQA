@@ -121,6 +121,8 @@ class Qlarifais(BaseModel):
         # --- CLASSIFICATION ---
         # embeddings
         logits = self.classifier(fused_features)
+        logits = torch.nn.functional.normalize(logits)
+        
         # average embedded annotator answer for type contrastive loss
         avg_embedded_answers  = self.graph_encoder(sample_list['answers'])
         if self.config.classifier.output_type == 'embeddings':
