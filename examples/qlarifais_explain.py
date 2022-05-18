@@ -118,7 +118,7 @@ if __name__ == "__main__":
                 
             else:
                 # Read images
-                img1 = cv2.imread(save_path[0])
+                img1 = cv2.cvtColor(cv2.imread(save_path[0]), cv2.COLOR_BGR2RGB)
                 img2 = cv2.imread(save_path[1])
                 
                 explainer_img = np.concatenate((img1, img2), axis=0)

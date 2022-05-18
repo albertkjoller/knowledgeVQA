@@ -97,8 +97,8 @@ class TwoModalityArithmetic(nn.Module):
             joint_repr = i_proj * q_proj
         elif self.operation == 'add':
             joint_repr = i_proj + q_proj
+            
         # TODO: average
-
         joint_feature = self.nonlinear(joint_repr)
 
         return joint_feature
