@@ -18,8 +18,20 @@ def get_args(argv=None):
     parser.add_argument(
         "--resume",
         #required=True,
-        help="save checkpoints and logs in <checkpoints-dir>/<prefix>.<save_dir_key>",
+        help="t/f, resuming from the current.ckpt",
         default = "False"
+    )
+    parser.add_argument(
+        "--resume_best",
+        #required=True,
+        help="t/f, resuming from the current.ckpt",
+        default = "False"
+    )
+    parser.add_argument(
+        "--max_to_keep",
+        #required=True,
+        help="specify how many eligible checkpoints to save",
+        default = "1"
     )
     parser.add_argument(
         "-q",
