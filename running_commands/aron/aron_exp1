@@ -1,10 +1,13 @@
-# train_val
+
+# todo: sweeping hyperparams
 
 python mmf/tools/sweeps/sweep_qlarifais.py \
 --run_type train_val \
 --resume False \
+--resume_best False \
 --config /zhome/96/8/147177/Desktop/explainableVQA/mmf/mmf/configs/experiments/baseline/ama.yaml \
 -prefix baseline_ama \
+--max_to_keep 5 \
 --tensorboard 1 \
 --tensorboard_logdir /work3/s194262/save/sweeps/tensorboard \
 --baseline_model /zhome/96/8/147177/Desktop/explainableVQA/mmf/mmf/models/qlarifais.py \
@@ -19,9 +22,14 @@ python mmf/tools/sweeps/sweep_qlarifais.py \
 -R "rusage[mem=5GB]" \
 -W 24:00 \
 
+# todo: testing the models
 
-# --- the best model ---
+# change to: --run_type test
 
+
+
+
+# assuming the
 # use the .sh train file in repo folder to submit job, adjust the running command
 
 # to train the model:

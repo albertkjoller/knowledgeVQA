@@ -160,7 +160,9 @@ def launch_train(args, config):
     # this will resume from the current.ckpt
     if args.resume == "True":
         train_cmd.extend(["checkpoint.resume", "True"])
-
+    # this will resume from the best.ckpt
+    if args.resume_best == "True":
+        train_cmd.extend(["checkpoint.resume_best", "True"])
 
     #train_cmd.extend(["distributed.world_size", str(args.num_nodes * args.num_gpus)])
     #if args.num_nodes > 1:
@@ -173,6 +175,7 @@ def launch_train(args, config):
     train_cmd.extend(["env.save_dir", save_dir])
     train_cmd.extend(["env.cache_dir", args.cache_dir])
     train_cmd.extend(["env.data_dir", args.data_dir])
+    train_cmd.extend(["checkpoint.max_to_keep", args.max_to_keep])
 
 
     if args.tensorboard:
