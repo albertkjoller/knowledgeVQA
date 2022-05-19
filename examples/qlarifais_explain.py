@@ -97,17 +97,14 @@ if __name__ == "__main__":
             
             explainability_method = input("\nEnter explainability method: ")
             image = load_image(img_path)
-            
-            #image_tensor = model.processor_dict["image_processor"](image)
-            
+                        
             save_path = run_explainability(model, model_name, 
                                            image, img_name, 
                                            question, category_id, 
                                            explainability_method,
                                            )
             
-            if explainability_method != 'MMGradientOR':
-                    
+            if explainability_method.split("-")[0] != 'OR':
                 
                 # show explainability image
                 explainer_img = cv2.imread(save_path)  # open from file object
@@ -118,8 +115,8 @@ if __name__ == "__main__":
                 
             else:
                 # Read images
-                img1 = cv2.cvtColor(cv2.imread(save_path[0]), cv2.COLOR_BGR2RGB)
-                img2 = cv2.imread(save_path[1])
+                img1 = cv2.imread(save_path[0]) #orig
+                img2 = cv2.imread(save_path[1]) # exp_map
                 
                 explainer_img = np.concatenate((img1, img2), axis=0)
 
@@ -128,7 +125,16 @@ if __name__ == "__main__":
                 cv2.resizeWindow(f"{explainability_method}", 600, 300)
                 cv2.imshow(f"{explainability_method}", explainer_img)
                 cv2.waitKey(1)
-                
+            
+            # get predictions and show input
+            topk = 5
+            outputs = model.classify(image=image, text=question, top_k=topk)
+            
+            # print answers and probabilities
+            print(f'\nQuestion: "{question}"')
+            print("\nPredicted outputs from the model:")
+            for i, (prob, answer) in enumerate(zip(*outputs)):
+                print(f"{i+1}) {answer} \t ({prob})")
 
     # when loop is ended
     cv2.destroyAllWindows()

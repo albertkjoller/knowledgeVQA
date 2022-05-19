@@ -86,7 +86,11 @@ class QlarifaisInterface(nn.Module):
         sample_list['answers'] = 'empty'    
         
         output = self.model(sample_list)
+        
+        #TODO: get embedding scores -flag for tsne
         scores = nn.functional.softmax(output["prediction_scores"], dim=1)                      
+        
+        # TODO: probability of prediction        
         
         if top_k != None:
             confidence, indices = scores.topk(5, dim=1)
