@@ -2,10 +2,14 @@
 import os
 from pathlib import Path
 
-import torch
+import numpy as np
+import pandas as pd
+
 import cv2
+import torch
 
 from mmf.models import Qlarifais
+import torchvision.datasets.folder as tv_helpers
 
 
 
@@ -18,20 +22,23 @@ model = Qlarifais.from_pretrained(f"{save_dir}/models/{model_name}", path_to_tor
 model.to(torch.device("cuda:0" if torch.cuda.is_available() else "cpu"))
 
 
-import numpy as np
-import pandas as pd
-
+# paths to data
 data_path = Path(model.config.dataset_config.okvqa.data_dir) / 'okvqa'
 test_data_path = data_path / 'defaults/annotations/annotations/imdb_test.npy'
 images_path = data_path / 'defaults/images'
 
+# test dataset
 okvqa_test = pd.DataFrame.from_records(np.load(test_data_path, allow_pickle=True)[1:])
 
-
-image = (images_path / okvqa_test.image_name[0]).as_posix() + '.jpg'
-
-img = cv2.imread(image)
-
-#outputs = model.classify(image=image, text=question)
+for i in range(okvqa_test.__len__()):
+    # load test image
+    img_name = (images_path / okvqa_test.image_name[i]).as_posix() + '.jpg'
+    image = tv_helpers.default_loader(img_name)
+    
+    # Get test question
+    question = okvqa_test.question_str[i]
+    
+    # Get predicted embedding
+    outputs = model.classify(image=image, text=question, embedding_output=True)
 
 print("")

@@ -7,7 +7,6 @@ Created on Mon Apr 25 11:14:28 2022
 """
 
 import sys, os
-from pathlib import Path
 
 import cv2
 import torch
@@ -17,37 +16,9 @@ from mmf.models import Qlarifais
 
 sys.path.append(('/').join(os.getcwd().split('/')[:-1]))
 from mmexp.utils.argument_wrapper import run_explainability, load_image
+from mmexp.utils.tools import image_loader
 
 if __name__ == "__main__":
-    
-    def image_loader(old_img_name):
-        # input image
-        img_name = input("Enter image name from '../imgs/temp/' folder (e.g. 'rain/rain.jpg'): ")
-        if old_img_name != None:
-            cv2.destroyWindow(f"{old_img_name}")
-    
-        if img_name != 'quit()': # continues until user quits
-            # load image
-            img2None = False
-            img_path = Path(f"./../imgs/temp/{img_name}").as_posix()
-            img = cv2.imread(img_path)  # open from file object
-            
-            if type(img) == type(None):
-                img = cv2.imread(Path("./../imgs/temp/fail.png").as_posix())
-                img2None = True       
-            
-            # show image
-            cv2.namedWindow(f"{img_name}", cv2.WINDOW_NORMAL)
-            cv2.resizeWindow(f"{img_name}", 600, 300)
-            cv2.imshow(f"{img_name}", img)
-            cv2.waitKey(1)
-            
-            if img2None:
-                img = None
-            
-            return img_name, img_path, img
-        else:
-            return "quit()", None, None
         
     # obtain user input
     save_dir = input("Enter directory path of saved models ('save'-folder): ")
