@@ -42,11 +42,15 @@ Install specific dependencies used for this project...
     pip install torch==1.8.0+cu111 torchvision==0.9.0+cu111 torchaudio==0.8.0 torchtext==0.9.0 -f https://download.pytorch.org/whl/torch_stable.html
 
     pip install detectron2 -f https://dl.fbaipublicfiles.com/detectron2/wheels/cu111/torch1.8/index.html
+    
+    pip install omegaconf==2.1.*
 
 #### CPU (MacOS or Linux)
     pip install torch==1.8.0 torchvision==0.9.0 torchaudio==0.8.0 torchtext==0.9.0 -f https://download.pytorch.org/whl/torch_stable.html
 
     pip install “git+https://github.com/facebookresearch/detectron2.git@ffff8ac”
+    
+    pip install omegaconf==2.1.*
 
 
 And that's it! Now, you should be able to reproduce the findings of this project!
