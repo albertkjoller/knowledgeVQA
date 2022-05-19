@@ -175,6 +175,7 @@ def launch_train(args, config):
     train_cmd.extend(["env.save_dir", save_dir])
     train_cmd.extend(["env.cache_dir", args.cache_dir])
     train_cmd.extend(["env.data_dir", args.data_dir])
+    # how many models to keep based on best (eligible checkpoints)
     train_cmd.extend(["checkpoint.max_to_keep", args.max_to_keep])
 
 
