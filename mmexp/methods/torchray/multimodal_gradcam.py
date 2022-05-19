@@ -1,7 +1,6 @@
+
 from torchray.attribution.common import Probe, get_module, resize_saliency
 from torchray.attribution.grad_cam import gradient_to_grad_cam_saliency
-
-
 
 def multimodal_gradcam(model, image_object,
                        question, category_id, 
@@ -13,9 +12,9 @@ def multimodal_gradcam(model, image_object,
     layer_names = list(zip(*list(model.named_modules())))[0]
     
     # Grad-CAM backprop.
-    saliency_layer = get_module(model, 'model.vision_module')
+    saliency_layer = get_module(model, 'model.classifier')
     
-    probe = Probe(saliency_layer, target='output')
+    probe = Probe(saliency_layer, target='input')
     
     # Gradient method.
     y = model.classify(image_object, question, explain=True)

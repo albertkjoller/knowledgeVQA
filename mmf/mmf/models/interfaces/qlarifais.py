@@ -54,6 +54,7 @@ class QlarifaisInterface(nn.Module):
         text: str,
         top_k = None,
         explain = False,
+        embedding_output = False,
     ):
         """Classifies a given image and text in it wrt. multi-class output defined 
         by MMF answer-txt-file.
@@ -87,21 +88,24 @@ class QlarifaisInterface(nn.Module):
         
         output = self.model(sample_list)
         
-        #TODO: get embedding scores -flag for tsne
-        scores = nn.functional.softmax(output["prediction_scores"], dim=1)                      
-        
-        # TODO: probability of prediction        
-        
-        if top_k != None:
-            confidence, indices = scores.topk(5, dim=1)
-
-            top_k = [(p.item(), answer.idx2word(indices[0][idx].item())) for (idx, p) in enumerate(confidence[0])]        
-            probs, answers = list(zip(*top_k))
-            return probs, answers
-        
-        elif explain:
-            return scores
+        if embedding_output:
+            return output['scores']
             
         else:
-            confidence, index = torch.max(scores, dim=1)
-            return {"label": index.item(), "confidence": confidence.item()}
+            scores = nn.functional.softmax(output["prediction_scores"], dim=1)                      
+            # TODO: check probability of prediction        
+            
+            if top_k != None:
+                confidence, indices = scores.topk(5, dim=1)
+    
+                top_k = [(p.item(), answer.idx2word(indices[0][idx].item())) for (idx, p) in enumerate(confidence[0])]        
+                probs, answers = list(zip(*top_k))
+                return probs, answers
+            
+            elif explain:
+                return scores
+                
+            else:
+                confidence, index = torch.max(scores, dim=1)
+                return {"label": index.item(), "confidence": confidence.item()}
+            

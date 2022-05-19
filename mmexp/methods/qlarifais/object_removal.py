@@ -8,12 +8,12 @@ Created on Fri May  6 13:09:24 2022
 
 import os
 from pathlib import Path
-import cv2
 
 import random
 
-import numpy as np
+import cv2
 import torch
+import numpy as np
 
 from mmexp.methods.automated_objects_removal_inpainter.src.config import Config
 from mmexp.methods.automated_objects_removal_inpainter.src.edge_connect import EdgeConnect
