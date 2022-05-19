@@ -1,3 +1,6 @@
+
+# todo: sweeping hyperparams
+
 python mmf/tools/sweeps/sweep_qlarifais.py \
 --run_type train_val \
 --resume False \

@@ -28,4 +28,5 @@ model_config:
       params:
         fusion:
           type: double_two_modality_arithmetic
-
+            params:
+              dropout: 0.1

@@ -1,3 +1,12 @@
+
+# todo: adjusting hyperparameters
+# go into experiemnts/ablation1/regions.yaml file:
+#       - change to the optimal fusion module
+# now you can sweep it.
+
+
+# todo: sweeping hyperparams
+
 python mmf/tools/sweeps/sweep_qlarifais.py \
 --run_type train_val \
 --resume False \

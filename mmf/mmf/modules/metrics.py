@@ -978,7 +978,6 @@ class F1PrecisionRecall(BaseMetric):
         scores = model_output["scores"]
         expected = sample_list["targets"]
 
-        print("F1!! Is multilabel?", self._multilabel)
 
         if self._multilabel:
             output = torch.sigmoid(scores)
@@ -1000,7 +999,6 @@ class F1PrecisionRecall(BaseMetric):
             "f1": expected.new_tensor(value_tuple[2], dtype=torch.float),
         }
 
-        print("f1 prec rec", value)
 
         return value
 

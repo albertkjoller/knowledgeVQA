@@ -160,8 +160,11 @@ def launch_train(args, config):
     # this will resume from the current.ckpt
     if args.resume == "True":
         train_cmd.extend(["checkpoint.resume", "True"])
+        # if a specific file is desired to run from
+        if args.resume_file is not False:
+            train_cmd.extend(["checkpoint.resume_file", args.resume_file])
     # this will resume from the best.ckpt
-    if args.resume_best == "True":
+    elif args.resume_best == "True":
         train_cmd.extend(["checkpoint.resume_best", "True"])
 
     #train_cmd.extend(["distributed.world_size", str(args.num_nodes * args.num_gpus)])

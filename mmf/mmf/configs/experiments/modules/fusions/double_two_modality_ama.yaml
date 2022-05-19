@@ -15,4 +15,4 @@ model_config:
         act: ReLU # activation function
         # TODO: optimization parameters:
         h_dim: 512  # hidden dim as input in classifier
-        dropout: 0 # avoid overfitting
+        dropout: 0.1 # avoid overfitting

@@ -28,6 +28,12 @@ def get_args(argv=None):
         default = "False"
     )
     parser.add_argument(
+        "--resume_file",
+        #required=True,
+        help="which file to resume from",
+        default = "False"
+    )
+    parser.add_argument(
         "--max_to_keep",
         #required=True,
         help="specify how many eligible checkpoints to save",

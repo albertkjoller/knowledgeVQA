@@ -26,4 +26,5 @@ model_config:
       params:
         fusion:
           type: two_modality_ama
-
+            params:
+              dropout: 0.1

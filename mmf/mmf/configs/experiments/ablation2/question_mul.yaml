@@ -22,8 +22,16 @@ includes:
 # overwrite fusion type
 model_config:
   qlarifais:
+    fusion:
+      params:
+        dropout: 0.1 # todo: what is the optimal
+    classifier:
+      params:
+        dropout: 0.1 # todo: what is the optimal
+    # setting correct fusion module in the attention module
     attention:
       params:
         fusion:
           type: two_modality_arithmetic
-
+            params:
+              dropout: 0.1
