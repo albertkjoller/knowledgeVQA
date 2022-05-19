@@ -23,6 +23,7 @@ from .visual_bert import VisualBERT
 from .pilot import Pilot
 from .vqtor import Vqtor
 from .qlarifais import Qlarifais
+
 __all__ = [
     "TopDownBottomUp",
     "Pythia",

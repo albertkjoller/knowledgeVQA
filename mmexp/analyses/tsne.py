@@ -18,5 +18,20 @@ model = Qlarifais.from_pretrained(f"{save_dir}/models/{model_name}", path_to_tor
 model.to(torch.device("cuda:0" if torch.cuda.is_available() else "cpu"))
 
 
+import numpy as np
+import pandas as pd
 
-outputs = model.classify(image=image, text=question, top_k=topk)
+data_path = Path(model.config.dataset_config.okvqa.data_dir) / 'okvqa'
+test_data_path = data_path / 'defaults/annotations/annotations/imdb_test.npy'
+images_path = data_path / 'defaults/images'
+
+okvqa_test = pd.DataFrame.from_records(np.load(test_data_path, allow_pickle=True)[1:])
+
+
+image = (images_path / okvqa_test.image_name[0]).as_posix() + '.jpg'
+
+img = cv2.imread(image)
+
+#outputs = model.classify(image=image, text=question)
+
+print("")
