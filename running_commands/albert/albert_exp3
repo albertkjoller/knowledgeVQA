@@ -1,6 +1,8 @@
 python mmf/tools/sweeps/sweep_qlarifais.py \
 --run_type train_val \
 --resume False \
+--resume_best False \
+--max_to_keep 5 \
 --config /zhome/b8/5/147299/Desktop/explainableVQA/mmf/mmf/configs/experiments/ablation2/question_mul.yaml \
 -prefix ablation2_question_mul \
 --tensorboard 1 \
