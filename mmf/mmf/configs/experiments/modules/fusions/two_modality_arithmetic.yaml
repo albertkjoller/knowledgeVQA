@@ -11,6 +11,6 @@ model_config:
         norm: weight # [weight, batch, layer, none]
         act: ReLU # activation function: [ReLu, Leaky_ReLu...]
         # TODO: optimization parameters:
-        h_dim: 5000  # hidden dim as input in classifier
+        h_dim: 512  # hidden dim as input in classifier
         dropout: 0.1 # avoid overfitting:
 
