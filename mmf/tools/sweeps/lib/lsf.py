@@ -147,25 +147,28 @@ def launch_train(args, config):
             print(f"skip failed run (override with --resume-failed): {save_dir}")
             return
 
-    # if folder is created, i.e. experiment could already be running, and run_type is not test
-    elif has_started(save_dir) and not args.run_type == "test":
-        print(f"skip in progress run: {save_dir}")
-        return
-
-    # if runtype is test
-    if args.resume_file is not None and args.run_type == 'test':
+    # if run_type is test
+    if args.run_type == 'test':
+        assert args.resume_file is not None
         # if not then it is null
         train_cmd.extend(["checkpoint.resume_file", os.path.join(save_dir, args.resume_file)])
 
+    # if resuming training from a checkpoint
     # this will resume from the current.ckpt
-    if args.resume == "True":
+    elif args.resume == "True":
         train_cmd.extend(["checkpoint.resume", "True"])
         # if a specific file is desired to run from
-        if args.resume_file is not False:
+        if args.resume_file is not None:
             train_cmd.extend(["checkpoint.resume_file", args.resume_file])
-    # this will resume from the best.ckpt
-    elif args.resume_best == "True":
-        train_cmd.extend(["checkpoint.resume_best", "True"])
+        # this will resume from the best.ckpt
+        elif args.resume_best == "True":
+            train_cmd.extend(["checkpoint.resume_best", "True"])
+
+    # if folder is created, i.e. experiment could already be running, and run_type is not test
+    elif has_started(save_dir):
+        print(f"skip in progress run: {save_dir}")
+        return
+
 
     #train_cmd.extend(["distributed.world_size", str(args.num_nodes * args.num_gpus)])
     #if args.num_nodes > 1:

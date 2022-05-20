@@ -62,5 +62,27 @@ In `experiments/ablation3/...`:
 
 ---
 
+## Debugging failed/stopped runs
+
+### If one or more runs need to restart
+
+1) Delete the folders in `save/sweeps/...` of experiments that need to restart.
+   
+    1.1) if the run had previously started, delete its' corresponding tensorboard folder too.
+   
+2) Run the full hyper parameter sweep command again, created folders will be skipped, i.e. finished/running experiments.
+
+
+### If a run suddenly stops and should continue from `current.ckpt`
+These steps are only intended for a single job:
+1) Copy its submit file commands in `train.log` which are after the `running commands:` and paste it in the `sweep_var.sh`.
+2) Adjust the `.out` and `.err` file names.
+3) Add the `checkpoint.resume True` argument to the `mmf_run` type command 
+4) Submit the job to clusters.
+
+
+TODO: If multiple runs need to continue from `current.ckpt` due to e.g. a wall-time limit:
+1) 
+
 
 
