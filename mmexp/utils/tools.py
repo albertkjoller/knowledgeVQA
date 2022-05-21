@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-import os, sys
+import os, sys, glob
 import tempfile
 from pathlib import Path
 
@@ -74,6 +74,19 @@ def load_image(img_path):
 def str_to_class(classname):
     return getattr(sys.modules['mmexp.methods'], classname)
 
+
+def load_predictions(model):
+    
+    if model.config.env.report_dir != '':
+        report_dir = Path(model.config.env.report_dir)
+    else:
+        report_dir = input("Enter test-report directory-name (e.g. okvqa_qlarifais_49203252): ")
+        report_dir = Path(model.config.env.save_dir) / report_dir
+    
+    for file in glob.glob((report_dir / 'reports/*.json').as_posix()):
+        results = pd.read_json(file)
+        break
+    return results
 
 def paths_to_okvqa(model, run_type='train'):
     # paths to data

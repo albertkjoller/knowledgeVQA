@@ -21,5 +21,6 @@ mmf_run config=/work3/s194253/save/models/baseline_ama_512/config.yaml \
     model=qlarifais \
     dataset=okvqa \
     run_type=test \
+    env.report_dir=/work3/s194253/tests/models/baseline_ama_512/reports \
     checkpoint.resume_file=/work3/s194253/save/models/baseline_ama_512/best.ckpt
 

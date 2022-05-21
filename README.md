@@ -82,12 +82,13 @@ Of course, exploiting the complete functionality of the MMF-framework requires d
 
 ## Testing a model
 
-Testing a model by getting predictions on the test data from OK-VQA is easy
+Testing a model by getting predictions on the test data from OK-VQA is as easy as training the model! Just follow this code example given by MMF.
 
     cd mmf
 
-    mmf_run config={path_to_pretrained_model}}/config.yaml \
+    mmf_predict config={path_to_pretrained_model}}/config.yaml \
         model={my_new_model} \
         dataset=okvqa \
         run_type=test \
+        env.report_dir={where_you_want_the_results}{my_new_model}/reports \
         checkpoint.resume_file={path_to_pretrained_model}/best.ckpt
