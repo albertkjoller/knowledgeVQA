@@ -1,18 +1,17 @@
-# Visual Question Answering - top-down attention and explainability
+# Visual Question Answering (VQA) - top-down attention and explainability
 
-Project repository related to bachelor thesis on Technical University of Denmark (DTU) in spring 2022. Investigating the role of top-down attention mechanisms, knowledge graphs and how interpretable these are through explainability tools.
+*Project repository related to bachelor thesis on Technical University of Denmark (DTU) in spring 2022.*
 
-Mention OK-VQA!
+Examining multi-modal learning through experiments with external knowledge and top-down attention mechanisms by including explainability tools for the visual modality. The project aims at competing with other contributors to the [OK-VQA challenge](https://okvqa.allenai.org/leaderboard.html) by training multi-modal VQA models using the [MMF](https://github.com/facebookresearch/mmf) framework. 
 
 <p align="center">
-  <img src="https://github.com/albertkjoller/explainableVQA/blob/main/imgs/pipeline/baseline.png" alt="drawing" width="600"/>
+  <img src="https://github.com/albertkjoller/explainableVQA/blob/main/qlarifais_dark.png" alt="drawing" width="600"/>
 </p>
 
-<!-- The project is built as an instance of the [MMXAI module](https://gitlab.doc.ic.ac.uk/g207004202/explainable-multimodal-classification) that is based on the [MMF-framework](https://github.com/facebookresearch/mmf). -->
 
 ## Setup
 
-Note: this project was carried out with access to GPU cores, for which reason the setup for reproducibility will also require access to GPU.
+Note: this project was carried out with access to GPU cores which is critical for training the models. Testing model performance on the test set and through demos (`examples/qlarifais_predict.py` and `examples/qlarifais_explain.py`) can be carried out on CPU.
 
 Clone the repository in your terminal and change directory.
 
@@ -24,12 +23,6 @@ Create a virtual environment in your preferred way - e.g. using `conda` - and ac
     conda create -n vqa python=3.8
     conda activate vqa
 
-<!-- Install dependencies from the MMXAI module (following their [installation guide](https://gitlab.doc.ic.ac.uk/g207004202/explainable-multimodal-classification)). 
-
-    pip install --editable .
-    pip install -r requirements.txt
--->
-
 Install the MMF-module.
 
     cd mmf
@@ -38,7 +31,7 @@ Install the MMF-module.
 
 Install specific dependencies used for this project...
 
-#### GPU (Only Linux)
+#### GPU (Linux only)
     pip install torch==1.8.0+cu111 torchvision==0.9.0+cu111 torchaudio==0.8.0 torchtext==0.9.0 -f https://download.pytorch.org/whl/torch_stable.html
 
     pip install detectron2 -f https://dl.fbaipublicfiles.com/detectron2/wheels/cu111/torch1.8/index.html
