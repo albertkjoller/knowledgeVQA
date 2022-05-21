@@ -75,6 +75,19 @@ def str_to_class(classname):
     return getattr(sys.modules['mmexp.methods'], classname)
 
 
+def paths_to_okvqa(model, run_type='train'):
+    # paths to data
+    data_path = Path(model.config.dataset_config.okvqa.data_dir) / 'okvqa'
+    images_path = data_path / 'defaults/images'
+
+    if run_type == 'test':
+        data_path = data_path / 'defaults/annotations/annotations/imdb_test.npy'
+    elif run_type == 'train_val':
+        data_path = data_path / 'defaults/annotations/annotations/imdb_trainval.npy'
+    else:
+        data_path = data_path / 'defaults/annotations/annotations/imdb_train.npy'
+    return data_path, images_path
+
 def fetch_test_embeddings(model):
     pickle_path = Path(model.config.env.save_dir)
     try:
@@ -86,12 +99,10 @@ def fetch_test_embeddings(model):
         print("Creating test embeddings...")
         
         # paths to data
-        data_path = Path(model.config.dataset_config.okvqa.data_dir) / 'okvqa'
-        test_data_path = data_path / 'defaults/annotations/annotations/imdb_test.npy'
-        images_path = data_path / 'defaults/images'
+        data_path, images_path = paths_to_okvqa(model, run_type='test')
     
         # test dataset
-        okvqa_test = pd.DataFrame.from_records(np.load(test_data_path, allow_pickle=True)[1:])
+        okvqa_test = pd.DataFrame.from_records(np.load(data_path, allow_pickle=True)[1:])
     
         # Initialize test embeddings
         test_embeddings = np.zeros((300, len(okvqa_test)))
