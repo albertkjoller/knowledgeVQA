@@ -5,7 +5,7 @@ python mmf/tools/sweeps/sweep_qlarifais.py \
 --run_type train_val \
 --resume False \
 --resume_best False \
---max_to_keep 3 \
+--max_to_keep 1 \
 --config /zhome/b8/5/147299/Desktop/explainableVQA/mmf/mmf/configs/experiments/pilot/double_mul.yaml \
 -prefix pilot_double_mul \
 --tensorboard 1 \
@@ -17,7 +17,7 @@ python mmf/tools/sweeps/sweep_qlarifais.py \
 --data_dir /work3/s194253/torch/mmf/data \
 -t -1 \
 -n 6 \
--q gpua100 \
+-q gpuv100 \
 -gpus "num=1:mode=exclusive_process" \
 -R "rusage[mem=5GB]" \
 -W 24:00 \
