@@ -5,8 +5,8 @@ Running the best found hyper parameters for an experiment on the test set.
 
 
 Assuming:
-- A hyper parameter search is done.
-- The best hyper parameters have been found using the tensorboards.
+- A hyperparameter search is done.
+- The best hyperparameters have been estimeated maunally from Tensorboards.
 - The best model checkpoint has been chosen.
     - If the `best.ckpt` update value seems arbitrary, consider the other eligible checkpoints.
 
