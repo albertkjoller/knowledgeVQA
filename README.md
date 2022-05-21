@@ -10,7 +10,7 @@ Examining multi-modal learning through experiments with external knowledge and t
 
 ## Setup
 
-Note: this project was carried out with access to GPU cores which is critical for training the models. Testing model performance on the test set and through demos (`examples/qlarifais_predict.py` and `examples/qlarifais_explain.py`) can be carried out on CPU.
+**Note**: this project was carried out with access to GPU cores which is critical for training the models. Testing model performance on the test set and through demos (`examples/qlarifais_predict.py` and `examples/qlarifais_explain.py`) can be carried out on CPU.
 
 Clone the repository in your terminal and change directory.
 
