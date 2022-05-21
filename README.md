@@ -69,13 +69,25 @@ Training your own model is very easy! There are a few steps you need to complete
 3) create default configurations (as a YAML-file, place it in `explainableVQA/mmf/mmf/configs/models/my_new_model/defaults.yaml`)
 
 Of course, exploiting the complete functionality of the MMF-framework requires digging deeper into the folders, experiment-configurations, etc.. However, you should now be able to run the trian command from the `explainableVQA/mmf`-folder!
-
+    
     cd mmf
 
-    mmf_run config='configs/experiments/model_name/run_type.yaml' \
+    mmf_run config='configs/experiments/{my_new_model}/defaults.yaml' \
         datasets=okvqa \
         model={my_new_model} \
         run_type=train_val \
         env.data_dir={where_you_want_to_store_the_data}/torch/mmf/data \
-        env.save_dir={where_you_want_to_save_the_model}/save/models/{and_the_save_name} \
+        env.save_dir={where_you_want_to_save_the_model}/save/models/{and_the_desired_name} \
         trainer.params.gpus=1 \
+
+## Testing a model
+
+Testing a model by getting predictions on the test data from OK-VQA is easy
+
+    cd mmf
+
+    mmf_run config={path_to_pretrained_model}}/config.yaml \
+        model={my_new_model} \
+        dataset=okvqa \
+        run_type=test \
+        checkpoint.resume_file={path_to_pretrained_model}/best.ckpt
