@@ -1,11 +1,11 @@
-# Visual Question Answering (VQA) - top-down attention and explainability
+# Qlarifais - Visual Question Answering (VQA) using top-down attention and explainability
 
 *Project repository related to bachelor thesis on Technical University of Denmark (DTU) in spring 2022.*
 
 Examining multi-modal learning through experiments with external knowledge and top-down attention mechanisms by including explainability tools for the visual modality. The project aims at competing with other contributors to the [OK-VQA challenge](https://okvqa.allenai.org/leaderboard.html) by training multi-modal VQA models using the [MMF](https://github.com/facebookresearch/mmf) framework. 
 
 <p align="center">
-  <img src="https://github.com/albertkjoller/explainableVQA/blob/main/qlarifais_dark.png" alt="drawing"/>
+  <img src="https://github.com/albertkjoller/explainableVQA/blob/main/qlarifais_dark_small.png" alt="drawing"/>
 </p>
 
 
