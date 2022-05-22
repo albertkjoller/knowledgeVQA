@@ -6,33 +6,37 @@ Running the best found hyper parameters for an experiment on the test set.
 
 Assuming:
 - A hyperparameter search is done.
-- The best hyperparameters have been estimeated maunally from Tensorboards.
-- The best model checkpoint has been chosen.
-    - If the `best.ckpt` update value seems arbitrary, consider the other eligible checkpoints.
+- The best hyperparameters have been estimated maunally from Tensorboards.
 
-Then:
-1) Go to the best models' folder and its `train.log`file.
-2) Copy the information given by `running_commands:` (i.e. the .sh commands).
-3) Paste this in the `sweep_var.sh` file.
-4) Adjusting the `python3 -u` command:
-   
-    4.1 Modify the following: `run_type train_val` to `run_type test`
-    
-    4.2 Add the following: `resume_file best.ckpt` or e.g. `resume_file models/model_900.ckpt`
+Then follow this simple guide:
+1) Retrieve the command given in the README of the main repository for testing and predicting. 
+    1.1 If running through LSF update open the `test.sh`- and `predict.sh`-files.
+2) Specify the model checkpoint path and modify paths for your needs.
+3) Run the command from the terminal.
+    3.1 If LSF-user: first submit the test-file by `bsub < test.sh`. When job is done, submit the prediction-file by `bsub < predict.sh`.
 
-6) submit this folder to the cluster: `bsub<sweep_var.sh`
+## Training the optimal model  
 
----
+If you want more checkpoints than the `best.ckpt`, do the following:
+
+1) Retrieve the command given in the README of the main repository for training.
+    1.1 If running through LSF update open the `train.sh`-file.
+2) Specify the `evaluation_interval`-parameter and set the `checkpoint.max_to_keep` to the desired amount of checkpoints for saving.
+3) Change the model name in `env.save_dir` to not overwrite already trained models.
+3) Run the command from the terminal.
+    3.1 If LSF-user: submit the train-file by `bsub < train.sh`.
 
 ## Steps on updating to the best module 
-Setting the optimal hyper parameter for each module, and importing the best found modules in upcoming experiments.
 
+<!---
 ### After Baseline
 In `experiments/modules/fusions/...`:
 - Set the optimal dropout value in the fusion modules.
-   - In: `two_modality_airthmetic.yaml` and `two_modality_ama.yaml`.
+    - In: `two_modality_airthmetic.yaml` and `two_modality_ama.yaml`.
+--->
 
-### After Pilot
+### Before Ablation 1
+<!---
 In `experiments/modules/fusions/...`:
 - Set the optimal dropout value in the fusion modules.
    - In: `triple_modality_arithmetic.yaml`, `double_two_modality_airthmetic.yaml` and `double_two_modality_ama.yaml`.
@@ -40,9 +44,10 @@ In `experiments/modules/fusions/...`:
 In `experiments/modules/classifiers/...`:
 - Set the optimal dropout value in the classifier module.
     - In: `embeddings.yaml`.
+--->
 
 In `experiments/...`:
-- Import the best triple modality fusion module in upcoming experiments.
+- Import the best fusion module for upcoming experiments.
    - In: `ablation1/...`, `ablation2/...` and `ablation3/...`.
 
 ### After Ablation 1
@@ -66,23 +71,24 @@ In `experiments/ablation3/...`:
 
 ### If one or more runs need to restart
 
-1) Delete the folders in `save/sweeps/...` of experiments that need to restart.
+1) Delete the errorneous folders in `save/sweeps/...` of experiments that need to restart.
    
     1.1) if the run had previously started, delete its' corresponding tensorboard folder too.
    
-2) Run the full hyper parameter sweep command again, created folders will be skipped, i.e. finished/running experiments.
+2) Run the full hyperparameter sweep command again - valid folders will be skipped, i.e. not overwriting finished/running experiments.
 
+### If you're out of memory
 
+Bad luck! Solve it manually by removing large files and consider checkpointing less regularly or delete non-optimal models that were saved in the hyperparameter sweep.
+
+<!---
 ### If a run suddenly stops and should continue from `current.ckpt`
 These steps are only intended for a single job:
 1) Copy its submit file commands in `train.log` which are after the `running commands:` and paste it in the `sweep_var.sh`.
 2) Adjust the `.out` and `.err` file names.
 3) Add the `checkpoint.resume True` argument to the `mmf_run` type command 
 4) Submit the job to clusters.
-
-
-TODO: If multiple runs need to continue from `current.ckpt` due to e.g. a wall-time limit:
-1) 
+--->
 
 
 
