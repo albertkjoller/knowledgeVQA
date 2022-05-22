@@ -7,7 +7,7 @@ python mmf/tools/sweeps/sweep_qlarifais.py \
 --resume_best False \
 --max_to_keep 1 \
 --config /zhome/2d/7/138174/Desktop/explainableVQA/mmf/mmf/configs/experiments/ablation1/regions.yaml \
--prefix ablation1_regions \
+-prefix ablation1_regions_double_ama \
 --tensorboard 1 \
 --tensorboard_logdir /work3/s184984/save/sweeps/tensorboard \
 --baseline_model /zhome/2d/7/138174/Desktop/explainableVQA/mmf/mmf/models/qlarifais.py \

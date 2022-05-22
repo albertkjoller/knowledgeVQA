@@ -1,7 +1,7 @@
 #!/bin/sh
-#BSUB -J pilot_double_ama_test
-#BSUB -o /work3/s194253/tests/models/pilot_double_ama/test_output_file_%J.out
-#BSUB -e /work3/s194253/tests/models/pilot_double_ama/test_error_file_%J.err
+#BSUB -J pilot_double_ama_predict
+#BSUB -o /work3/s194253/tests/models/pilot_double_ama/predict_output_file_%J.out
+#BSUB -e /work3/s194253/tests/models/pilot_double_ama/predict_error_file_%J.err
 #BSUB -n 6
 #BSUB -q gpuv100
 #BSUB -gpu 'num=1:mode=exclusive_process'
@@ -17,7 +17,7 @@ module load cuda/11.1
 source /work3/s194253/envs/vqa/bin/activate
 cd mmf
 
-mmf_run config=/work3/s194253/save/models/pilot_double_ama/config.yaml \
+mmf_predict config=/work3/s194253/save/models/pilot_double_ama/config.yaml \
     model=qlarifais \
     dataset=okvqa \
     run_type=test \

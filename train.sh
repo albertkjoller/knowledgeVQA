@@ -11,21 +11,22 @@
 #BSUB -B
 #BSUB -N
 
+
 nvidia-smi
 module load cuda/11.1
 source /work3/s194253/envs/vqa/bin/activate
 cd mmf
 
-python3 -u /zhome/b8/5/147299/Desktop/explainableVQA/mmf/mmf/../mmf_cli/run.py \
+mmf_run config='configs/experiments/pilot/double_ama.yaml' \
+    datasets=okvqa \
+    model=qlarifais \
+    run_type=train_val \
     env.save_dir /work3/s194253/models/pilot_double_ama \ 
     env.cache_dir /work3/s194253/torch/mmf \
     env.data_dir /work3/s194253/torch/mmf/data \ 
     env.tensorboard_logdir /work3/s194253/save/models/pilot_double_ama  \
     training.tensorboard 1 \
-    run_type train_val \
-    config /zhome/b8/5/147299/Desktop/explainableVQA/mmf/mmf/configs/experiments/pilot/double_ama.yaml \
-    model qlarifais \
-    dataset okvqa \
+    checkpoint.max_to_keep=5 \
     training.seed 1 \
     optimizer.params.lr 0.0005 \
     optimizer.params.weight_decay 1e-06 \
