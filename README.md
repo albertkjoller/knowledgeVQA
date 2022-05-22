@@ -1,4 +1,4 @@
-# Qlarifais - Visual Question Answering (VQA) using top-down attention and explainability
+# Qlarifais - Visual Question Answering (VQA) investigating top-down attention through explainability
 
 *Project repository related to bachelor thesis on Technical University of Denmark (DTU) in spring 2022.*
 
