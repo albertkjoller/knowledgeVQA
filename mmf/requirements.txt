@@ -25,4 +25,3 @@ psutil
 filelock
 six
 bert-score
-torchray==1.0.0.2

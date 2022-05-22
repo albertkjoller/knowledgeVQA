@@ -22,13 +22,15 @@ Create a virtual environment in your preferred way - e.g. using `conda` - and ac
     conda create -n vqa python=3.8
     conda activate vqa
 
+### MMF
+
 Install the MMF-module.
 
     cd mmf
     pip install --editable .
     cd ..
 
-Install specific dependencies used for this project...
+Install specific dependencies used for this project that are needed for the MMF module...
 
 #### GPU (Linux only)
     pip install torch==1.8.0+cu111 torchvision==0.9.0+cu111 torchaudio==0.8.0 torchtext==0.9.0 -f https://download.pytorch.org/whl/torch_stable.html
@@ -44,9 +46,15 @@ Install specific dependencies used for this project...
     
     pip install omegaconf==2.1.*
 
+### MMEXP - Multi-Modal Explainability
 
-And that's it! Now, you should be able to reproduce the findings of this project!
-	
+So now you've got the basics for training and testing multi-modal models through MMF, however, for usingthe explainability- and analysis-tools created in this project, run the following commands:
+
+    cd mmexp
+
+    pip install -r requirements.txt
+
+And that's it! Now, you should be able to reproduce the findings of this project!	
 
 ## Pre-trained models
 
@@ -58,7 +66,7 @@ After downloading, create the folder `explainableVQA/mmf/save/` and place the do
 Now, you're ready to use the pre-trained model for predictions! Change directory to the `explainableVQA/examples`-folder, run the following command and follow the in-prompt directions.
 
     cd examples
-    python Qlarifais_predict.py
+    python qlarifais_predict.py
 
 ## Training your own model
 

@@ -12,7 +12,7 @@ import torch
 
 from mmf.models import Qlarifais
 
-from mmexp.analyzer import prediction_dataframe, plot_TSNE, stratified_predictions
+from mmexp.analyzer import prediction_dataframe, plot_TSNE, stratified_predictions, performance_report
 from mmexp.utils.tools import paths_to_okvqa
 
 # obtain user input
@@ -31,14 +31,15 @@ if okvqa_filepath == 'None':
     okvqa_filepath = data_path
 okvqa_test = pd.DataFrame.from_records(np.load(okvqa_filepath, allow_pickle=True)[1:])
 
-
-# Plot t-SNE
-plot_TSNE(model, data=okvqa_test, label_by='start_word')
-
 # Get predictions
 data = prediction_dataframe(model, data=okvqa_test)
+
+# Performance report
+performance_report(data)
 
 # Stratifications
 
 
+# Plot t-SNE
+plot_TSNE(model, data=okvqa_test, label_by='start_word')
 
