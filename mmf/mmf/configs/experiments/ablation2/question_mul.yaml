@@ -2,7 +2,7 @@
 env:
   save_dir: ${env.part_save_dir}/ques_guided
 
-
+              
 includes:
     # include running experiment configs (defaults for all)
   - configs/experiments/defaults.yaml
@@ -19,15 +19,16 @@ includes:
   - configs/experiments/modules/fusions/double_two_modality_arithmetic.yaml
 
 
+
 # overwrite fusion type
-model_config:
-  qlarifais:
-    attention:
-      params:
-        fusion:
-          type: two_modality_arithmetic
-            params:
-              dropout: 0.1
+#model_config:
+#  qlarifais:
+#    attention:
+#      params:
+#        fusion:
+#          type: two_modality_arithmetic
+#            params:
+#              dropout: 0.1
 
 # overwrite fusion type
 #model_config:

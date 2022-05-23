@@ -20,11 +20,11 @@ includes:
 
 
 # overwrite fusion type
-model_config:
-  qlarifais:
-    attention:
-      params:
-        fusion:
-          type: two_modality_arithmetic
-            params:
-              dropout: 0.1
+#model_config:
+#  qlarifais:
+#    attention:
+#      params:
+#        fusion:
+#          type: two_modality_arithmetic
+#            params:
+#              dropout: 0.1
