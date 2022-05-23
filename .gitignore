@@ -37,3 +37,6 @@ datainvestigation/data/
 *.tar
 *.gz
 *.npy
+
+# editable pip installs
+/detectron2
