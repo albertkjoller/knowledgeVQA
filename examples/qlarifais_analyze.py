@@ -104,6 +104,7 @@ if __name__ == '__main__':
     # Load model
     model = Qlarifais.from_pretrained(args.model_dir, args.torch_cache)
     model.to(torch.device("cuda:0" if torch.cuda.is_available() else "cpu"))
+    model_name = args.model_dir.split("/")[-1]
     
     # Load data
     data_path, images_path = paths_to_okvqa(model, run_type='test')
@@ -122,9 +123,11 @@ if __name__ == '__main__':
             stratified_object = Stratify(model, data, 
                                          by=strat_type, 
                                          pickle_path=args.pickle_path)
+
             # Compute t-SNE        
-            if args.tsne:
-                plot_TSNE(stratified_object, save_path=args.save_path)
+            # TODO: remove temp-solution
+            if args.tsne and not stratified_object.temp_solution:
+                plot_TSNE(stratified_object, model_name=model_name, save_path=args.save_path)
             
     # Performance report
     if args.performance_report:

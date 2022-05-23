@@ -7,6 +7,8 @@ Created on Sat May 21 18:10:09 2022
 """
 
 import pandas as pd
+import numpy as np
+
 from pathlib import Path
 
 from collections import Counter
@@ -38,16 +40,20 @@ class Stratify:
 
         self.stratify_data()
         
-        # Category to index
-        self.cat2idx = {cat: i for i, cat in enumerate(self.categories)}
+        if not self.temp_solution:
+            # Category to index
+            self.cat2idx = {cat: i for i, cat in enumerate(self.categories)}
     
     def stratify_data(self, ):
+        
+        # Temporary
+        self.temp_solution = False
         
         if self.by == 'start_words':
             self.start_words()
             
         elif self.by == 'okvqa_categories':
-            self.okvqa_categoires()
+            self.okvqa_categories()
             
         elif self.by == 'question_length':
             self.question_length()
@@ -65,6 +71,8 @@ class Stratify:
             
         # Start words
         start_words = self.data['question_tokens'].apply(lambda x: x[0])
+        
+        # Update data
         self.data['stratification_label'] = start_words
         self.categories = categories = list(zip(*Counter(start_words).most_common(num_categories)))[0]
                 
@@ -83,24 +91,40 @@ class Stratify:
         # TODO: implement based on data investigation pickles
         try:
             self.data['categories']
-        except AttributeError:
+        except KeyError:
+            self.temp_solution = True
             pass
             #raise AttributeError("Make sure that the file associated with the flag \
             #                     --okvqa_file contains an attribute called 'categories'")
     
     def question_length(self, ):
-        pass
-        #raise NotImplementedError()
+        
+        # Question length
+        question_length = self.data['question_tokens'].apply(lambda x: x.__len__())
+        
+        # TODO: change bins and category names
+        bins, self.categories = [0, 5, 10, np.inf], ['short', 'intermediate', 'long']
+        self.data['stratification_label'] = pd.cut(question_length, bins, labels=self.categories)
+        
 
     def answer_length(self, ):
+        self.temp_solution = True
         pass
         #raise NotImplementedError()
         
     def numerical_answers(self, ):
+        
+        has_number = lambda question: any(char.isdigit() for char in question)
+        
+        # TODO: implement something that accounts for multiple answers 
+        answers_with_numbers = self.data['answers'].apply(lambda x: has_number(x))
+        
+        self.temp_solution = True
         pass
         #raise NotImplementedError()
         
     def visual_objects(self, ):
+        self.temp_solution = True
         pass
         #raise NotImplementedError()
             
