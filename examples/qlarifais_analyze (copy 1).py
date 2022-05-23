@@ -14,8 +14,14 @@ import torch
 from mmf.models import Qlarifais
 
 sys.path.append("..")
+<<<<<<< HEAD
+
 from mmexp.analyzer import *
 from mmexp.utils.tools import paths_to_okvqa, str_to_class
+=======
+from mmexp.analyzer import prediction_dataframe, plot_TSNE, stratified_predictions, performance_report
+from mmexp.utils.tools import paths_to_okvqa
+>>>>>>> 11e756dc8d2e30567ccb9bf854933035ac1e64a9
 
 import argparse
 
@@ -87,12 +93,6 @@ def get_args():
             Requires --explain flag.",
         default='Gradient',
     )
-    parser.add_argument(
-        "--save_path",
-        required=True,
-        help="where to store output of the  analysis run.",
-        default=None,
-    )
         
     return parser.parse_args()
 
@@ -120,11 +120,11 @@ if __name__ == '__main__':
         for strat_type in args.stratify_by:
             # Create stratification object
             stratified_object = Stratify(model, data, 
-                                         by=strat_type, 
+                                         by=args.stratify_by, 
                                          pickle_path=args.pickle_path)
             # Compute t-SNE        
             if args.tsne:
-                plot_TSNE(stratified_object, save_path=args.save_path)
+                plot_TSNE(stratified_object)
             
     # Performance report
     if args.performance_report:

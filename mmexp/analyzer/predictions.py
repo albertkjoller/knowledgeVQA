@@ -30,33 +30,35 @@ class Stratify:
     
     def __init__(self, model, data, by, pickle_path):
         
+        # Initialize class
         self.model = model
         self.data = data
+        self.by = by
         self.embeddings = fetch_test_embeddings(model, pickle_path)
 
-        self.stratify_data(by=by)
+        self.stratify_data()
         
         # Category to index
         self.cat2idx = {cat: i for i, cat in enumerate(self.categories)}
     
-    def stratify_data(self, by):
+    def stratify_data(self, ):
         
-        if by == 'start_words':
+        if self.by == 'start_words':
             self.start_words()
             
-        elif by == 'okvqa_categories':
+        elif self.by == 'okvqa_categories':
             self.okvqa_categoires()
             
-        elif by == 'question_length':
+        elif self.by == 'question_length':
             self.question_length()
             
-        elif by == 'answer_length':
+        elif self.by == 'answer_length':
             self.answer_length()
         
-        elif by == 'numerical_answers':
+        elif self.by == 'numerical_answers':
             self.numerical_answers()
         
-        elif by == 'visual_objects':
+        elif self.by == 'visual_objects':
             self.visual_objects()
                         
     def start_words(self, num_categories=10):
