@@ -1,4 +1,5 @@
 imageio
 Pillow==8.3.1
 scikit-image
+open-cv
 torchray==1.0.0.2

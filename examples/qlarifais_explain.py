@@ -14,7 +14,9 @@ import numpy as np
 
 from mmf.models import Qlarifais
 
-sys.path.append(('/').join(os.getcwd().split('/')[:-1]))
+#sys.path.append(('/').join(os.getcwd().split('/')[:-1]))
+sys.path.append("..") #('/').join(os.getcwd().split('/')[:-1]))
+
 from mmexp.utils.argument_wrapper import run_explainability, load_image
 from mmexp.utils.tools import image_loader
 
@@ -24,6 +26,7 @@ if __name__ == "__main__":
     save_dir = input("Enter directory path of saved models ('save'-folder): ")
     model_name = input("\nEnter saved model filename: ")
     path_to_torch_cache = input("\nEnter the path to where your torch-cache folder is located (e.g. /work3/s194253): ")
+    checkpoint_to_use = input("\nEnter the name of the checkpoint-file for use and make sure that this is the only checkpoint-file in the model directory: ")
 
     model = Qlarifais.from_pretrained(f"{save_dir}/models/{model_name}", path_to_torch_cache)
     model.to(torch.device("cuda:0" if torch.cuda.is_available() else "cpu"))
@@ -90,7 +93,8 @@ if __name__ == "__main__":
                 img2 = cv2.imread(save_path[1]) # exp_map
                 
                 explainer_img = np.concatenate((img1, img2), axis=0)
-
+                cv2.imwrite(save_path[0].split(".png")[0] + f'_{checkpoint_to_use}_full.png', explainer_img)
+                
                 # show explainability image
                 cv2.namedWindow(f"{explainability_method}", cv2.WINDOW_NORMAL)
                 cv2.resizeWindow(f"{explainability_method}", 600, 300)
