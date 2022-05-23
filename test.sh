@@ -17,11 +17,11 @@ module load cuda/11.1
 source vqa2/bin/activate
 cd mmf
 
-mmf_run config=/work3/s194262/save/models/optimized/baseline_mul/config.yaml \
+mmf_run config=/work3/s194262/save/models/optimized/ablation1_double_ama/config.yaml \
     model=qlarifais \
     dataset=okvqa \
     run_type=test \
-    env.report_dir=/work3/s194262/tests/models/optimized/baseline_mul/reports \
-    env.tensorboard_logdir=/work3/s194262/tests/models/optimized/tensorboard/baseline_mul \
-    checkpoint.resume_file=/work3/s194262/save/models/optimized/baseline_mul/best.ckpt
+    env.report_dir=/work3/s194262/tests/models/optimized/ablation1_double_ama/reports \
+    env.tensorboard_logdir=/work3/s194262/tests/models/optimized/tensorboard/ablation1_double_ama \
+    checkpoint.resume_file=/work3/s194262/save/models/optimized/ablation1_double_ama/best.ckpt
 

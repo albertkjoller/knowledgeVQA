@@ -75,15 +75,9 @@ def str_to_class(classname):
     return getattr(sys.modules['mmexp.methods'], classname)
 
 
-def load_predictions(model):
+def load_predictions(report_dir):
     
-    if model.config.env.report_dir != '':
-        report_dir = Path(model.config.env.report_dir)
-    else:
-        report_dir = input("Enter test-report directory-name (e.g. okvqa_qlarifais_49203252): ")
-        report_dir = Path(model.config.env.save_dir) / report_dir
-    
-    for file in glob.glob((report_dir / 'reports/*.json').as_posix()):
+    for file in glob.glob((report_dir / '*.json').as_posix()):
         results = pd.read_json(file)
         break
     return results
@@ -101,8 +95,9 @@ def paths_to_okvqa(model, run_type='train'):
         data_path = data_path / 'defaults/annotations/annotations/imdb_train.npy'
     return data_path, images_path
 
-def fetch_test_embeddings(model):
-    pickle_path = Path(model.config.env.save_dir)
+def fetch_test_embeddings(model, pickle_path):
+    pickle_path = Path(pickle_path)
+    
     try:
         # Try to load existing embedding
         with open(pickle_path / 'test_embeddings.npy', 'rb') as f:
@@ -131,8 +126,9 @@ def fetch_test_embeddings(model):
             
             # Get predicted embedding
             outputs = model.classify(image=image, text=question, embedding_output=True)
-            test_embeddings[:, i] = outputs.detach().numpy()
-            
+            test_embeddings[:, i] = outputs.cpu().detach().numpy()
+        
+        os.makedirs(pickle_path, exist_ok=True)
         with open(pickle_path / 'test_embeddings.npy', 'wb') as f:
             np.save(f, test_embeddings)
     

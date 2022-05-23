@@ -14,7 +14,7 @@ includes:
   - configs/experiments/modules/classifiers/embeddings.yaml
     # TODO: what is the optimized?
     # image featurizer
-  - configs/experiments/modules/featurizers/grids.yaml
+  - configs/experiments/modules/featurizers/regions.yaml
     # fusion module
   - configs/experiments/modules/fusions/double_two_modality_arithmetic.yaml
 
