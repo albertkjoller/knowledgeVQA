@@ -136,7 +136,7 @@ if __name__ == '__main__':
                                                embeddings,
                                                logger)
         # Call performance report
-        performance_report.collect('full dataset')
+        performance_report.collect()
         logger = performance_report.logger
         
             
