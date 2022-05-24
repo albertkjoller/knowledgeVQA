@@ -37,15 +37,16 @@ def plot_TSNE(stratified_object, model_name: str, save_path: str):
               \nPrediction embeddings stratified by {stratified_object.by}",
               fontsize=12,
               loc='left')
-    plt.legend(loc='center', bbox_to_anchor=(0.85, 0.3, 0.5, 0.5))
+    plt.legend(loc='center', bbox_to_anchor=(0.95, 0.3, 0.5, 0.5))
     plt.tight_layout()
 
     # Save fig
-    os.makedirs(save_path, exist_ok=True)
-    plt.savefig(Path(save_path) / f'{model_name}_{stratified_object.by}.png')
+    save_path = Path(save_path)
+    os.makedirs(save_path / 'tsne', exist_ok=True)
+    plt.savefig(save_path / f'tsne/{model_name}_{stratified_object.by}.png')
     
     # Show fig
-    plt.show()
+    #plt.show()
 
 
 def embedding_variation(model, modularity: str):
