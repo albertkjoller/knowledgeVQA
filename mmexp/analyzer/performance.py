@@ -74,8 +74,8 @@ class PerformanceReport:
         # Performance dict
         self.scores = {'vqa_acc': self.vqa_acc.mean(),
                        'acc': self.acc.mean(),
-                       'numberbatch_score': self.numberbatch_score.mean(),
-                       'mean_inverse_rank': self.mir.mean(),
+                       #'numberbatch_score': self.numberbatch_score.mean(),
+                       #'mean_inverse_rank': self.mir.mean(),
                        }
         
         if stratification == 'full':
