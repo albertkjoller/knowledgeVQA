@@ -79,15 +79,15 @@ class PerformanceReport:
                        }
         
         if stratification == 'full':
-            self.logger.info(f"\n{'-'*50}\n Performance report on {stratification} testset\n{'-'*50}\n")
+            self.logger.info(f"\n{'-'*100}\n Performance report on {stratification} testset\n{'-'*100}\n")
         else:
-            self.logger.info(f"\n{'-'*50}\n Performance report on testset - stratified by {stratification}\n{'-'*50}\n")
+            self.logger.info(f"\n{'-'*100}\n Performance report on testset - stratified by {stratification}\n{'-'*100}\n")
             
         # Print scores and CIs
-        self.logger.info(f"\nPerformance scores:\n")
-        self.logger.info(self.scores)
-        self.logger.info(f"\n\nBootstrapped CIs:\n")
-        self.logger.info(self.CIs)
-        self.logger.info(f"\n{'-'*50}")
+        self.logger.info(f"Performance scores:\n{self.scores}\n")
+        #self.logger.info(self.scores)
+        self.logger.info(f"Bootstrapped CIs:\n{self.CIs}\n")
+        #self.logger.info(self.CIs)
+        self.logger.info(f"\n{'-'*100}")
 
         
