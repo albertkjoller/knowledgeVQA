@@ -98,7 +98,7 @@ def init_logger(args):
     logger.setLevel(logging.INFO)
      
     # Setup info
-    logger.info(f"\n{'-'*50}\nRunning analyses for {args.model_dir.split('/')[-1]}\n{'-'*50}\n")
+    logger.info(f"\n{'-'*50}\n{'-'*50}\nRunning analyses for {args.model_dir.split('/')[-1]}\n{'-'*50}\n{'-'*50}\n")
                 
     return logger
 

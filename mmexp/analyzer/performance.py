@@ -72,10 +72,10 @@ class PerformanceReport:
         #self.CIs['mir'] = self.bootstrap_CI(self.mir)
         
         # Performance dict
-        self.scores = {'vqa_acc': self.vqa_acc,
-                       'acc': self.acc,
-                       'numberbatch_score': self.numberbatch_score,
-                       'mean_inverse_rank': self.mir,
+        self.scores = {'vqa_acc': self.vqa_acc.mean(),
+                       'acc': self.acc.mean(),
+                       'numberbatch_score': self.numberbatch_score.mean(),
+                       'mean_inverse_rank': self.mir.mean(),
                        }
         
         if stratification == 'full':
