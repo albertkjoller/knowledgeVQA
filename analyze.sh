@@ -16,7 +16,7 @@ module load cuda/11.1
 source /work3/s194253/envs/vqa/bin/activate
 cd examples
 
-python qlarifais_analyze.py --model_dir /work3/s194262/save/models/optimized/ablation1_double_ama --torch_cache /work3/s194253 --stratify_by start_words --test True --report_dir /work3/s194262/tests/models/optimized/ablation1_double_ama/reports --pickle_path /work3/s194262/tests/models/optimized/ablation1_double_ama --explain False
+python qlarifais_analyze.py --model_dir /work3/s194262/save/models/optimized/baseline_ama --torch_cache /work3/s194253 --stratify_by start_words okvqa_categories question_length answer_length numerical_answers num_visual_objects visual_objects_types --test True --report_dir /work3/s194262/tests/models/optimized/baseline_ama/reports --pickle_path /work3/s194262/tests/models/optimized/baseline_ama --save_path /work3/s194253/temp/baseline_ama --okvqa_file /work3/s194253/OKVQA_rich.json
 
 
 
