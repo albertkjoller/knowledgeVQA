@@ -126,7 +126,7 @@ if __name__ == '__main__':
     
     if args.test:    
         # Get predictions
-        data = prediction_dataframe(data=data, report_dir=args.report_dir)
+        data = prediction_dataframe(model=model, data=data, report_dir=args.report_dir)
         embeddings = fetch_test_embeddings(model, args.pickle_path)
         
     # Performance report

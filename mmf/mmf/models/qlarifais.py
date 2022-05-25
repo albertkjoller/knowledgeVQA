@@ -129,10 +129,9 @@ class Qlarifais(BaseModel):
             logits = torch.nn.functional.normalize(logits)
             prediction_scores = torch.nansum(logits.unsqueeze(dim=1) * self.embedded_answer_vocab, dim=2)
             
-            
             # prediction output
-            if self.global_config.evaluation.predict:
-                logits = prediction_scores
+            #if self.global_config.evaluation.predict:
+            #    logits = logits
                 
         else:
             prediction_scores = logits

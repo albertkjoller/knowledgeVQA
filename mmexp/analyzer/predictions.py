@@ -13,12 +13,13 @@ from pathlib import Path
 
 from collections import Counter
 
-from mmexp.utils.tools import load_predictions, fetch_test_embeddings
+from mmexp.utils.tools import load_predictions, fetch_test_embeddings, fetch_test_predictions
 
-def prediction_dataframe(data, report_dir):
+def prediction_dataframe(model, data, report_dir):
     # Get predictions
-    predictions = load_predictions(Path(report_dir))
-    predictions = predictions.rename(columns={'answer': 'prediction'})
+    predictions = fetch_test_predictions(model, report_dir)
+    #predictions = load_predictions(Path(report_dir))
+    #predictions = predictions.rename(columns={'answer': 'prediction'})
     
     # Merge with test data
     data = data.merge(predictions, on='question_id')
