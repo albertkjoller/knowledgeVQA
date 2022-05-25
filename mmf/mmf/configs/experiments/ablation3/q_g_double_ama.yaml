@@ -18,7 +18,7 @@ includes:
     # image featurizer
   - configs/experiments/modules/featurizers/grids.yaml
     # fusion module
-  - configs/experiments/modules/fusions/double_two_modality_arithmetic.yaml
+  - configs/experiments/modules/fusions/double_two_modality_ama.yaml
 
 
 # overwrite fusion type
@@ -29,4 +29,4 @@ model_config:
         fusion:
           type: double_two_modality_ama
             params:
-              dropout: 0.1
+            dropout: 0.1

@@ -149,6 +149,8 @@ if __name__ == '__main__':
     # Stratifications
     if args.stratify_by != None:
         for strat_type in args.stratify_by:
+            logger.info("\n\n\n Stratifying by {strat_type}...\n")
+
             # Create stratification object
             stratified_object = Stratify(model, data, 
                                          by=strat_type, 
