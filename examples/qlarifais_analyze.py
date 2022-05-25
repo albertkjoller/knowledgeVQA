@@ -11,6 +11,8 @@ import numpy as np
 import pandas as pd
 import torch
 
+from tqdm import tqdm
+
 from mmf.models import Qlarifais
 
 sys.path.append("..")
@@ -128,13 +130,17 @@ if __name__ == '__main__':
         # Get predictions
         data = prediction_dataframe(model=model, data=data, report_dir=args.report_dir)
         embeddings = fetch_test_embeddings(model, args.pickle_path)
-        
+    
+    # Numberbatch
+    Numberbatch_object = Numberbatch(model)
+    
     # Performance report
     if args.performance_report:
         # Create performance report object
         performance_report = PerformanceReport(data, 
                                                embeddings,
-                                               logger)
+                                               logger,
+                                               Numberbatch_object)
         # Call performance report
         performance_report.collect()
         logger = performance_report.logger
@@ -149,22 +155,33 @@ if __name__ == '__main__':
                                          pickle_path=args.pickle_path,
                                          )
             
-            # Call stratified data
-            stratified_data = stratified_object.data
-            stratified_embeddings = stratified_object.embeddings
-            
             # Compute t-SNE        
             if args.tsne:
                 plot_TSNE(stratified_object, model_name=model_name, save_path=args.save_path)
             
             # Performance report
             if args.performance_report:
-                performance_report = PerformanceReport(stratified_data,
-                                                       stratified_embeddings,
-                                                       logger)
-                # Call performance report
-                performance_report.collect(strat_type)
-                logger = performance_report.logger
+                
+                # strat_labels
+                strat_labels = stratified_object.data['stratification_label'].unique()
+                for label in tqdm(strat_labels):
+
+                    # Stratification indeces
+                    strat_idxs = stratified_object.data.stratification_label == label
+                    
+                    # Stratify data + embeddings
+                    stratified_data = stratified_object.data[strat_idxs].reset_index(drop=True)
+                    stratified_embeddings = stratified_object.embeddings[:, strat_idxs]
+                    
+                    # Create performance report
+                    performance_report = PerformanceReport(stratified_data,
+                                                           stratified_embeddings,
+                                                           logger,
+                                                           Numberbatch_object)
+                                        
+                    # Call performance report
+                    performance_report.collect(strat_type)
+                    logger = performance_report.logger
             
             
 

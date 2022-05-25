@@ -181,6 +181,6 @@ def fetch_test_predictions(model, report_dir):
             pass
             
         os.makedirs(report_dir, exist_ok=True)
-        test_predictions.to_csv(report_dir / 'test_predictions.csv')
+        test_predictions.to_csv(report_dir / 'test_predictions.csv', index=False)
         
     return test_predictions

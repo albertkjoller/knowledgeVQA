@@ -22,6 +22,10 @@ def prediction_dataframe(model, data, report_dir):
     # Merge with test data
     data = data.merge(predictions, on='question_id')
     data = data.drop(columns=['image_id', 'question_str', 'all_answers', 'feature_path'])
+    
+    # clean top-k
+    clean_topk = lambda x: [token.strip("'").split("')")[0] for token in x.strip("[").strip("]").split(", ")[1::2]]
+    data['topk'] = data.topk.apply(lambda x: clean_topk(x))
     return data
 
 class Stratify:
