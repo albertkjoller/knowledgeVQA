@@ -127,6 +127,12 @@ class Qlarifais(BaseModel):
         if self.config.classifier.output_type == 'embeddings':
             logits = torch.nn.functional.normalize(logits)
             prediction_scores = torch.nansum(logits.unsqueeze(dim=1) * self.embedded_answer_vocab, dim=2)
+            
+            # prediction output
+            if self.config.evaluation.predict:
+                print("\n\n\n\nhere\n\n\n\n")
+                output = {"scores": prediction_scores}
+                return output
         else:
             prediction_scores = logits
 
