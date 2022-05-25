@@ -180,7 +180,7 @@ if __name__ == '__main__':
                                                            Numberbatch_object)
                                         
                     # Call performance report
-                    performance_report.collect(strat_type)
+                    performance_report.collect(f'{strat_type} = {label}')
                     logger = performance_report.logger
             
             
