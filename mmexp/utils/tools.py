@@ -133,3 +133,54 @@ def fetch_test_embeddings(model, pickle_path):
             np.save(f, test_embeddings)
     
     return test_embeddings
+
+def fetch_test_predictions(model, report_dir):
+    report_dir = Path(report_dir)
+    
+    if os.path.exists(report_dir / 'test_predictions.csv'):
+        test_predictions = pd.read_csv(report_dir / 'test_predictions.csv')
+        print("Loaded embeddings successfully!")
+        
+    else:
+        print("Creating test embeddings...")
+        
+        # paths to data
+        data_path, images_path = paths_to_okvqa(model, run_type='test')
+    
+        # test dataset
+        okvqa_test = pd.DataFrame.from_records(np.load(data_path, allow_pickle=True)[1:])
+    
+        # Initialize test embeddings
+        test_predictions = np.ones((3, len(okvqa_test))).T * np.nan
+        test_predictions = pd.DataFrame(test_predictions)
+        test_predictions = test_predictions.rename(columns={0: 'question_id',
+                                                            1: 'prediction',
+                                                            2: 'topk'})
+        
+        # Obtain predictions
+        for i, row in tqdm(okvqa_test.iterrows(), total=len(okvqa_test)):
+            # load test image
+            img_name = (images_path / row.image_name).as_posix() + '.jpg'
+            image = tv_helpers.default_loader(img_name)
+            
+            # Get test question
+            question = row.question_str
+            
+            # Get predicted embedding
+            outputs = model.classify(image=image, text=question, top_k=5)
+            outputs = outputs #.cpu().detach().numpy()
+            
+            # Write in dataframe
+            test_predictions.loc[i, 'prediction'] = outputs[1][0]
+            test_predictions.loc[i, 'topk'] = [list(zip(*outputs))]
+            test_predictions.loc[i, 'question_id'] = int(row.question_id)
+        
+        try:
+            test_predictions['question_id'] = test_predictions.question_id.astype(int)
+        except pd.errors.IntCastingNaNError:
+            pass
+            
+        os.makedirs(report_dir, exist_ok=True)
+        test_predictions.to_csv(report_dir / 'test_predictions.csv')
+        
+    return test_predictions

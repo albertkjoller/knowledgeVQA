@@ -9,7 +9,7 @@ from mmf.models.interfaces.qlarifais import QlarifaisInterface
 from mmf.models.base_model import BaseModel
 from mmf.common.registry import registry
 from mmf.utils.checkpoint import load_pretrained_model
-from mmf.utils.configuration import get_mmf_cache_dir
+from mmf.utils.configuration import get_mmf_cache_dir, get_global_config
 from mmf.utils.text import *
 
 
@@ -29,6 +29,7 @@ class Qlarifais(BaseModel):
 
     def __init__(self, config):
         super().__init__(config)
+        self.global_config = get_global_config()
         self.build()
 
     @classmethod
@@ -127,6 +128,7 @@ class Qlarifais(BaseModel):
         if self.config.classifier.output_type == 'embeddings':
             logits = torch.nn.functional.normalize(logits)
             prediction_scores = torch.nansum(logits.unsqueeze(dim=1) * self.embedded_answer_vocab, dim=2)
+            
         else:
             prediction_scores = logits
 

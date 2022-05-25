@@ -354,4 +354,5 @@ def get_random_port():
 # extra parameters in submission file
 def add_extra():
     return 'nvidia-smi\nmodule load cuda/11.1\nsource vqa2/bin/activate\ncd mmf\n'
+    #return 'nvidia-smi\nmodule load cuda/11.1\nsource /work3/s194253/envs/vqa/bin/activate\ncd mmf\n'
 

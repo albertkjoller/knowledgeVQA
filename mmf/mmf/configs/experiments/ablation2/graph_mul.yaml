@@ -14,17 +14,17 @@ includes:
   - configs/experiments/modules/classifiers/embeddings.yaml
     # TODO: what is the optimized?
     # image featurizer
-  - configs/experiments/modules/featurizers/regions.yaml
+  - configs/experiments/modules/featurizers/grids.yaml
     # fusion module
-  - configs/experiments/modules/fusions/double_two_modality_arithmetic.yaml
+  - configs/experiments/modules/fusions/double_two_modality_ama.yaml
 
 
 # overwrite fusion type
-#model_config:
-#  qlarifais:
-#    attention:
-#      params:
-#        fusion:
-#          type: two_modality_arithmetic
-#            params:
-#              dropout: 0.1
+model_config:
+  qlarifais:
+    attention:
+      params:
+        fusion:
+          type: two_modality_arithmetic
+          params:
+            dropout: 0.1
