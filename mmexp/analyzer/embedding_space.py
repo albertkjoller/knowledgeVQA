@@ -24,7 +24,7 @@ def plot_TSNE(stratified_object, model_name: str, save_path: str):
     
     # Scatter plot with colors based on the stratification_func
     cmap = cm.get_cmap('tab20')
-    fig, ax = plt.subplots(figsize=(8,8))
+    fig, ax = plt.subplots(figsize=(8,8), dpi=400)
     for cat in stratified_object.categories:
         indices = stratified_object.data['stratification_label'][stratified_object.data['stratification_label'] == cat].index.to_numpy()
         color = cmap(stratified_object.cat2idx[cat])

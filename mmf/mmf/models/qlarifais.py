@@ -29,7 +29,7 @@ class Qlarifais(BaseModel):
 
     def __init__(self, config):
         super().__init__(config)
-        self.global_config = get_global_config
+        self.global_config = get_global_config()
         self.build()
 
     @classmethod
@@ -132,9 +132,8 @@ class Qlarifais(BaseModel):
             
             # prediction output
             if self.global_config.evaluation.predict:
-                print("\n\n\n\nhere\n\n\n\n")
-                output = {"scores": prediction_scores}
-                return output
+                logits = prediction_scores
+                
         else:
             prediction_scores = logits
 
