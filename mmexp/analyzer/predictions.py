@@ -18,8 +18,6 @@ from mmexp.utils.tools import load_predictions, fetch_test_embeddings, fetch_tes
 def prediction_dataframe(model, data, report_dir):
     # Get predictions
     predictions = fetch_test_predictions(model, report_dir)
-    #predictions = load_predictions(Path(report_dir))
-    #predictions = predictions.rename(columns={'answer': 'prediction'})
     
     # Merge with test data
     data = data.merge(predictions, on='question_id')
@@ -64,8 +62,8 @@ class Stratify:
         elif self.by == 'num_visual_objects':
             self.num_visual_objects()
             
-        elif self.by == 'visual_object_types':
-            self.visual_object_types()
+        elif self.by == 'visual_objects_types':
+            self.visual_objects_types()
                         
     def start_words(self, num_categories=10):
         # Start words
@@ -140,7 +138,7 @@ class Stratify:
         bins, self.categories = [-np.inf, 10, 20, 30, 40, 50, np.inf], ['< 10', '10-20', '20-30', '30-40', '40-50', '50 <']
         self.data['stratification_label'] = pd.cut(num_objects, bins, labels=self.categories)
     
-    def visual_object_types(self, ):
+    def visual_objects_types(self, ):
         
         # Visual objects (from automated-object-removal)
         object_dict = {0: 'aeroplane',

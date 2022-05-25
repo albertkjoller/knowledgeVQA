@@ -146,7 +146,7 @@ if __name__ == '__main__':
             # Create stratification object
             stratified_object = Stratify(model, data, 
                                          by=strat_type, 
-                                         pickle_path=args.pickle_path
+                                         pickle_path=args.pickle_path,
                                          )
             
             # Call stratified data

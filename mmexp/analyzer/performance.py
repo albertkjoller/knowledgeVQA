@@ -85,9 +85,9 @@ class PerformanceReport:
             
         # Print scores and CIs
         self.logger.info(f"Performance scores:\n{self.scores}\n")
-        #self.logger.info(self.scores)
         self.logger.info(f"Bootstrapped CIs:\n{self.CIs}\n")
-        #self.logger.info(self.CIs)
+
+
         self.logger.info(f"\n{'-'*100}")
 
         

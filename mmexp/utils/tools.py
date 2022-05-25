@@ -138,7 +138,7 @@ def fetch_test_predictions(model, report_dir):
     report_dir = Path(report_dir)
     
     if os.path.exists(report_dir / 'test_predictions.csv'):
-        test_predictions = pd.read(report_dir / 'test_predictions.csv')
+        test_predictions = pd.read_csv(report_dir / 'test_predictions.csv')
         print("Loaded embeddings successfully!")
         
     else:
@@ -168,7 +168,7 @@ def fetch_test_predictions(model, report_dir):
             
             # Get predicted embedding
             outputs = model.classify(image=image, text=question, top_k=5)
-            outputs = outputs#.cpu().detach().numpy()
+            outputs = outputs #.cpu().detach().numpy()
             
             # Write in dataframe
             test_predictions.loc[i, 'prediction'] = outputs[1][0]

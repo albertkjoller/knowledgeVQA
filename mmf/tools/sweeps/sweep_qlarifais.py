@@ -54,10 +54,6 @@ def get_grid(args):
     # number of non-linear layers (cnl)
     #hp.extend([hyperparam("model_config.qlarifais.classifier.params.num_non_linear_layers", [2, 4], save_dir_key=lambda val: f"cnl{val}")])
 
-    # dropout (cdo)
-    hp.extend([hyperparam("model_config.qlarifais.classifier.params.dropout", [0.1, 0.3], save_dir_key=lambda val: f"cdo{val}")])
-
-
     # experiment specific hp search
     experiment_type = args.config.split('/')[-2] # extracting experiment folder name
     # hp search for optimal fusion module
@@ -66,6 +62,10 @@ def get_grid(args):
         # dropout (fdo)
         hp.extend([hyperparam('model_config.qlarifais.fusion.params.dropout', [0.1, 0.3],
                               save_dir_key=lambda val: f"fdo{val}")])
+        
+        # dropout (cdo)
+        hp.extend([hyperparam("model_config.qlarifais.classifier.params.dropout", [0.1, 0.3], save_dir_key=lambda val: f"cdo{val}")])
+
         # fusion hidden dimension (fhd)
         #hp.extend([hyperparam('model_config.qlarifais.fusion.params.h_dim', [2500, 5000],
         #           save_dir_key=lambda val: f"fhd{val}")])
@@ -76,6 +76,7 @@ def get_grid(args):
         # dropout (ado)
         hp.extend([hyperparam('model_config.qlarifais.attention.params.fusion.params.dropout', [0.1, 0.3],
                               save_dir_key=lambda val: f"ado{val}")])
+        
         # fusion hidden dimension (ahd)
         #hp.extend([hyperparam('model_config.qlarifais.attention.params.fusion.params.h_dim', [2500, 5000],
         #           save_dir_key=lambda val: f"ahd{val}")])
