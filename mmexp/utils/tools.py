@@ -158,7 +158,7 @@ def fetch_test_predictions(model, report_dir):
                                                             2: 'topk'})
         
         # Obtain predictions
-        for i, row in tqdm(okvqa_test[:5].iterrows(), total=len(okvqa_test[:5])):
+        for i, row in tqdm(okvqa_test.iterrows(), total=len(okvqa_test)):
             # load test image
             img_name = (images_path / row.image_name).as_posix() + '.jpg'
             image = tv_helpers.default_loader(img_name)
