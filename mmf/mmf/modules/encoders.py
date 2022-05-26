@@ -571,29 +571,30 @@ class gfvqaImageEncoder(Encoder):
         batch_size = len(images)
         # constructing desired imput
         inputs = [{"image": image} for image in images]
-        with inference_context(self.grid_feats_vqa):
+        self.grid_feats_vqa.eval()
+        #with inference_context(self.grid_feats_vqa):
 
-            if self.type == 'grid':
-                images = self.grid_feats_vqa.preprocess_image(inputs) # Normalize, pad and batch the input images.
-                features = self.grid_feats_vqa.backbone(images.tensor) # features from backbone
-                outputs = self.grid_feats_vqa.roi_heads.get_conv5_features(features) # [batch_size, i_dim, sqrt(max_features), sqrt(max_features)]
-                outputs = outputs.flatten(2, 3).permute(0, 2, 1)  # [batch_size, num_features, i_dim]
+        if self.type == 'grid':
+            images = self.grid_feats_vqa.preprocess_image(inputs) # Normalize, pad and batch the input images.
+            features = self.grid_feats_vqa.backbone(images.tensor) # features from backbone
+            outputs = self.grid_feats_vqa.roi_heads.get_conv5_features(features) # [batch_size, i_dim, sqrt(max_features), sqrt(max_features)]
+            outputs = outputs.flatten(2, 3).permute(0, 2, 1)  # [batch_size, num_features, i_dim]
 
-            elif self.type == 'region':
-                # compute features and proposals
-                images = self.grid_feats_vqa.preprocess_image(inputs)
-                features = self.grid_feats_vqa.backbone(images.tensor)
-                proposals, _ = self.grid_feats_vqa.proposal_generator(images, features)
-                # pooled features and box predictions
-                box_features, pooled_features_fc7, pooled_features_fc6 = self.grid_feats_vqa.roi_heads.get_roi_features(features, proposals)
-                # chosen regions within each batch
-                # getting the batch shape back
-                set_proposals = [len(p) for p in proposals] # originally found boxes (split based on batch)
-                #accum = [sum(set_proposals[:i+1]) for i, j in enumerate(set_proposals[:-1])]
-                #pooled_features_fc7 = np.array(np.split(pooled_features_fc7.numpy(), accum, axis=0), dtype=object)
-                pooled_features_fc7 = torch.nn.utils.rnn.pad_sequence(list(torch.split(pooled_features_fc7, set_proposals)),
-                                                                      batch_first=True, padding_value=-np.inf)
-                outputs = pooled_features_fc7
+        elif self.type == 'region':
+            # compute features and proposals
+            images = self.grid_feats_vqa.preprocess_image(inputs)
+            features = self.grid_feats_vqa.backbone(images.tensor)
+            proposals, _ = self.grid_feats_vqa.proposal_generator(images, features)
+            # pooled features and box predictions
+            box_features, pooled_features_fc7, pooled_features_fc6 = self.grid_feats_vqa.roi_heads.get_roi_features(features, proposals)
+            # chosen regions within each batch
+            # getting the batch shape back
+            set_proposals = [len(p) for p in proposals] # originally found boxes (split based on batch)
+            #accum = [sum(set_proposals[:i+1]) for i, j in enumerate(set_proposals[:-1])]
+            #pooled_features_fc7 = np.array(np.split(pooled_features_fc7.numpy(), accum, axis=0), dtype=object)
+            pooled_features_fc7 = torch.nn.utils.rnn.pad_sequence(list(torch.split(pooled_features_fc7, set_proposals)),
+                                                                  batch_first=True, padding_value=-np.inf)
+            outputs = pooled_features_fc7
         return outputs
 
 

@@ -53,6 +53,7 @@ if __name__ == "__main__":
     # pooled features and box predictions
     box_features, pooled_features_fc7, pooled_features_fc6 = vision_module.grid_feats_vqa.roi_heads.get_roi_features(
         features, proposals)
+
     predictions = vision_module.grid_feats_vqa.roi_heads.box_predictor(pooled_features_fc7)
     #predictions, r_indices = vision_module.grid_feats_vqa.roi_heads.box_predictor(box_features)
     predictions, r_indices = vision_module.grid_feats_vqa.roi_heads.box_predictor.inference(predictions, proposals)

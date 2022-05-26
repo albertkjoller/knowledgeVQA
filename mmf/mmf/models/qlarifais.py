@@ -26,7 +26,7 @@ from mmf.utils.build import (
     )
 
 '''
-mmf_run config='configs/experiments/baseline/mul.yaml' model=qlarifais dataset=okvqa run_type=train_val
+mmf_run config='configs/experiments/ablation1/regions.yaml' model=qlarifais dataset=okvqa run_type=train_val
 
 mmf_run config='configs/experiments/baseline/mul.yaml' model=qlarifais dataset=okvqa run_type=test \
 checkpoint.resume_file=/Users/arond.jacobsen/Documents/GitHub/explainableVQA/mmf/save/models/mul/qlarifais_final.pth
@@ -123,7 +123,7 @@ class Qlarifais(BaseModel):
 
                 # NOT WORKING!!!
                 # torch.from_numpy(np.nanmean(torch.nan_to_num(image_features, neginf=np.nan).detach().cpu(), axis=1)).to(get_current_device())
-            
+
         # --- FUSION ---
         # type of fusion based on inputs
         if self.config.graph_encoder.use:
