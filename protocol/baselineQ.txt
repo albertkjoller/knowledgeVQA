@@ -1,0 +1,47 @@
+Q: What food is this?
+I: hotdog.jpg
+A: hotdog
+
+Q: What sport is this?
+I: tennis.jpg
+A: tennis
+
+Q: Are they happy?
+I: hairdresser.jpg
+A: yes
+
+Q: Where is he going?
+I: oldman.jpg
+A: upstairs
+
+Q: What can you do with this vehicle?
+I: airplane.jpeg
+A: fly
+
+Q: How many forks are on this table?
+I: table.jpeg
+A: 2
+
+Q: did this guy just hear good news?
+I: phone.jpg
+A: no
+
+Q: what kind of food does this swimming ring resemble?
+I: pool.jpg
+A: watermelon
+
+Q: which animal do these resemble?
+I: teddy.jpg
+A: bear
+
+Q: What are you buying at this location?
+I: Mcdonalds.jpg
+A: burger
+
+Q: What is she doing?
+I: wholefoods.jpg
+A: shopping
+
+Q: what color is he painting the wall?
+I: paint.jpg
+A: white
