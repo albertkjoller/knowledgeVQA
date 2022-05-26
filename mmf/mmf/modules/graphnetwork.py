@@ -63,11 +63,12 @@ class Numberbatch(nn.Module):
 
             self.numberbatch_dim = self.config.g_dim
 
+
+            print('Loading Numberbatch...')
+            '''
             # path to saved pickle
             #numberbatch_file = os.path.join('/'.join(self.config.filepath.split('/')[:-1]), 'numberbatch.pkl')
             #full_path = mmf_indirect(numberbatch_file)
-            print('Loading Numberbatch...')
-            '''
             if os.path.exists(full_path):
                 file = open(full_path, "rb")
                 self.numberbatch = pickle.load(file)

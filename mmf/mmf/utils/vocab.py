@@ -461,7 +461,8 @@ class EmbeddedVocab:
         if os.path.exists(saved_dir):
             # load file
             print('Embedded answer vocabulary file found and is loaded')
-            self.embedded_answer_vocab = torch.load(saved_dir, map_location=torch.device('cpu'))
+            self.embedded_answer_vocab = torch.load(saved_dir).to(torch.device("cuda:0" if torch.cuda.is_available() else "cpu"))
+
 
         # if desired embedded vocabulary does not exist
         else:
@@ -472,7 +473,6 @@ class EmbeddedVocab:
             #encoder = build_graph_encoder(encoder_config)
             answer_vocab = VocabDict(vocab_file) # loading vocab
             self.embedded_answer_vocab = encoder(answer_vocab.word_list) # creating embeddings
-            print(saved_dir)
             torch.save(self.embedded_answer_vocab, saved_dir) # saving
 
 

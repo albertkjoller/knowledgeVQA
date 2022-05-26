@@ -290,7 +290,7 @@ class AttributeStandardROIHeads(AttributeROIHeads, StandardROIHeads):
             return losses
         else:
             pred_instances, _ = self.box_predictor.inference(predictions, proposals)
-            return pred_instances#[0] , r_indices[0]
+            return pred_instances[0] , r_indices[0]
 
     def get_conv5_features(self, features):
         assert len(self.in_features) == 1
