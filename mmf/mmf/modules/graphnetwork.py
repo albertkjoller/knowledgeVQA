@@ -64,8 +64,8 @@ class Numberbatch(nn.Module):
             self.numberbatch_dim = self.config.g_dim
 
             # path to saved pickle
-            numberbatch_file = os.path.join('/'.join(self.config.filepath.split('/')[:-1]), 'numberbatch.pkl')
-            full_path = mmf_indirect(numberbatch_file)
+            #numberbatch_file = os.path.join('/'.join(self.config.filepath.split('/')[:-1]), 'numberbatch.pkl')
+            #full_path = mmf_indirect(numberbatch_file)
             print('Loading Numberbatch...')
             '''
             if os.path.exists(full_path):
@@ -92,10 +92,10 @@ class Numberbatch(nn.Module):
                     #tensor = torch.tensor(list(map(float, l.split(' ')[1:])), dtype=torch.float32)
                     tensor = torch.tensor(list(map(float, l.split(' ')[1:])), dtype=torch.float32)
                     self.numberbatch[word] = tensor
-                print('Saving Numberbatch as .npy file')
-                file = open(full_path, "wb")
-                pickle.dump(self.numberbatch, file)
-                file.close()
+                #print('Saving Numberbatch as .npy file')
+                #file = open(full_path, "wb")
+                #pickle.dump(self.numberbatch, file)
+                #file.close()
                 #np.save(full_path, self.numberbatch)
 
         print('Finished loading Numberbatch.')

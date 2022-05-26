@@ -65,7 +65,7 @@ if __name__ == "__main__":
             features, proposals)
         predictions = model.grid_feats_vqa.roi_heads.box_predictor(pooled_features_fc7)
         predictions, r_indices = model.grid_feats_vqa.roi_heads.box_predictor.inference(predictions, proposals)
-        print(predictions)
+        print(len(pooled_features_fc7.shape))
         raise NotImplementedError
 
 
