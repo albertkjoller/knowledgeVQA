@@ -58,7 +58,7 @@ class TripleOneWayTopDown(nn.Module):
     def forward(self, i, q1, q2):
 
         #attention = self.norm(self.transform(self.fusion_module(i, q1, q2)))
-        attention = self.norm(torch.nan_to_num(self.transform(self.fusion_module(i, q, q2)), nan=-np.inf))
+        attention = self.norm(torch.nan_to_num(self.transform(self.fusion_module(i, q1, q2)), nan=-np.inf))
 
         return attention
 

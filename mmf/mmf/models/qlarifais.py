@@ -117,8 +117,6 @@ class Qlarifais(BaseModel):
         else:
             fused_features = self.fusion_module(image_features, question_features) # [batch_size, answer_vocab_dim/embedding_dim]
 
-        print(fused_features)
-        raise NotImplementedError
         # --- CLASSIFICATION ---
         # embeddings
         logits = self.classifier(fused_features)
