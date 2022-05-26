@@ -545,7 +545,6 @@ class gfvqaImageEncoder(Encoder):
         self.grid_feats_vqa = build_model(self.cfg)
         DetectionCheckpointer(self.grid_feats_vqa, save_dir=self.cfg.OUTPUT_DIR).resume_or_load(self.cfg.MODEL.WEIGHTS, resume=True)
 
-
     def setup(self, args, config):
         """
         Create configs and perform basic setups.

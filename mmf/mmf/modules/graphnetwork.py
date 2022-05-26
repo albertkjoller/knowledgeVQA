@@ -61,7 +61,7 @@ class Numberbatch(nn.Module):
 
             # todo: write that we are loading and have finished loading numberbatch
 
-            self.numberbatch_dim = self.config.g_dim
+            #self.numberbatch_dim = self.config.g_dim
 
 
             print('Loading Numberbatch...')
