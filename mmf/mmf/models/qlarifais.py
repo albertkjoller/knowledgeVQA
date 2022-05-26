@@ -117,6 +117,8 @@ class Qlarifais(BaseModel):
         else:
             fused_features = self.fusion_module(image_features, question_features) # [batch_size, answer_vocab_dim/embedding_dim]
 
+        print(fused_features)
+        raise NotImplementedError
         # --- CLASSIFICATION ---
         # embeddings
         logits = self.classifier(fused_features)
@@ -125,7 +127,7 @@ class Qlarifais(BaseModel):
         if self.config.classifier.output_type == 'embeddings':
             logits = torch.nn.functional.normalize(logits)
             prediction_scores = torch.nansum(logits.unsqueeze(dim=1) * self.embedded_answer_vocab, dim=2)
-            
+
         else:
             prediction_scores = logits
 
