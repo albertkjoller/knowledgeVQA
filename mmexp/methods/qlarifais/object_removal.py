@@ -20,15 +20,16 @@ from mmexp.methods.automated_objects_removal_inpainter.src.edge_connect import E
 
 class ObjectRemoval:
     
-    def __init__(self, input_image):
+    def __init__(self, image_path, save_path, object4removal):
         
+        self.object4removal = object4removal
         self.classes_dict = self.load_classes()
         self.object_id = self.object_to_remove()
-        self.number_of_objects = int(input("Enter how many objects for removal: "))
+        self.number_of_objects = 3 #int(input("Enter how many objects for removal: "))
         print("")
         
-        self.input = Path(f"./../imgs/temp/{input_image.split('/')[0]}").as_posix()
-        self.output = Path(f"./../imgs/removal_results/{self.object_name}").as_posix() 
+        self.input = image_path
+        self.output = save_path #Path(f"./../imgs/removal_results/{self.object_name}").as_posix() 
         
         self.config = self.load_config()
         
@@ -43,7 +44,7 @@ class ObjectRemoval:
     
     def object_to_remove(self, ):
         try:
-            self.object_name = input("Specify object to remove: ")
+            self.object_name = self.object4removal #input("Specify object to remove: ")
             return self.classes_dict[self.object_name]
         except KeyError:
             print("\nModel is not trained to remove this object... Try again!\n")

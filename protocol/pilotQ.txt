@@ -1,7 +1,3 @@
-Q: What food is this?
-I: hotdog.jpg
-A: hotdog
-
 Q: What sport is this?
 I: tennis.jpg
 A: tennis
