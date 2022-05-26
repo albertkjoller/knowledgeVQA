@@ -10,9 +10,13 @@ from .qlarifais.object_removal import ObjectRemoval as OR
 from .torchray.multimodal_extremal_perturbation import multi_extremal_perturbation as MMEP
 from .torchray.multimodal_gradient import multimodal_gradient as MMGradient
 from .torchray.multimodal_gradcam import multimodal_gradcam as MMGradCAM
+from .qlarifais.random_noise import random_image as VisualNoise
+from .qlarifais.random_noise import random_question as TextualNoise
 
 __all__ = [
     "OR",
+    "VisualNoise",
+    "TextualNoise",
     "MMEP",
     "MMGradient",
     "MMGradCAM",   

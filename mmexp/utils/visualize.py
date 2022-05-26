@@ -38,7 +38,7 @@ def plot_example(input,
 
         plt.subplot(batch_size, 2, 2 + 2 * i)
         imsc(saliency[i], interpolation='none')
-        plt.title('{} for answer category {} ({})'.format(
+        plt.title('{} for answer category {} (id: {})'.format(
             method, answer_vocab[class_i], class_i), fontsize=8)
 
     # Save figure if path is specified.

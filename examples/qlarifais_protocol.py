@@ -9,6 +9,9 @@ Created on Tue May 24 20:16:46 2022
 import sys, os
 from pathlib import Path
 
+import numpy as np
+import glob
+
 import torch
 import cv2
 
@@ -130,11 +133,11 @@ if __name__ == '__main__':
         image = load_image((image_path / image_name).as_posix())
         
         # Add predictions to report
-        prediction_str = f'PREDICTIONS: \n\nQuestion: "{question}"\nImage: {image_name}' + \
+        prediction_str = f'PREDICTIONS: \n\nQuestion: "{question}"\nImage: {image_name}\nAnswer: {answer}\n' + \
                             "\nPredicted outputs from the model:\n" 
         outputs = model.classify(image=image, text=question, top_k=5)
         for i, (prob, ans) in enumerate(zip(*outputs)):
-            prediction_str += f"{i+1}) {ans} \t ({prob}\n)"
+            prediction_str += f"{i+1}) {ans} \n" #"\t ({prob})\n"
         logger.info(prediction_str)
         
         # Run explainability if answer is in answer vocab
@@ -156,56 +159,100 @@ if __name__ == '__main__':
                         mod_image = image
                         mod_question = question
                         
+                        # Run xplainability
+                        save_name = Path(args.save_path) / f"explainability/{explainability_method}/{image_name.split('.')[0]}/{question.strip('?').replace(' ', '_').lower()}/{analysis_type.lower()}"
+                        run_method(model, model_name, 
+                                   mod_image, image_name, 
+                                   mod_question, category_id, 
+                                   explainability_method,
+                                   save_path=save_name.as_posix(),
+                                   analysis_type=analysis_type,
+                                   )
+                        
                     elif analysis_type == 'OR' and remove_object != None:
                         # Remove object                        
                         removal_path = Path(args.protocol_dir) / f'removal_results/{image_name.split(".")[0]}/{remove_object}'
-                        #if not os.path.exists(removal_path):
-                        os.makedirs(removal_path, exist_ok=True)
-                        
-                        # remove objects from image
-                        OR = str_to_class('OR')
-                        OR_model = OR(image_path=image_path, 
-                                      save_path=removal_path, 
-                                      object4removal=remove_object)
-                        OR_model.remove_object()
+                        if not os.path.exists(removal_path):
+                            os.makedirs(removal_path, exist_ok=True)
+                            
+                            # remove objects from image
+                            OR = str_to_class('OR')
+                            OR_model = OR(image_path=(image_path / image_name).as_posix(),
+                                          save_path=removal_path.as_posix(),
+                                          obj=remove_object,
+                                          num=3)
+                            
+                            OR_model.remove_object()
                         
                         # Load modified image
-                        mod_image = load_image((removal_path / (".").join([image_name.split(".")[0], "png"])).as_posix())
+                        mod_image = load_image((removal_path / image_name).as_posix())
                         mod_question = question
+                        
+                        # Run xplainability
+                        save_name = Path(args.save_path) / f"explainability/{explainability_method}/{image_name.split('.')[0]}/{question.strip('?').replace(' ', '_').lower()}/{analysis_type.lower()}"
+                        run_method(model, model_name, 
+                                   mod_image, image_name, 
+                                   mod_question, category_id, 
+                                   explainability_method,
+                                   save_path=save_name.as_posix(),
+                                   analysis_type=analysis_type,
+                                   )
 
                     elif analysis_type == 'VisualNoise':
-                        #image = 
-                        pass
+                                   
+                        VisualNoise = str_to_class('VisualNoise')
+                        mod_image = VisualNoise(image)
+                        mod_question = question
+                        
+                        # Run xplainability
+                        save_name = Path(args.save_path) / f"explainability/{explainability_method}/{image_name.split('.')[0]}/{question.strip('?').replace(' ', '_').lower()}/{analysis_type.lower()}"
+                        run_method(model, model_name, 
+                                   mod_image, image_name, 
+                                   mod_question, category_id, 
+                                   explainability_method,
+                                   save_path=save_name.as_posix(),
+                                   analysis_type=analysis_type,
+                                   )
+                        
                     elif analysis_type == 'TextualNoise':
-                        #question = 
-                        pass
+                        
+                        TextualNoise = str_to_class('TextualNoise')
+                        mod_image = image
+                        mod_question = TextualNoise(question, model)
+                        
+                        # Run xplainability
+                        save_name = Path(args.save_path) / f"explainability/{explainability_method}/{image_name.split('.')[0]}/{question.strip('?').replace(' ', '_').lower()}/{analysis_type.lower()}"
+                        run_method(model, model_name, 
+                                   mod_image, image_name, 
+                                   mod_question, category_id, 
+                                   explainability_method,
+                                   save_path=save_name.as_posix(),
+                                   analysis_type=analysis_type,
+                                   )
+                        
                     else:
                         if remove_object != None:
                             logger.warning(f"Analysis type - {analysis_type} - is not implemented...")
                             raise NotImplementedError(f"Analysis type - {analysis_type} - is not implemented...")
-                            
-                    save_name = Path(args.save_path) / f"explainability/{explainability_method}/{image_name.split('.')[0]}/{question.strip('?').replace(' ', '_').lower()}/{analysis_type.lower()}"
-                    run_method(model, model_name, 
-                               mod_image, image_name, 
-                               mod_question, category_id, 
-                               explainability_method,
-                               save_path=save_name.as_posix(),
-                               analysis_type=analysis_type,
-                               )
                     
-                    # Run explainability method for each image input
-                    #run_explainability(model, model_name, 
-                    #                   image, image_name, 
-                    #                   question, category_id, 
-                    #                   explainability_method,
-                    #                   save_path=args.save_path
-                    #                   )
-                
                 if args.show_all:
-                    pass
-            
-            #explainer_img = cv2.imread(save_path_temp)
-        
+                    
+                    where = Path(args.save_path) / f"explainability/{explainability_method}/{image_name.split('.')[0]}/{question.strip('?').replace(' ', '_').lower()}/*"
+                    explainer_img = None
+                    for i, file in enumerate(glob.glob(where.as_posix())):
+                        if file.split("/")[-1] != 'combined.png':
+                            read_img = cv2.imread(file) #orig
+                            
+                            try:
+                                if explainer_img == None:
+                                    explainer_img = read_img
+                            except ValueError:
+                                explainer_img = np.concatenate((explainer_img, read_img), axis=0)
+
+
+                    # SAVE
+                    combined_filename = ("/").join(where.as_posix().split("/")[:-1]) + '/combined.png'
+                    cv2.imwrite(combined_filename, explainer_img)
             
         
         

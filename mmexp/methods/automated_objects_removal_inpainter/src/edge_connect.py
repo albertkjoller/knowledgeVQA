@@ -18,7 +18,7 @@ from torchvision import transforms
 class EdgeConnect():
     def __init__(self, config):
         self.config = config
-
+        
         if config.MODEL == 1:
             model_name = 'edge'
         elif config.MODEL == 2:
@@ -30,8 +30,8 @@ class EdgeConnect():
 
         self.debug = False
         self.model_name = model_name
-        self.edge_model = EdgeModel(config).to(config.DEVICE)
-        self.inpaint_model = InpaintingModel(config).to(config.DEVICE)
+        self.edge_model = EdgeModel(config).to(self.config.DEVICE)
+        self.inpaint_model = InpaintingModel(config).to(self.config.DEVICE)
 
 
         # test mode
