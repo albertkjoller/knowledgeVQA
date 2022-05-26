@@ -13,6 +13,35 @@ from mmexp.methods import *
 from mmexp.utils.visualize import plot_example
 from mmexp.utils.tools import load_image, str_to_class
 
+
+
+def run_method(model, model_name, 
+               image, image_name, 
+               question, category_id, 
+               method,
+               save_path,):
+    
+    # Answer vocabulary
+    answer_vocab = model.processor_dict['answer_processor'].answer_vocab.word_list
+    
+    # Get saliency map
+    saliency = method(model, 
+                      image,
+                      question,
+                      category_id,
+                      )
+    # visualize gradient map
+    #plt.subplot(212)
+    plot_example(model.image_tensor[:, [2, 1, 0]], 
+                 saliency, 
+                 method=method, 
+                 category_id=category_id,
+                 answer_vocab=answer_vocab,
+                 show_plot=False,
+                 save_path=save_path + '.png',
+                 )
+
+
 def run_explainability(model, model_name, image, img_name, question, category_id, explainability_method):
     
     # Specify answer vocab and save path
