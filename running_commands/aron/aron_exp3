@@ -6,8 +6,8 @@ python mmf/tools/sweeps/sweep_qlarifais.py \
 --resume False \
 --resume_best False \
 --max_to_keep 1 \
---config /zhome/96/8/147177/Desktop/explainableVQA/mmf/mmf/configs/experiments/ablation2/question_ama.yaml \
--prefix ablation2_question_ama \
+--config /zhome/96/8/147177/Desktop/explainableVQA/mmf/mmf/configs/experiments/ablation1/grids.yaml \
+-prefix ablation1_grids \
 --tensorboard 1 \
 --tensorboard_logdir /work3/s194262/save/sweeps/tensorboard \
 --baseline_model /zhome/96/8/147177/Desktop/explainableVQA/mmf/mmf/models/qlarifais.py \
