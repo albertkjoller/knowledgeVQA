@@ -55,14 +55,26 @@ if __name__ == "__main__":
     #images = model.grid_feats_vqa.preprocess_image(inputs) # Normalize, pad and batch the input images.
     #features = model.grid_feats_vqa.backbone(images.tensor) # features from backbone
     #outputs = model.grid_feats_vqa.roi_heads.get_conv5_features(features)
-    
-    
-    #with torch.no_grad():
-    outputs = model.grid_feats_vqa([{"image": T.functional.to_tensor(img)}])
-    
+    inputs = [{"image": T.functional.to_tensor(img)}]
+    with torch.no_grad():
+        images = model.grid_feats_vqa.preprocess_image(inputs)
+        features = model.grid_feats_vqa.backbone(images.tensor)
+        proposals, _ = model.grid_feats_vqa.proposal_generator(images, features)
+        # pooled features and box predictions
+        box_features, pooled_features_fc7, pooled_features_fc6 = model.grid_feats_vqa.roi_heads.get_roi_features(
+            features, proposals)
+        predictions = model.grid_feats_vqa.roi_heads.box_predictor(pooled_features_fc7)
+        predictions, r_indices = model.grid_feats_vqa.roi_heads.box_predictor.inference(predictions, proposals)
+        print(predictions)
+        raise NotImplementedError
+
+
+    #outputs = model.grid_feats_vqa([{"image": T.functional.to_tensor(img)}])
+    # (img[:, :, ::-1] # convert RGB to BGR
     v_gt = Visualizer(img, None)
     v_gt = v_gt.overlay_instances(boxes=outputs[0]["instances"].pred_boxes)
-    #print(outputs[0]["instances"].pred_boxes)
+    print(outputs)
+    #print(outputs["instances"].pred_boxes)
     fig, ax = plt.subplots(figsize=(10, 10))
     ax.imshow(v_gt.get_image())
     plt.show()

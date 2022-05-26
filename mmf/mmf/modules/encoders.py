@@ -593,7 +593,6 @@ class gfvqaImageEncoder(Encoder):
                 #pooled_features_fc7 = np.array(np.split(pooled_features_fc7.numpy(), accum, axis=0), dtype=object)
                 pooled_features_fc7 = torch.nn.utils.rnn.pad_sequence(list(torch.split(pooled_features_fc7, set_proposals)),
                                                                       batch_first=True, padding_value=-np.inf)
-
                 outputs = pooled_features_fc7
         return outputs
 
