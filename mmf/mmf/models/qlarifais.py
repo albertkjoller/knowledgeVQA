@@ -22,7 +22,7 @@ from mmf.utils.build import (
     build_attention_module
     )
 
-# mmf_run config='configs/experiments/ablation3/q_g_double_mul.yaml' model=qlarifais dataset=okvqa run_type=train_val
+# mmf_run config='configs/experiments/ablation1/grids.yaml' model=qlarifais dataset=okvqa run_type=train_val
 
 @registry.register_model("qlarifais")
 class Qlarifais(BaseModel):
@@ -107,7 +107,7 @@ class Qlarifais(BaseModel):
         else:
             if self.config.image_encoder.resize == 'average_pooling':
                 # average pooling of K features of size 2048
-                image_features = torch.from_numpy(np.nanmean(torch.nan_to_num(image_features, neginf=np.nan), axis=1)).to(get_current_device())
+                image_features = torch.from_numpy(np.nanmean(torch.nan_to_num(image_features, neginf=np.nan).cpu(), axis=1)).to(get_current_device())
                 # [batch_size, i_dim]
 
         # --- FUSION ---

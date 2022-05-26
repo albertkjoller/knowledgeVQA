@@ -531,7 +531,9 @@ class gfvqaImageEncoder(Encoder):
 
         if 'region' in self.config.model:
             self.type = "region"
-        elif 'grid' in self.config.model:
+
+        # the challenge are grid feartures from 152 backbone
+        elif np.logical_or('grid' in self.config.model, 'challenge' in self.config.model):
             self.type = 'grid'
             # forcing the final residual block to have dilations 1
             self.cfg.MODEL.RESNETS.RES5_DILATION = 1
