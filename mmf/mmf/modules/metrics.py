@@ -321,11 +321,11 @@ class NumberbatchScore(BaseMetric):
         self.score_key = score_key
         self.target_key = target_key
         self.annotator_key = annotator_key
-        '''
-        self.config = get_global_config()
-        self.numberbatch = build_graph_encoder(self.config.dataset_config.embedding_models.numberbatch)
+
+        #self.config = get_global_config()
+        #self.numberbatch = build_graph_encoder(self.config.dataset_config.embedding_models.numberbatch)
         self.cos = torch.nn.CosineSimilarity(dim=1)
-        '''
+
         # adding necessary params
         self.required_params = ["scores", "answers", "avg_embedded_answers"]
 
