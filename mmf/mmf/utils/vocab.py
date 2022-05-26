@@ -461,7 +461,7 @@ class EmbeddedVocab:
         if os.path.exists(saved_dir):
             # load file
             print('Embedded answer vocabulary file found and is loaded')
-            self.embedded_answer_vocab = torch.load(saved_dir)
+            self.embedded_answer_vocab = torch.load(saved_dir, map_location=torch.device('cpu'))
 
         # if desired embedded vocabulary does not exist
         else:

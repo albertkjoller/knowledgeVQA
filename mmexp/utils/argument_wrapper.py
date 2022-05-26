@@ -18,13 +18,15 @@ from mmexp.utils.tools import load_image, str_to_class
 def run_method(model, model_name, 
                image, image_name, 
                question, category_id, 
-               method,
-               save_path,):
+               explainability_method,
+               save_path,
+               analysis_type):
     
     # Answer vocabulary
     answer_vocab = model.processor_dict['answer_processor'].answer_vocab.word_list
     
     # Get saliency map
+    method = str_to_class(explainability_method)
     saliency = method(model, 
                       image,
                       question,
@@ -34,11 +36,12 @@ def run_method(model, model_name,
     #plt.subplot(212)
     plot_example(model.image_tensor[:, [2, 1, 0]], 
                  saliency, 
-                 method=method, 
+                 method=explainability_method, 
                  category_id=category_id,
                  answer_vocab=answer_vocab,
                  show_plot=False,
                  save_path=save_path + '.png',
+                 analysis_type=analysis_type,
                  )
 
 

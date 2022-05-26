@@ -180,14 +180,17 @@ if __name__ == '__main__':
                         #question = 
                         pass
                     else:
-                        logger.warning(f"Analysis type - {analysis_type} - is not implemented...")
-                        raise NotImplementedError(f"Analysis type - {analysis_type} - is not implemented...")
-                
+                        if remove_object != None:
+                            logger.warning(f"Analysis type - {analysis_type} - is not implemented...")
+                            raise NotImplementedError(f"Analysis type - {analysis_type} - is not implemented...")
+                            
+                    save_name = Path(args.save_path) / f"explainability/{explainability_method}/{image_name.split('.')[0]}/{question.strip('?').replace(' ', '_').lower()}/{analysis_type.lower()}"
                     run_method(model, model_name, 
                                mod_image, image_name, 
                                mod_question, category_id, 
-                               method,
-                               save_path=args.save_path,
+                               explainability_method,
+                               save_path=save_name.as_posix(),
+                               analysis_type=analysis_type,
                                )
                     
                     # Run explainability method for each image input

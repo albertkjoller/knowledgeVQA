@@ -9,7 +9,8 @@ def plot_example(input,
                  category_id,
                  answer_vocab: list,
                  show_plot=False,
-                 save_path=None):
+                 save_path=None,
+                 analysis_type=None):
     """Plot an example.
 
     Args:
@@ -33,11 +34,11 @@ def plot_example(input,
 
         plt.subplot(batch_size, 2, 1 + 2 * i)
         imsc(input[i])
-        plt.title('input image', fontsize=8)
+        plt.title(f'{analysis_type}', fontsize=8)
 
         plt.subplot(batch_size, 2, 2 + 2 * i)
         imsc(saliency[i], interpolation='none')
-        plt.title('{} for category {} ({})'.format(
+        plt.title('{} for answer category {} ({})'.format(
             method, answer_vocab[class_i], class_i), fontsize=8)
 
     # Save figure if path is specified.
