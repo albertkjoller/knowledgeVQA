@@ -72,7 +72,7 @@ training:
   detect_anomaly: true #TODO:??
   # Level of logging, only logs which are >= to current level will be logged
   logger_level: info
-  batch_size: 2 # default: 512, 128 or higher performs better (2017 tips and tricks)
+  batch_size: 128 # default: 512, 128 or higher performs better (2017 tips and tricks)
   lr_scheduler: true   # Don't forget to update schedule_attributes if you update this
   max_updates: null # default: 22000, krisp uses 88000
   max_epochs: 600 # recommended by okvqa paper
@@ -80,7 +80,7 @@ training:
   tensorboard: true
   use_warmup: true
   evaluate_metrics: true # enable evaluation every log_interval number of updates
-  evaluation_interval: 1 # how many times to evaluate on the validaiton set
+  evaluation_interval: 250 # how many times to evaluate on the validaiton set
   find_unused_parameters: true # Turn on if you want to ignore unused parameters in case of DDP
   fast_read: true # TODO: is it faster now?
   early_stop:

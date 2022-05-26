@@ -357,7 +357,12 @@ if __name__ == "__main__":
         #height, width = img.shape[:2]
         # loads the desired BGR
         img = torch.as_tensor(img.astype("float32").transpose(2, 0, 1)) # correct shape
+        print(img.shape)
         images.append(img)
+
+    pooled = vision_module(images)
+    print(pooled.shape)
+    raise NotImplementedError
     inputs = [{"image": image} for image in images]
     vision_module.grid_feats_vqa.eval()
     images = vision_module.grid_feats_vqa.preprocess_image(inputs)
@@ -366,6 +371,7 @@ if __name__ == "__main__":
     # pooled features and box predictions
     box_features, pooled_features_fc7, pooled_features_fc6 = vision_module.grid_feats_vqa.roi_heads.get_roi_features(
         features, proposals)
+    raise NotImplementedError
     print(pooled_features_fc7.shape)
     predictions = vision_module.grid_feats_vqa.roi_heads.box_predictor(pooled_features_fc7)
     #predictions, r_indices = vision_module.grid_feats_vqa.roi_heads.box_predictor(box_features)
