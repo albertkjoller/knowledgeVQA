@@ -11,6 +11,9 @@ from mmf.common.registry import registry
 from mmf.utils.checkpoint import load_pretrained_model
 from mmf.utils.configuration import get_mmf_cache_dir, get_global_config
 from mmf.utils.text import *
+from mmf.utils.vocab import EmbeddedVocab
+import os
+
 from mmf.utils.general import get_current_device
 
 from mmf.utils.build import (
@@ -22,8 +25,12 @@ from mmf.utils.build import (
     build_attention_module
     )
 
-# mmf_run config='configs/experiments/ablation1/grids.yaml' model=qlarifais dataset=okvqa run_type=train_val
+'''
+mmf_run config='configs/experiments/baseline/mul.yaml' model=qlarifais dataset=okvqa run_type=train_val
 
+mmf_run config='configs/experiments/baseline/mul.yaml' model=qlarifais dataset=okvqa run_type=test \
+checkpoint.resume_file=/Users/arond.jacobsen/Documents/GitHub/explainableVQA/mmf/save/models/mul/qlarifais_final.pth
+'''
 @registry.register_model("qlarifais")
 class Qlarifais(BaseModel):
 
@@ -68,9 +75,14 @@ class Qlarifais(BaseModel):
             # initiating attention module
             self.attention_module = build_attention_module(self.config.attention.params)
 
+
+        emb_vocab_file = os.path.join('/'.join(self.config.vocab_file.split('/')[:-1]), 'embedded_answer_vocab.pt')
+        self.embedded_answer_vocab = EmbeddedVocab(self.mmf_indirect(emb_vocab_file), self.mmf_indirect(self.config.vocab_file),
+                                                   self.graph_encoder).embedded_answer_vocab
+
         # initialized and used when generating predictions w.r.t. answer vocabulary
-        self.answer_vocab = VocabDict(self.mmf_indirect(self.config.vocab_file))
-        self.embedded_answer_vocab = self.graph_encoder(self.answer_vocab.word_list)
+        #self.answer_vocab = VocabDict(self.mmf_indirect(self.config.vocab_file))
+        #self.embedded_answer_vocab = self.graph_encoder(self.answer_vocab.word_list)
 
     def forward(self, sample_list):
 
@@ -121,7 +133,7 @@ class Qlarifais(BaseModel):
         # embeddings
         logits = self.classifier(fused_features)
         # average embedded annotator answer for type contrastive loss
-        avg_embedded_answers  = self.graph_encoder(sample_list['answers'])
+        avg_embedded_answers = self.graph_encoder(sample_list['answers'])
         if self.config.classifier.output_type == 'embeddings':
             logits = torch.nn.functional.normalize(logits)
             prediction_scores = torch.nansum(logits.unsqueeze(dim=1) * self.embedded_answer_vocab, dim=2)

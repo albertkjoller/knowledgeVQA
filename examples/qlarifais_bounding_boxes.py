@@ -21,17 +21,17 @@ transforms.PILToTensor()])
 sys.path.append("..")
 
 #from mmf.models.frcnn import GeneralizedRCNN
-
+# python3 -u /examples/qlarifais_bounding_boxes.py
 
 if __name__ == "__main__":
     
-    config_path = 'mmexp/methods/bounding_boxes/config.yaml'
+    config_path = 'mmexp/methods/bounding_boxes/config2.yaml'
     
     config = OmegaConf.load(os.path.dirname(os.getcwd()) + "/" + config_path)
     # Init FasterRCNN
     #model = GeneralizedRCNN(config)
     
-    model = gfvqaImageEncoder(config.model_config.pilot.image_encoder.params)
+    model = gfvqaImageEncoder(config.image_encoder.params)
     
     model.cfg.defrost()
     #model.cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST=0.95
