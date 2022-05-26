@@ -49,17 +49,17 @@ A: white
 Q: What is the man wearing?
 I: shirtguy.jpg
 A: shirt
-Remove man
+R: man
 
 Q: What room is this?
 I: image430.png
 A: Living room
-Remove sofa
+R: sofa
 
 Q: What is usually done in this room?
 I: image956.png
 A: sleep
-remove bed
+R: bed
 
 Q: How many people in this photo?
 I: coffee.jpg
@@ -68,17 +68,17 @@ A: 2
 Q: What is he looking at?
 I: tv.jpg
 A: watching tv
-remove TV
+R: TV
 
 Q: What are they doing?
 I: thanksgiving3.jpg
 A: eating
-Remove dining table
+R: dining table
 
 Q: What object is this?
 I: bus.jpg
 A: bus
-Remove bus
+R: bus
 
 Q: Which animal is to the left?
 I: dog-facts-cat-facts.jpg
@@ -87,17 +87,17 @@ A: cat
 Q: How fast is he going?
 I: fast.jpg
 A: fast
-Remove motorcycle
+R: motorcycle
 
 Q: What is this?
 I: soccer.jpg
 A: Goalee
-Remove person
+R: person
 
 Q: Who would use this house?
 I: doghouse.jpg
 A: dog
-Remove dog
+R: dog
 
 Q: Is she wearing shoes?
 I: running.jpg
