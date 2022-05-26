@@ -7,6 +7,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 from tqdm import tqdm
+from collections import defaultdict
 
 import cv2
 from PIL import Image
@@ -184,3 +185,23 @@ def fetch_test_predictions(model, report_dir):
         test_predictions.to_csv(report_dir / 'test_predictions.csv', index=False)
         
     return test_predictions
+
+def get_input(protocol_dir, protocol_name):
+    
+    input_file = Path(protocol_dir) / protocol_name
+    if os.path.exists(input_file):
+        with open(input_file, 'r') as f:
+            info = f.read().splitlines()
+            
+        # Initialize parameters
+        i = 0
+        protocol_dict = defaultdict(dict)
+
+        for string in info:
+            if string == '':
+                i += 1
+            else:
+                key, val = string.split(": ")
+                protocol_dict[i][key] = val
+                
+    return protocol_dict

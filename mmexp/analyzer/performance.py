@@ -238,7 +238,7 @@ class PerformanceReport:
             self.logger.info(f"\n{'-'*100}\n Performance report on testset - stratified by {stratification}\n{'-'*100}\n")
                 
         # Log size
-        self.logger.info(f"\nNumber of test points = {len(self.data)}")
+        self.logger.info(f"\nNumber of test points = {len(self.data)}\n")
         
         # Print scores and CIs
         self.logger.info(f"Performance scores:\n{self.scores}\n")

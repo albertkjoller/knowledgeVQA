@@ -14,6 +14,7 @@ from mmexp.utils.visualize import plot_example
 from mmexp.utils.tools import load_image, str_to_class
 
 def run_explainability(model, model_name, image, img_name, question, category_id, explainability_method):
+    
     # Specify answer vocab and save path
     answer_vocab = model.processor_dict['answer_processor'].answer_vocab.word_list
     save_path = f"./../imgs/explainability/{model_name}/{explainability_method}/{img_name.split('/')[0]}/{question.replace(' ', '_')}"
