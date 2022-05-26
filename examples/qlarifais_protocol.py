@@ -170,7 +170,7 @@ if __name__ == '__main__':
                             OR_model.remove_object()
                         
                         # Load modified image
-                        mod_image = load_image(removal_path)
+                        mod_image = load_image((removal_path / (".").join([image_name.split(".")[0], "png"])).as_posix())
                         mod_question = question
 
                     elif analysis_type == 'VisualNoise':

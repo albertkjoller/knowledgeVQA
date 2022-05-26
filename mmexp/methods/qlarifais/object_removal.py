@@ -8,6 +8,7 @@ Created on Fri May  6 13:09:24 2022
 
 import os
 from pathlib import Path
+from omegaconf import OmegaConf
 
 import random
 
@@ -28,8 +29,8 @@ class ObjectRemoval:
         self.number_of_objects = 3 #int(input("Enter how many objects for removal: "))
         print("")
         
-        self.input = image_path
-        self.output = save_path #Path(f"./../imgs/removal_results/{self.object_name}").as_posix() 
+        self.input = image_path.as_posix()
+        self.output = save_path.as_posix() #Path(f"./../imgs/removal_results/{self.object_name}").as_posix() 
         
         self.config = self.load_config()
         
@@ -56,7 +57,7 @@ class ObjectRemoval:
         config_path = '../mmexp/methods/automated_objects_removal_inpainter/checkpoints/config.yml'
         
         # load config file
-        config = Config(config_path)
+        config = OmegaConf.load(config_path) # Config(config_path)
     
         # test mode
         config.MODE = 2
@@ -95,9 +96,9 @@ class ObjectRemoval:
         random.seed(self.config.SEED)
     
         # build the model and initialize
-        model = EdgeConnect(self.config)
-        model.load()
+        self.edgemodel = EdgeConnect(self.config)
+        self.edgemodel.load()
     
         # model test
         print('\nRemove object (running...)\n')
-        model.test()
+        self.edgemodel.test()
