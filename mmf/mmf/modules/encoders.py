@@ -533,7 +533,7 @@ class gfvqaImageEncoder(Encoder):
             self.type = "region"
 
         # the challenge are grid feartures from 152 backbone
-        elif np.logical_or('grid' in self.config.model, 'challenge' in self.config.model):
+        elif 'grid' in self.config.model:
             self.type = 'grid'
             # forcing the final residual block to have dilations 1
             self.cfg.MODEL.RESNETS.RES5_DILATION = 1
@@ -559,12 +559,7 @@ class gfvqaImageEncoder(Encoder):
         # For compatibility with both training and explainability, the
         # - path needs to go back to the root (explainableVQA) and then enter mmf.
         cfg.merge_from_file('./../mmf/mmf/configs/other/feat_configs/' + model)
-        #
-        #from mmf.utils.configuration import get_global_config
-        #general_config = get_global_config()
-        #cfg.OUTPUT_DIR = general_config.env.cache_dir # + '/' + cfg.MODEL.WEIGHTS # avoid overwriting other config.yaml file
         cfg.OUTPUT_DIR = config.output_dir #general_config.env.save_dir
-        #cfg.MODEL.RESNETS.RES2_OUT_CHANNELS = config.get("modal_hidden_size", False)
         cfg.MODEL.DEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'
         # maybe not necessary, but logs and configs
         #default_setup(cfg, args) #https://github.com/facebookresearch/detectron2/blob/main/detectron2/engine/defaults.py
@@ -592,40 +587,14 @@ class gfvqaImageEncoder(Encoder):
                     # pooled features and box predictions
                     box_features, pooled_features_fc7, pooled_features_fc6 = self.grid_feats_vqa.roi_heads.get_roi_features(features, proposals)
                     # chosen regions within each batch
-                    '''
-                    predictions = self.grid_feats_vqa.roi_heads.box_predictor(pooled_features_fc7)
-                    print('predictions', predictions[0].shape)
-                    predictions, r_indices = self.grid_feats_vqa.roi_heads.box_predictor.inference(predictions, proposals)
-
-                    # expanding the pooled features to correspond to batch size (final region selection)
-                    # getting the batch shape back
-                    split_values = [len(p) for p in proposals] # originally found boxes (split based on batch)
-                    print('split_values', split_values)
-                    pooled_features_fc7 = torch.split(pooled_features_fc7, split_values)
-                    # maximum number of regions possible per batch
-                    max_regions = max([len(num_indices) for num_indices in r_indices]) # chosen regions within each batch
-                    print('regions num', [len(num_indices) for num_indices in r_indices])
-
-                    # constructing outputs
-                    # output shape
-                    outputs = torch.ones((batch_size, max_regions, self.cfg.MODEL.ROI_BOX_HEAD.FC_DIM))
-                    for idx in range(batch_size):
-                        outputs[idx] *= np.nan # initializing as nan values
-                        outputs[idx][:len(r_indices[idx]), :] = pooled_features_fc7[idx][r_indices[idx]]
-                        # filtering out nans
-                        #outputs[idx] = outputs[idx][~torch.all(outputs[idx].isnan(), dim=1)]
-                    '''
                     # getting the batch shape back
                     set_proposals = [len(p) for p in proposals] # originally found boxes (split based on batch)
                     #accum = [sum(set_proposals[:i+1]) for i, j in enumerate(set_proposals[:-1])]
                     #pooled_features_fc7 = np.array(np.split(pooled_features_fc7.numpy(), accum, axis=0), dtype=object)
                     pooled_features_fc7 = torch.nn.utils.rnn.pad_sequence(list(torch.split(pooled_features_fc7, set_proposals)),
                                                                           batch_first=True, padding_value=-np.inf)
-                    #print(set_proposals)
-                    #print('encoded feature', pooled_features_fc7.shape)
+
                     outputs = pooled_features_fc7
-        #print(type(outputs))
-        #outputs = torch.tensor(outputs)
         return outputs
 
 

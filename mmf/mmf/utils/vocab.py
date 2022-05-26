@@ -446,3 +446,38 @@ class ExtractedVocab(BaseVocab):
 
     def get_dim(self):
         return self.emb_dim
+
+
+
+class EmbeddedVocab:
+    '''
+    Use a encoder to embed answer vocabulary and use it to  e.g. used for similarity measures with the model output as an embedding.
+    '''
+    def __init__(self, saved_dir, vocab_file = None, encoder = None):
+
+        from mmf.utils.text import VocabDict
+
+        # if desired embedded vocabulary exist
+        if os.path.exists(saved_dir):
+            # load file
+            print('Embedded answer vocabulary file found and is loaded')
+            self.embedded_answer_vocab = torch.load(saved_dir)
+
+        # if desired embedded vocabulary does not exist
+        else:
+            #assert encoder != None, print('Input the graph encoder as argument too since file does not exist')
+            # load and embed
+            print('Embedded answer vocabulary does not exists, generating it...')
+            #from mmf.utils.build import (build_graph_encoder)
+            #encoder = build_graph_encoder(encoder_config)
+            answer_vocab = VocabDict(vocab_file) # loading vocab
+            self.embedded_answer_vocab = encoder(answer_vocab.word_list) # creating embeddings
+            print(saved_dir)
+            torch.save(self.embedded_answer_vocab, saved_dir) # saving
+
+
+
+
+
+
+

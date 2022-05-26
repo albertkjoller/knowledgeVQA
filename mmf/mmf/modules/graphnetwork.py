@@ -57,26 +57,48 @@ class Numberbatch(nn.Module):
             if self.numberbatch == dict():
                 pass
         except AttributeError:
-            self.numberbatch = {}
             self.device = get_current_device()
 
             # todo: write that we are loading and have finished loading numberbatch
 
-            with open(mmf_indirect(self.config.filepath), 'rb') as f:
+            self.numberbatch_dim = self.config.g_dim
 
-                info = f.readlines(1)
-                lines, self.numberbatch_dim = (int(x) for x in info[0].decode('utf-8').strip("\n").split(" "))
-                print('Loading Numberbatch...')
-                for line in tqdm(f, total=lines):
-                    l = line.decode('utf-8')
-                    l = l.strip("\n")
+            # path to saved pickle
+            numberbatch_file = os.path.join('/'.join(self.config.filepath.split('/')[:-1]), 'numberbatch.pkl')
+            full_path = mmf_indirect(numberbatch_file)
+            print('Loading Numberbatch...')
 
-                    # create tensor-dictionary
-                    word = l.split(' ')[0]
-                    #tensor = torch.tensor(list(map(float, l.split(' ')[1:])), dtype=torch.float32)
-                    tensor = torch.tensor(list(map(float, l.split(' ')[1:])), dtype=torch.float32)
-                    self.numberbatch[word] = tensor
-                print('Finished loading Numberbatch.')
+            if os.path.exists(full_path):
+                file = open(full_path, "rb")
+                self.numberbatch = pickle.load(file)
+                file.close()
+                #self.numberbatch = np.load(full_path, allow_pickle=True).item()
+            # opening as .txt file
+            else:
+                self.numberbatch = {}
+
+                with open(mmf_indirect(self.config.filepath), 'rb') as f:
+
+                    info = f.readlines(1)
+                    lines, self.numberbatch_dim = (int(x) for x in info[0].decode('utf-8').strip("\n").split(" "))
+
+                    for line in tqdm(f, total=lines):
+                        l = line.decode('utf-8')
+                        l = l.strip("\n")
+
+                        # create tensor-dictionary
+                        word = l.split(' ')[0]
+                        #tensor = torch.tensor(list(map(float, l.split(' ')[1:])), dtype=torch.float32)
+                        tensor = torch.tensor(list(map(float, l.split(' ')[1:])), dtype=torch.float32)
+                        self.numberbatch[word] = tensor
+                    print('Saving Numberbatch as .npy file')
+                    file = open(full_path, "wb")
+                    pickle.dump(self.numberbatch, file)
+                    file.close()
+                    #np.save(full_path, self.numberbatch)
+
+            print('Finished loading Numberbatch.')
+
 
     def conceptualize(self, tokenized_sentence):
 

@@ -7,7 +7,7 @@ model_config:
       params:
         name: grid_feats_vqa
         # specify backbone and type of features
-        model: X-152-challenge.yaml # choices: [R-50-(grid or updn), X-101-grid, X-152-(grid or challenge(MoVie+GridFeat))]
+        model: X-152-grid.yaml # choices: [R-50-(grid or updn), X-101-grid, X-152-(grid or challenge(MoVie+GridFeat))]
         output_dir: ${env.save_dir}
       # how to resize features
       resize: average_pooling

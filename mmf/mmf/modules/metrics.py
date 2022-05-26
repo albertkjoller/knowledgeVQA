@@ -64,6 +64,9 @@ from sklearn.preprocessing import MultiLabelBinarizer
 from torch import Tensor
 import numpy as np
 from tqdm import tqdm
+import os
+
+from mmf.utils.vocab import EmbeddedVocab
 
 
 def _convert_to_one_hot(expected, output):
@@ -100,21 +103,33 @@ class Metrics:
         from mmf.utils.configuration import get_global_config
         self.config = get_global_config()
         if self.config.model == 'qlarifais': # todo: more general?
-            from mmf.utils.build import build_graph_encoder, build_processors
             from mmf.utils.text import tokenize
             self.tokenize = tokenize
-            self.numberbatch = build_graph_encoder(self.config.dataset_config.embedding_models.numberbatch)
-            self.answer_processor = registry.get(self.config.datasets + "_answer_processor")
 
-            self.answer_vocab = self.answer_processor.answer_vocab
-            # todo: update for new tokenizer in numberbatch
+            #from mmf.utils.build import build_graph_encoder, build_processors
+            #self.numberbatch = build_graph_encoder(self.config.dataset_config.embedding_models.numberbatch)
+            #self.answer_processor = registry.get(self.config.datasets + "_answer_processor")
 
-            self.embedded_answer_vocab = self.numberbatch(self.answer_vocab.word_list)  # [batch_size, g_dim]
+            #self.answer_vocab = self.answer_processor.answer_vocab
+            #self.embedded_answer_vocab = self.numberbatch(self.answer_vocab.word_list)  # [batch_size, g_dim]
+
+
+            emb_vocab_file = os.path.join('/'.join(self.config.model_config.qlarifais.vocab_file.split('/')[:-1]), 'embedded_answer_vocab.pt')
+            self.embedded_answer_vocab = EmbeddedVocab(self.mmf_indirect(emb_vocab_file), vocab_file=None, encoder=None).embedded_answer_vocab
+
 
             self.top_k = int(self.config.model_config[self.config.model].classifier.params.top_k)
             self.num_not_top_k = len(self.embedded_answer_vocab) - self.top_k # if classifier outputs embeddings
 
+    # Do indirect path stuff with mmf
+    def mmf_indirect(self, path):
+        from mmf.utils.configuration import get_mmf_cache_dir
 
+        if os.path.exists(path):
+            return path
+        else:
+            path = os.path.join(get_mmf_cache_dir(), "data/datasets", path)
+            return path
 
     def _init_metrics(self, metric_list):
         metrics = {}
@@ -298,25 +313,34 @@ class NumberbatchScore(BaseMetric):
     """
 
     def __init__(self, score_key="scores", target_key="targets", annotator_key="answers", topk=5):
-        super().__init__("bert_score") # todo: bert score??
-        from mmf.utils.build import build_graph_encoder, build_processors
-        from mmf.utils.configuration import get_global_config
+        super().__init__("numberbatch_score")
+        #from mmf.utils.build import build_graph_encoder, build_processors
+        #from mmf.utils.configuration import get_global_config
         from mmf.utils.text import tokenize
         self.tokenize = tokenize
         self.score_key = score_key
         self.target_key = target_key
         self.annotator_key = annotator_key
+        '''
         self.config = get_global_config()
         self.numberbatch = build_graph_encoder(self.config.dataset_config.embedding_models.numberbatch)
         self.cos = torch.nn.CosineSimilarity(dim=1)
+        '''
         # adding necessary params
         self.required_params = ["scores", "answers", "avg_embedded_answers"]
 
 
 
+
     def calculate(self, sample_list, model_output, *args, **kwargs):
         # answers are averaged by numberbatch
-        return torch.mean(self.cos(model_output['embeddings'], self.numberbatch(sample_list['answers'])))
+        #sim = torch.mean(self.cos(model_output['embeddings'], self.numberbatch(sample_list['answers'])))
+        sim = torch.mean(self.cos(model_output['embeddings'], model_output['avg_embedded_answers']))
+        print(model_output['avg_embedded_answers'])
+        print('\n\n')
+        print(sim)
+        raise NotImplementedError
+        return sim
 
 
 @registry.register_metric("accuracy")
