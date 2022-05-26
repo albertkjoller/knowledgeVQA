@@ -1,0 +1,14 @@
+
+model_config:
+  qlarifais:
+    # models from grid-feats-vqa: https://github.com/facebookresearch/grid-feats-vqa
+    image_encoder:
+      type: grid_feats_vqa
+      params:
+        name: grid_feats_vqa
+        # specify backbone and type of features
+        model: X-152-challenge.yaml # choices: [R-50-(grid or updn), X-101-grid, X-152-(grid or challenge(MoVie+GridFeat))]
+        output_dir: ${env.save_dir}
+      # how to resize features
+      resize: average_pooling
+      num_features: 49 # based on okvqa image dim, 224x224 and grid feats 32x32 sized stride (i.e. 224^2/32^2 = 7*7

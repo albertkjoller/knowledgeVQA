@@ -10,8 +10,7 @@ model_config:
         name: grid_feats_vqa
         # specify backbone and type of features
         # choices: [R-50-(grid or updn), X-101-grid, X-152-(grid or challenge(MoVie+GridFeat))]
-        backbone_features: ./mmf/configs/other/feat_configs/R-50-updn.yaml
-        pretrained: true
-        zero_init_residual: false
+        model: X-152-region-dc5.yaml
+        output_dir: ${env.save_dir}
       resize: average_pooling
 

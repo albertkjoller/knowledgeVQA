@@ -66,7 +66,7 @@ class Numberbatch(nn.Module):
 
                 info = f.readlines(1)
                 lines, self.numberbatch_dim = (int(x) for x in info[0].decode('utf-8').strip("\n").split(" "))
-
+                print('Loading Numberbatch...')
                 for line in tqdm(f, total=lines):
                     l = line.decode('utf-8')
                     l = l.strip("\n")
@@ -76,6 +76,7 @@ class Numberbatch(nn.Module):
                     #tensor = torch.tensor(list(map(float, l.split(' ')[1:])), dtype=torch.float32)
                     tensor = torch.tensor(list(map(float, l.split(' ')[1:])), dtype=torch.float32)
                     self.numberbatch[word] = tensor
+                print('Finished loading Numberbatch.')
 
     def conceptualize(self, tokenized_sentence):
 
