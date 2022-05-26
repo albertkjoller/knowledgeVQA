@@ -76,13 +76,14 @@ class Qlarifais(BaseModel):
             self.attention_module = build_attention_module(self.config.attention.params)
 
 
-        emb_vocab_file = os.path.join('/'.join(self.config.vocab_file.split('/')[:-1]), 'embedded_answer_vocab.pt')
-        self.embedded_answer_vocab = EmbeddedVocab(self.mmf_indirect(emb_vocab_file), self.mmf_indirect(self.config.vocab_file),
-                                                   self.graph_encoder).embedded_answer_vocab
+        #emb_vocab_file = os.path.join('/'.join(self.config.vocab_file.split('/')[:-1]), 'embedded_answer_vocab.pt')
+        #self.embedded_answer_vocab = EmbeddedVocab(self.mmf_indirect(emb_vocab_file), self.mmf_indirect(self.config.vocab_file),
+        #                                           self.graph_encoder).embedded_answer_vocab
+        #self.embedded_answer_vocab.to(get_current_device())
 
         # initialized and used when generating predictions w.r.t. answer vocabulary
-        #self.answer_vocab = VocabDict(self.mmf_indirect(self.config.vocab_file))
-        #self.embedded_answer_vocab = self.graph_encoder(self.answer_vocab.word_list)
+        self.answer_vocab = VocabDict(self.mmf_indirect(self.config.vocab_file))
+        self.embedded_answer_vocab = self.graph_encoder(self.answer_vocab.word_list)
 
     def forward(self, sample_list):
 
@@ -119,8 +120,10 @@ class Qlarifais(BaseModel):
         else:
             if self.config.image_encoder.resize == 'average_pooling':
                 # average pooling of K features of size 2048
-                image_features = torch.nan_to_num(image_features, nan=0, neginf=0).sum(axis=1) / image_features.shape[1] # [batch_size, i_dim]
+                denominator = (image_features.isnan() == False).sum(1) 
+                image_features = (torch.nan_to_num(image_features, nan=0).sum(axis=1) / denominator).squeeze() # [batch_size, i_dim]
 
+                
                 # NOT WORKING!!!
                 # torch.from_numpy(np.nanmean(torch.nan_to_num(image_features, neginf=np.nan).detach().cpu(), axis=1)).to(get_current_device())
 

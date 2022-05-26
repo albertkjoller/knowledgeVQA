@@ -2,35 +2,32 @@
 # -*- coding: utf-8 -*-
 """
 Created on Fri May  6 13:09:24 2022
-
 @author: s194253
 """
 
 import os
 from pathlib import Path
-from omegaconf import OmegaConf
+import cv2
 
 import random
 
-import cv2
-import torch
 import numpy as np
+import torch
 
 from mmexp.methods.automated_objects_removal_inpainter.src.config import Config
 from mmexp.methods.automated_objects_removal_inpainter.src.edge_connect import EdgeConnect
 
 class ObjectRemoval:
     
-    def __init__(self, image_path, save_path, object4removal):
+    def __init__(self, input_image):
         
-        self.object4removal = object4removal
         self.classes_dict = self.load_classes()
         self.object_id = self.object_to_remove()
-        self.number_of_objects = 3 #int(input("Enter how many objects for removal: "))
+        self.number_of_objects = int(input("Enter how many objects for removal: "))
         print("")
         
-        self.input = image_path.as_posix()
-        self.output = save_path.as_posix() #Path(f"./../imgs/removal_results/{self.object_name}").as_posix() 
+        self.input = Path(f"./../imgs/temp/{input_image.split('/')[0]}").as_posix()
+        self.output = Path(f"./../imgs/removal_results/{self.object_name}").as_posix() 
         
         self.config = self.load_config()
         
@@ -45,7 +42,7 @@ class ObjectRemoval:
     
     def object_to_remove(self, ):
         try:
-            self.object_name = self.object4removal #input("Specify object to remove: ")
+            self.object_name = input("Specify object to remove: ")
             return self.classes_dict[self.object_name]
         except KeyError:
             print("\nModel is not trained to remove this object... Try again!\n")
@@ -57,7 +54,7 @@ class ObjectRemoval:
         config_path = '../mmexp/methods/automated_objects_removal_inpainter/checkpoints/config.yml'
         
         # load config file
-        config = OmegaConf.load(config_path) # Config(config_path)
+        config = Config(config_path)
     
         # test mode
         config.MODE = 2
@@ -96,9 +93,9 @@ class ObjectRemoval:
         random.seed(self.config.SEED)
     
         # build the model and initialize
-        self.edgemodel = EdgeConnect(self.config)
-        self.edgemodel.load()
+        model = EdgeConnect(self.config)
+        model.load()
     
         # model test
         print('\nRemove object (running...)\n')
-        self.edgemodel.test()
+        model.test()

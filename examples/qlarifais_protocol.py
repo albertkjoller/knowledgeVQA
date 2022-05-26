@@ -159,15 +159,15 @@ if __name__ == '__main__':
                     elif analysis_type == 'OR' and remove_object != None:
                         # Remove object                        
                         removal_path = Path(args.protocol_dir) / f'removal_results/{image_name.split(".")[0]}/{remove_object}'
-                        if not os.path.exists(removal_path):
-                            os.makedirs(removal_path)
-                            
-                            # remove objects from image
-                            OR = str_to_class('OR')
-                            OR_model = OR(image_path=image_path, 
-                                          save_path=removal_path, 
-                                          object4removal=remove_object)
-                            OR_model.remove_object()
+                        #if not os.path.exists(removal_path):
+                        os.makedirs(removal_path, exist_ok=True)
+                        
+                        # remove objects from image
+                        OR = str_to_class('OR')
+                        OR_model = OR(image_path=image_path, 
+                                      save_path=removal_path, 
+                                      object4removal=remove_object)
+                        OR_model.remove_object()
                         
                         # Load modified image
                         mod_image = load_image((removal_path / (".").join([image_name.split(".")[0], "png"])).as_posix())

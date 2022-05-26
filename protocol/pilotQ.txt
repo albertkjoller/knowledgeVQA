@@ -1,6 +1,7 @@
 Q: What sport is this?
 I: tennis.jpg
 A: tennis
+R: person
 
 Q: Are they happy or unhappy?
 I: hairdresser.jpg
