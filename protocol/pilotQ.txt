@@ -322,3 +322,83 @@ A: yes
 Q: what is he pointing at?
 I: surfers.jpg
 A: woman
+
+Q: what is the object used to talk to people called?
+I: hardhats.jpg
+A: walkie-talkie
+
+Q: Which object is he standing on?
+I: football.jpg
+A: football
+
+Q: which object is in his hand?
+I: phone.jpg
+A: phone
+
+Q: what is the object to the left?
+I: mcdonalds.jpg
+A: car
+
+Q: what kind of object are they looking at?
+I: bigFatPumpkin.jpg
+A: pumpkin
+
+Q: what are they running on?
+I: treadmill.jpg
+A: treadmill
+
+Q: what object is the woman in red on?
+I: trainstation.jpg
+A: bike
+
+Q: what color is the sky?
+I: sky.jpg
+A: red
+
+Q: what is the object he is holding in his hand?
+I: Bedtime_reading.jpg
+A: book
+
+Q: what is the object she is standing on?
+I: surfers.jpg
+A: surfboard
+
+Q: How many children are in this picture?
+I: trampoline.jpg
+A: 3
+
+Q: How many forks are on this table?
+I: table.jpg
+A: 2
+
+Q: How many phone like objects is in this image?
+I: hardhats.jpg
+A: 2
+
+Q: how many sharks are in this picture
+I: underwater.jpg
+A: 4
+
+Q: how many of these girls have black hair?
+I: cheerleaders.jpg
+A: 2
+
+Q: how many people are using the swings?
+I: swingset.jpg
+A: 2
+
+Q: How many primary colors are on these costumes?
+I: costumes.jpg
+A: 3
+
+Q: How many of these people are patients?
+I: godtsmil-tandlaegerne.jpg
+A: 1
+
+Q: How many phones are on this table?
+I: techTable.jpg
+A: 5
+
+Q: how many ties are in this image?
+I: suits.jpg
+A: 2
