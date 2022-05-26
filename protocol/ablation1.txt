@@ -6,13 +6,13 @@ Q: What sport is this?
 I: tennis.jpg
 A: tennis
 
-Q: Are they happy?
+Q: Are they happy or unhappy?
 I: hairdresser.jpg
-A: yes
+A: happy
 
 Q: Where is he going?
 I: oldman.jpg
-A: upstairs
+A: up
 
 Q: What can you do with this vehicle?
 I: airplane.jpeg
@@ -22,9 +22,9 @@ Q: How many forks are on this table?
 I: table.jpeg
 A: 2
 
-Q: did this guy just hear good news?
+Q: did he just hear good or bad news?
 I: phone.jpg
-A: no
+A: bad
 
 Q: what kind of food does this swimming ring resemble?
 I: pool.jpg
@@ -51,11 +51,6 @@ I: shirtguy.jpg
 A: shirt
 R: man
 
-Q: What room is this?
-I: image430.png
-A: Living room
-R: sofa
-
 Q: What is usually done in this room?
 I: image956.png
 A: sleep
@@ -67,12 +62,12 @@ A: 2
 
 Q: What is he looking at?
 I: tv.jpg
-A: watching tv
-R: TV
+A: tv
+R: tv
 
 Q: What are they doing?
 I: thanksgiving3.jpg
-A: eating
+A: eat
 R: dining table
 
 Q: What object is this?
@@ -91,21 +86,13 @@ R: motorcycle
 
 Q: What is this?
 I: soccer.jpg
-A: Goalee
+A: goalie
 R: person
 
 Q: Who would use this house?
 I: doghouse.jpg
 A: dog
 R: dog
-
-Q: Is she wearing shoes?
-I: running.jpg
-A: No
-
-Q: Is she not wearing shoes?
-I: running.jpg
-A: yes
 
 Q: Which animal is to the left?
 I: dog-facts-cat-facts.jpg
@@ -115,17 +102,17 @@ Q: Which animal is not to the left?
 I: dog-facts-cat-facts.jpg
 A: dog
 
-Q: Is the woman holding the baby?
+Q: What is the woman holding?
 I: baby.jpg
-A: yes
+A: baby
 
-Q: Is the baby holding the woman?
+Q: What is the baby holding?
 I: baby.jpg
-A: no
+A: woman
 
 Q: What is the gender of this creature?
 I: running.jpg
-A: female / woman
+A: woman
 
 Q: What is a different gender than this creature?
 I: running.jpg
@@ -139,13 +126,9 @@ Q: What is the name of the fruit that is not red?
 I: Apple_and_pear.jpg
 A: pear
 
-Q: Is the swimmer under water?
+Q: Is the swimmer under or over water?
 I: swimmer.jpg
-A: yes
-
-Q: Is the swimmer above water?
-I: swimmer.jpg
-A: no
+A: under
 
 Q: What is the device used for typing in this image?
 I: keyboard.jpg
@@ -163,29 +146,13 @@ Q: Which animal is largest?
 I: feline_brothers.jpg
 A: tiger
 
-Q: Do you sit on this?
+Q: Is this used to sit or sleep?
 I: sit_down.jpg
-A: yes
+A: sit
 
-Q: Do you lie down on this?
-I: sit_down.jpg
-A: no
-
-Q: Is the pot empty?
+Q: Is the pot empty or full?
 I: food.jpeg
-A: no
-
-Q: is the pot full?
-I: food.jpeg
-A: yes
-
-Q: Which movie franchise is this character from?
-I: father.jpg
-A: star wars
-
-Q: Which movie franchise is this character from?
-I: Gandalf.jpeg
-A: lord of the rings
+A: full
 
 Q: What kind of animal is this?
 I: tiger.png
@@ -203,45 +170,25 @@ Q: What is the gender of this creature?
 I: running.jpg
 A: female
 
-Q: Is she wearing shoes?
-I: running.jpg
-A: no
-
-Q: Is she wearing shoes?
+Q: What is she wearing on her feet?
 I: woman.jpeg
-A: yes
+A: nothing
 
-Q: Is he under water?
-I: swimmer.jpg
-A: yes
-
-Q: Is he under water?
-I: man.jpg
-A: no
-
-Q: Do you sleep in this?
-I: sit_down.jpg
-A: no
-
-Q: Do you sleep in this?
+Q: What is this room used for?
 I: bedroom.png
-A: yes
+A: sleep
 
 Q: What is this device used for?
 I: keyboard1.jpg
-A: typing
+A: type
 
-Q: What is this device used for?
-I: mouse.jpg
-A: clicking
-
-Q: Can you eat this?
+Q: Is this used for eating or sitting on?
 I: Apple_and_pear.jpg
-A: yes
+A: eat
 
-Q: Can you eat this?
+Q: Is this used for eating or sitting on?
 I: sit_down.jpg
-A: no
+A: sit
 
 Q: Is this an adult or a child?
 I: man.jpg
@@ -251,13 +198,13 @@ Q: Is this an adult or a child?
 I: like-a-child.jpg
 A: child
 
-Q: is the pot empty?
+Q: is the pot full or empty?
 I: food.jpeg
-A: no
+A: full
 
-Q: is the pot empty?
+Q: is the pot full or empty?
 I: empty-pot-wooden-spoon.jpg
-A: yes
+A: empty
 
 Q: what animal would you find in this house?
 I: bird.jpeg
@@ -273,23 +220,23 @@ A: fly
 
 Q: Which holiday is usually associated with the object on top of the cars?
 I: cars.jpeg
-A: Christmas
+A: christmas
 
-Q: Does this fruit grow on trees or plants?
+Q: Does this fruit grow on a tree or plant?
 I: pineapple.jpg
-A: plants
+A: plant
 
 Q: In which city is this statue located?
 I: statue.jpg
-A: New York City
+A: new york city
 
 Q: Is the food on this plate vegetarian or not?
 I: steak-med-pommes-frittes.jpeg
 A: not
 
-Q: Is this activity good for you?
+Q: Is this activity healthy or unhealthy?
 I: lynch.png
-A: no
+A: unhealthy
 
 Q: What continent are these animals native to?
 I: pandas.jpg
@@ -297,7 +244,7 @@ A: asia
 
 Q: What kind of animal do these scooters resemble?
 I: scooter.jpg
-A: cheetah
+A: leopard
 
 Q: At what time of day do you usually go here?
 I: school.jpg
@@ -315,9 +262,9 @@ Q: what color is the shirt of the woman on the bike?
 I: trainstation.jpg
 A: red
 
-Q: is the lowest monkey a parent?
+Q: is the biggest monkey a parent or not?
 I: monkeys.jpg
-A: yes
+A: parent
 
 Q: what is he pointing at?
 I: surfers.jpg
@@ -325,7 +272,7 @@ A: woman
 
 Q: what is the object used to talk to people called?
 I: hardhats.jpg
-A: walkie-talkie
+A: phone
 
 Q: Which object is he standing on?
 I: football.jpg
@@ -343,9 +290,9 @@ Q: what kind of object are they looking at?
 I: bigFatPumpkin.jpg
 A: pumpkin
 
-Q: what are they running on?
+Q: what are they doing?
 I: treadmill.jpg
-A: treadmill
+A: run
 
 Q: what object is the woman in red on?
 I: trainstation.jpg
@@ -415,29 +362,25 @@ Q: how do you consume the objects on the top shelf?
 I: fridge.jpeg
 A: drinking
 
-Q: is the person in the middle wearing glasses?
+Q: is the person in the middle wearing glasses or not?
 I: PiaK.jpg
-A: yes
+A: glasses
 
-Q: is the animal in front the largest in the image?
+Q: is the cat or the tiger in the foreground?
 I: feline_brothers.jpg
-A: no
+A: cat
 
 Q: what is the gender of the creature to the right?
 I: treadmill.jpg
 A: woman
 
-Q: is the person to the right a hairdresser?
+Q: what is the mood of the person on the left?
 I: hairdresser.jpg
-A: no
+A: happy
 
 Q: what is the color of the shirt on the woman to the left?
 I: trainstation.jpg
-A:  red
-
-Q: is the lowest monkey a bigger?
-I: monkeys.jpg
-A: yes
+A: red
 
 Q: does the person to the left or right carry the most watermelons?
 I: bigWatermelons.jpg
