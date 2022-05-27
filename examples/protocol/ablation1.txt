@@ -83,7 +83,7 @@ R: dog
 Q: How fast is he going?
 I: fast.jpg
 A: fast
-R: motorcycle
+R: motorbike
 
 Q: What is this?
 I: soccer.jpg
