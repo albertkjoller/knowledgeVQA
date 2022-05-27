@@ -11,6 +11,9 @@ from mmf.common.registry import registry
 from mmf.utils.checkpoint import load_pretrained_model
 from mmf.utils.configuration import get_mmf_cache_dir, get_global_config
 from mmf.utils.text import *
+from mmf.utils.vocab import EmbeddedVocab
+import os
+
 from mmf.utils.general import get_current_device
 
 from mmf.utils.build import (
@@ -22,8 +25,12 @@ from mmf.utils.build import (
     build_attention_module
     )
 
-# mmf_run config='configs/experiments/ablation1/grids.yaml' model=qlarifais dataset=okvqa run_type=train_val
+'''
+mmf_run config='configs/experiments/ablation1/regions.yaml' model=qlarifais dataset=okvqa run_type=train_val
 
+mmf_run config='configs/experiments/baseline/mul.yaml' model=qlarifais dataset=okvqa run_type=test \
+checkpoint.resume_file=/Users/arond.jacobsen/Documents/GitHub/explainableVQA/mmf/save/models/mul/qlarifais_final.pth
+'''
 @registry.register_model("qlarifais")
 class Qlarifais(BaseModel):
 
@@ -68,6 +75,12 @@ class Qlarifais(BaseModel):
             # initiating attention module
             self.attention_module = build_attention_module(self.config.attention.params)
 
+
+        #emb_vocab_file = os.path.join('/'.join(self.config.vocab_file.split('/')[:-1]), 'embedded_answer_vocab.pt')
+        #self.embedded_answer_vocab = EmbeddedVocab(self.mmf_indirect(emb_vocab_file), self.mmf_indirect(self.config.vocab_file),
+        #                                           self.graph_encoder).embedded_answer_vocab
+        #self.embedded_answer_vocab.to(get_current_device())
+
         # initialized and used when generating predictions w.r.t. answer vocabulary
         self.answer_vocab = VocabDict(self.mmf_indirect(self.config.vocab_file))
         self.embedded_answer_vocab = self.graph_encoder(self.answer_vocab.word_list)
@@ -107,8 +120,12 @@ class Qlarifais(BaseModel):
         else:
             if self.config.image_encoder.resize == 'average_pooling':
                 # average pooling of K features of size 2048
-                image_features = torch.from_numpy(np.nanmean(torch.nan_to_num(image_features, neginf=np.nan).cpu(), axis=1)).to(get_current_device())
-                # [batch_size, i_dim]
+                denominator = (image_features.isnan() == False).sum(1) 
+                image_features = (torch.nan_to_num(image_features, nan=0).sum(axis=1) / denominator).squeeze() # [batch_size, i_dim]
+
+                
+                # NOT WORKING!!!
+                # torch.from_numpy(np.nanmean(torch.nan_to_num(image_features, neginf=np.nan).detach().cpu(), axis=1)).to(get_current_device())
 
         # --- FUSION ---
         # type of fusion based on inputs
@@ -121,7 +138,7 @@ class Qlarifais(BaseModel):
         # embeddings
         logits = self.classifier(fused_features)
         # average embedded annotator answer for type contrastive loss
-        avg_embedded_answers  = self.graph_encoder(sample_list['answers'])
+        avg_embedded_answers = self.graph_encoder(sample_list['answers'])
         if self.config.classifier.output_type == 'embeddings':
             logits = torch.nn.functional.normalize(logits)
             prediction_scores = torch.nansum(logits.unsqueeze(dim=1) * self.embedded_answer_vocab, dim=2)

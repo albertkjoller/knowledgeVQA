@@ -2,33 +2,34 @@
 # -*- coding: utf-8 -*-
 """
 Created on Fri May  6 13:09:24 2022
-
 @author: s194253
 """
 
 import os
 from pathlib import Path
+import cv2
 
 import random
 
-import cv2
-import torch
 import numpy as np
+import torch
 
 from mmexp.methods.automated_objects_removal_inpainter.src.config import Config
 from mmexp.methods.automated_objects_removal_inpainter.src.edge_connect import EdgeConnect
 
 class ObjectRemoval:
     
-    def __init__(self, input_image):
+    def __init__(self, image_path, save_path, obj, num=3):
         
+        self.object_name = obj #input("Specify object to remove: ")
+        self.number_of_objects = num # int(input("Enter how many objects for removal: "))
+
         self.classes_dict = self.load_classes()
         self.object_id = self.object_to_remove()
-        self.number_of_objects = int(input("Enter how many objects for removal: "))
         print("")
         
-        self.input = Path(f"./../imgs/temp/{input_image.split('/')[0]}").as_posix()
-        self.output = Path(f"./../imgs/removal_results/{self.object_name}").as_posix() 
+        self.input = ('/').join(image_path.split('/')[:-1])
+        self.output = save_path # Path(f"./../imgs/removal_results/{self.object_name}").as_posix() 
         
         self.config = self.load_config()
         
@@ -43,7 +44,6 @@ class ObjectRemoval:
     
     def object_to_remove(self, ):
         try:
-            self.object_name = input("Specify object to remove: ")
             return self.classes_dict[self.object_name]
         except KeyError:
             print("\nModel is not trained to remove this object... Try again!\n")
