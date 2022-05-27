@@ -1,7 +1,7 @@
 #!/bin/sh
-#BSUB -J baseline_ama_mmf_test
-#BSUB -o /work3/s194253/results/baseline_ama/mmf_log.out
-#BSUB -e /work3/s194253/results/baseline_ama/mmf_log.err
+#BSUB -J ablation3_q_g_double_ama_mmf_test
+#BSUB -o /work3/s194253/results/ablation3_q_g_double_ama/mmf_log.out
+#BSUB -e /work3/s194253/results/ablation3_q_g_double_ama/mmf_log.err
 #BSUB -n 6
 #BSUB -q gpuv100
 #BSUB -gpu 'num=1:mode=exclusive_process'
@@ -17,12 +17,12 @@ module load cuda/11.1
 source /work3/s194253/envs/vqa/bin/activate
 cd mmf
 
-mmf_run config=/work3/s194262/save/models/optimized/baseline_ama/config.yaml \
+mmf_run config=/work3/s194262/save/models/optimized/ablation3_q_g_double_ama/config.yaml \
     model=qlarifais \
     dataset=okvqa \
     run_type=test \
-    env.report_dir=/work3/s194253/results/baseline_ama/reports \
-    env.tensorboard_logdir=/work3/s194253/results/tensorboard/baseline_ama \
-    env.save_dir=/work3/s194253/results/baseline_ama/mmf \
-    checkpoint.resume_file=/work3/s194262/save/models/optimized/baseline_ama/best.ckpt
+    env.report_dir=/work3/s194253/results/ablation3_q_g_double_ama/reports \
+    env.tensorboard_logdir=/work3/s194253/results/tensorboard/ablation3_q_g_double_ama \
+    env.save_dir=/work3/s194253/results/ablation3_q_g_double_ama/mmf \
+    checkpoint.resume_file=/work3/s194262/save/models/optimized/ablation3_q_g_double_ama/best.ckpt
 

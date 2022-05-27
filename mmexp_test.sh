@@ -3,7 +3,7 @@
 #BSUB -o /work3/s194253/results/baseline_ama/mmexp_log.out
 #BSUB -e /work3/s194253/results/baseline_ama/mmexp_log.err
 #BSUB -n 6
-#BSUB -q gpuv100
+#BSUB -q gpua100
 #BSUB -gpu 'num=1:mode=exclusive_process'
 #BSUB -W 2:00
 #BSUB -R 'rusage[mem=5GB]'

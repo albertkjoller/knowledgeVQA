@@ -102,6 +102,8 @@ if __name__ == '__main__':
     # Get input
     args = get_args()
     args.show_all = args.show_all == 'True'
+    args.analysis_type.insert(0, 'Normal')
+    
     protocol_dict = get_input(args.protocol_dir, args.protocol_name)
 
     # Load model
@@ -127,14 +129,6 @@ if __name__ == '__main__':
         image_path = imgs_dir / image_name.split(".")[0]
         image = load_image((image_path / image_name).as_posix())
         
-        # Add predictions to report
-        prediction_str = f'PREDICTIONS: \n\nQuestion: "{question}"\nImage: {image_name}\nAnswer: {answer}\n' + \
-                            "\nPredicted outputs from the model:\n" 
-        outputs = model.classify(image=image, text=question, top_k=5)
-        for i, (prob, ans) in enumerate(zip(*outputs)):
-            prediction_str += f"{i+1}) {ans} \n" #"\t ({prob})\n"
-        logger.info(prediction_str)
-        
         # Run explainability if answer is in answer vocab
         category_id = model.processor_dict['answer_processor'].word2idx(answer)
         if category_id == 0:
@@ -147,15 +141,24 @@ if __name__ == '__main__':
                 # Create exp-method object
                 method = str_to_class(explainability_method)
                 
+                logger.info(f'\n\n\n\nPREDICTIONS: \n\nQuestion: "{question}"\nImage: {image_name}\nAnswer: {answer}\n')
+                
                 # Choose analysis types
-                args.analysis_type.insert(0, 'Normal')
                 for analysis_type in args.analysis_type:
                     if analysis_type == 'Normal':
                         mod_image = image
                         mod_question = question
+                        analysis_num = 0
+                        
+                        # Add predictions to report
+                        prediction_str = f'\nPredicted outputs from the model ({analysis_type}):\n'
+                        outputs = model.classify(image=mod_image, text=mod_question, top_k=5)
+                        for i, (prob, ans) in enumerate(zip(*outputs)):
+                            prediction_str += f"{i+1}) {ans} \n" #"\t ({prob})\n"
+                        logger.info(prediction_str)
                         
                         # Run xplainability
-                        save_name = Path(args.save_path) / f"explainability/{explainability_method}/{image_name.split('.')[0]}/{question.strip('?').replace(' ', '_').lower()}/{analysis_type.lower()}"
+                        save_name = Path(args.save_path) / f"explainability/{explainability_method}/{image_name.split('.')[0]}/{question.strip('?').replace(' ', '_').lower()}/{analysis_num}_{analysis_type.lower()}"
                         run_method(model, model_name, 
                                    mod_image, image_name, 
                                    mod_question, category_id, 
@@ -178,13 +181,22 @@ if __name__ == '__main__':
                                           num=3)
                             
                             OR_model.remove_object()
+                            OR = None # For recursion
                         
                         # Load modified image
                         mod_image = load_image((removal_path / image_name).as_posix())
                         mod_question = question
+                        analysis_num = 1
+                        
+                        # Add predictions to report
+                        prediction_str = f'\nPredicted outputs from the model ({analysis_type}):\n'
+                        outputs = model.classify(image=mod_image, text=mod_question, top_k=5)
+                        for i, (prob, ans) in enumerate(zip(*outputs)):
+                            prediction_str += f"{i+1}) {ans} \n" #"\t ({prob})\n"
+                        logger.info(prediction_str)
                         
                         # Run xplainability
-                        save_name = Path(args.save_path) / f"explainability/{explainability_method}/{image_name.split('.')[0]}/{question.strip('?').replace(' ', '_').lower()}/{analysis_type.lower()}"
+                        save_name = Path(args.save_path) / f"explainability/{explainability_method}/{image_name.split('.')[0]}/{question.strip('?').replace(' ', '_').lower()}/{analysis_num}_{analysis_type.lower()}"
                         run_method(model, model_name, 
                                    mod_image, image_name, 
                                    mod_question, category_id, 
@@ -198,9 +210,17 @@ if __name__ == '__main__':
                         VisualNoise = str_to_class('VisualNoise')
                         mod_image = VisualNoise(image)
                         mod_question = question
+                        analysis_num = 2
+                        
+                        # Add predictions to report
+                        prediction_str = f'\nPredicted outputs from the model ({analysis_type}):\n'
+                        outputs = model.classify(image=mod_image, text=mod_question, top_k=5)
+                        for i, (prob, ans) in enumerate(zip(*outputs)):
+                            prediction_str += f"{i+1}) {ans} \n" #"\t ({prob})\n"
+                        logger.info(prediction_str)
                         
                         # Run xplainability
-                        save_name = Path(args.save_path) / f"explainability/{explainability_method}/{image_name.split('.')[0]}/{question.strip('?').replace(' ', '_').lower()}/{analysis_type.lower()}"
+                        save_name = Path(args.save_path) / f"explainability/{explainability_method}/{image_name.split('.')[0]}/{question.strip('?').replace(' ', '_').lower()}/{analysis_num}_{analysis_type.lower()}"
                         run_method(model, model_name, 
                                    mod_image, image_name, 
                                    mod_question, category_id, 
@@ -214,9 +234,17 @@ if __name__ == '__main__':
                         TextualNoise = str_to_class('TextualNoise')
                         mod_image = image
                         mod_question = TextualNoise(question, model)
+                        analysis_num = 3
+                        
+                        # Add predictions to report
+                        prediction_str = f'\nPredicted outputs from the model ({analysis_type}):\n'
+                        outputs = model.classify(image=mod_image, text=mod_question, top_k=5)
+                        for i, (prob, ans) in enumerate(zip(*outputs)):
+                            prediction_str += f"{i+1}) {ans} \n" #"\t ({prob})\n"
+                        logger.info(prediction_str)
                         
                         # Run xplainability
-                        save_name = Path(args.save_path) / f"explainability/{explainability_method}/{image_name.split('.')[0]}/{question.strip('?').replace(' ', '_').lower()}/{analysis_type.lower()}"
+                        save_name = Path(args.save_path) / f"explainability/{explainability_method}/{image_name.split('.')[0]}/{question.strip('?').replace(' ', '_').lower()}/{analysis_num}_{analysis_type.lower()}"
                         run_method(model, model_name, 
                                    mod_image, image_name, 
                                    mod_question, category_id, 
@@ -234,7 +262,8 @@ if __name__ == '__main__':
                     
                     where = Path(args.save_path) / f"explainability/{explainability_method}/{image_name.split('.')[0]}/{question.strip('?').replace(' ', '_').lower()}/*"
                     explainer_img = None
-                    for i, file in enumerate(glob.glob(where.as_posix())):
+                    filenames_imgs = glob.glob(where.as_posix())
+                    for i, file in enumerate(sorted(filenames_imgs)):
                         if file.split("/")[-1] != 'combined.png':
                             read_img = cv2.imread(file) #orig
                             
