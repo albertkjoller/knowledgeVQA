@@ -1,0 +1,140 @@
+Q: What food is this?
+I: hotdog.jpg
+A: hotdog
+
+Q: What sport is this?
+I: tennis.jpg
+A: tennis
+
+Q: Are they happy or unhappy?
+I: hairdresser.jpg
+A: happy
+
+Q: Where is he going?
+I: oldman.jpg
+A: up
+
+Q: What can you do with this vehicle?
+I: airplane.jpeg
+A: fly
+
+Q: How many forks are on this table?
+I: table.jpeg
+A: 2
+
+Q: did he just hear good or bad news?
+I: phone.jpg
+A: bad
+
+Q: what kind of food does this swimming ring resemble?
+I: pool.jpg
+A: watermelon
+
+Q: which animal do these resemble?
+I: teddy.jpg
+A: bear
+
+Q: What are you buying at this location?
+I: mcdonalds.jpg
+A: burger
+
+Q: What is she doing?
+I: wholefoods.jpg
+A: shopping
+
+Q: what color is he painting the wall?
+I: paint.jpg
+A: white
+
+Q: What is usually done in this room?
+I: image956.png
+A: sleep
+
+Q: What is the man wearing?
+I: shirtguy.jpg
+A: shirt
+R: person
+
+Q: How many people in this photo?
+I: coffee.jpg
+A: 2
+R: person
+
+Q: What is he looking at?
+I: tv.jpg
+A: tv
+R: tv
+
+Q: What are they doing?
+I: thanksgiving3.jpg
+A: eat
+R: dining table
+
+Q: What object is this?
+I: bus.jpg
+A: bus
+R: bus
+
+Q: Which animal is to the left?
+I: dog-facts-cat-facts.jpg
+A: cat
+R: dog
+
+Q: How fast is he going?
+I: fast.jpg
+A: fast
+R: motorcycle
+
+Q: What is this?
+I: soccer.jpg
+A: goalie
+R: person
+
+Q: Who would use this house?
+I: doghouse.jpg
+A: dog
+R: dog
+
+Q: Which animal is to the left?
+I: dog-facts-cat-facts.jpg
+A: cat
+
+Q: Which animal is not to the left?
+I: dog-facts-cat-facts.jpg
+A: dog
+
+Q: What is the woman holding?
+I: baby.jpg
+A: baby
+
+Q: What is the baby holding?
+I: baby.jpg
+A: woman
+
+Q: What is the gender of this creature?
+I: running.jpg
+A: woman
+
+Q: What is a different gender than this creature?
+I: running.jpg
+A: male
+
+Q: What is the name of the red fruit?
+I: Apple_and_pear.jpg
+A: apple
+
+Q: What is the name of the fruit that is not red?
+I: Apple_and_pear.jpg
+A: pear
+
+Q: Is the swimmer under or over water?
+I: swimmer.jpg
+A: under
+
+Q: What is the device used for typing in this image?
+I: keyboard.jpg
+A: keyboard
+
+Q: What is the device not used for typing in this image?
+I: keyboard.jpg
+A: mouse
