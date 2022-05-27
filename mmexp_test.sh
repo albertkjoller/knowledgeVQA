@@ -34,7 +34,7 @@ python qlarifais_run_explainer.py --model_dir /work3/s194262/save/models/optimiz
     --protocol_dir /zhome/b8/5/147299/Desktop/explainableVQA/examples/protocol \
     --analysis_type OR VisualNoise TextualNoise \
     --explainability_methods MMGradient \
-    --protocol_name pilotQ.txt \
+    --protocol_name baselineQ1.txt \
     --show_all True \
 
 

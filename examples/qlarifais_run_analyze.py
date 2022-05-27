@@ -139,7 +139,6 @@ if __name__ == '__main__':
     Numberbatch_object = Numberbatch(model)
     
     # Performance report
-    barplot_dict = defaultdict(dict)
     if args.performance_report == True:
         # Create performance report object
         performance_report = PerformanceReport(data, 
@@ -179,6 +178,7 @@ if __name__ == '__main__':
             if args.performance_report == True:
                 
                 # strat_labels
+                barplot_dict = defaultdict(dict)
                 strat_labels = stratified_object.data['stratification_label'].unique()
                 for label in tqdm(strat_labels):
 

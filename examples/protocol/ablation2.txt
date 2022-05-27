@@ -46,24 +46,24 @@ Q: what color is he painting the wall?
 I: paint.jpg
 A: white
 
+Q: What is usually done in this room?
+I: image956.png
+A: sleep
+
 Q: What is the man wearing?
 I: shirtguy.jpg
 A: shirt
 R: person
 
-Q: What is usually done in this room?
-I: image956.png
-A: sleep
-R: bed
-
 Q: How many people in this photo?
 I: coffee.jpg
 A: 2
+R: person
 
 Q: What is he looking at?
 I: tv.jpg
 A: tv
-R: tv
+R: tv/monitor
 
 Q: What are they doing?
 I: thanksgiving3.jpg
@@ -78,6 +78,7 @@ R: bus
 Q: Which animal is to the left?
 I: dog-facts-cat-facts.jpg
 A: cat
+R: dog
 
 Q: How fast is he going?
 I: fast.jpg
