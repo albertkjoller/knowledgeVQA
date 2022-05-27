@@ -20,8 +20,6 @@ from .vilbert import ViLBERT
 from .vilt import ViLT
 from .vinvl import VinVL
 from .visual_bert import VisualBERT
-from .pilot import Pilot
-from .vqtor import Vqtor
 from .qlarifais import Qlarifais
 
 __all__ = [
@@ -51,7 +49,5 @@ __all__ = [
     "ViLT",
     "UNITER",
     "VinVL",
-    "Pilot",
-    "Vqtor",
     "Qlarifais"
 ]

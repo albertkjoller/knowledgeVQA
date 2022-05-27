@@ -150,6 +150,9 @@ class PerformanceReport:
         self.numberbatch_score = self.compute_numberbatch_score()
         self.AP_at_5 = self.compute_AP_at_k(K=5)
         
+        # Plot barplots of scores
+        self.plot_bars()
+        
     def compute_vqa_acc(self, ):
         
         vqa_acc = lambda pred_ans, gt_ans: min(sum([pred_ans==ans for ans in gt_ans]) / 3, 1)
@@ -246,5 +249,8 @@ class PerformanceReport:
 
 
         self.logger.info(f"\n{'-'*100}")
+    
+    def plot_bars(self,):
+        raise NotImplementedError("PLOT BARPLOTS!")
 
         
