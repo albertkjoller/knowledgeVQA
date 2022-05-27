@@ -45,12 +45,11 @@ A: white
 Q: What is the man wearing?
 I: shirtguy.jpg
 A: shirt
-R: man
+R: person
 
 Q: What is usually done in this room?
 I: image956.png
 A: sleep
-R: bed
 
 Q: How many people in this photo?
 I: coffee.jpg

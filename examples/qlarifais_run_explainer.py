@@ -72,7 +72,7 @@ def get_args():
     parser.add_argument(
         "--show_all",
         help="whether to save a combined image of the explainability methods",
-        default=True,
+        default='True',
     )    
     return parser.parse_args()
 
@@ -97,17 +97,20 @@ def init_logger(args):
 
 if __name__ == '__main__':
     
+    # --model_dir /work3/s194262/save/models/optimized/baseline_ama --torch_cache /work3/s194253 --report_dir /work3/s194253/results/baseline_ama/reports --save_path /work3/s194253/results/baseline_ama --protocol_dir /work3/s194262/protocol --analysis_type OR VisualNoise TextualNoise --explainability_methods MMGradient --protocol_name pilotQ.txt --show_all True 
+    
     # Get input
     args = get_args()
+    args.show_all = args.show_all == 'True'
     protocol_dict = get_input(args.protocol_dir, args.protocol_name)
-
-    # Initialize logger
-    logger = init_logger(args)
 
     # Load model
     model = Qlarifais.from_pretrained(args.model_dir, args.torch_cache)
     model.to(torch.device("cuda:0" if torch.cuda.is_available() else "cpu"))
     model_name = args.model_dir.split("/")[-1]
+    
+    # Initialize logger
+    logger = init_logger(args)
     
     # Image directory
     imgs_dir = Path(args.protocol_dir) / 'imgs'
@@ -227,7 +230,7 @@ if __name__ == '__main__':
                             logger.warning(f"Analysis type - {analysis_type} - is not implemented...")
                             raise NotImplementedError(f"Analysis type - {analysis_type} - is not implemented...")
                     
-                if args.show_all:
+                if args.show_all == True:
                     
                     where = Path(args.save_path) / f"explainability/{explainability_method}/{image_name.split('.')[0]}/{question.strip('?').replace(' ', '_').lower()}/*"
                     explainer_img = None

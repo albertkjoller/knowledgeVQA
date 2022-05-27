@@ -137,13 +137,12 @@ def fetch_test_embeddings(model, pickle_path):
 
 def fetch_test_predictions(model, report_dir):
     report_dir = Path(report_dir)
-    
+
     if os.path.exists(report_dir / 'test_predictions.csv'):
         test_predictions = pd.read_csv(report_dir / 'test_predictions.csv')
-        print("Loaded embeddings successfully!")
-        
+        print("Loaded predictions successfully!")
     else:
-        print("Creating test embeddings...")
+        print("Creating test predictions...")
         
         # paths to data
         data_path, images_path = paths_to_okvqa(model, run_type='test')
@@ -183,6 +182,7 @@ def fetch_test_predictions(model, report_dir):
             
         os.makedirs(report_dir, exist_ok=True)
         test_predictions.to_csv(report_dir / 'test_predictions.csv', index=False)
+        test_predictions = pd.read_csv(report_dir / 'test_predictions.csv')
         
     return test_predictions
 
