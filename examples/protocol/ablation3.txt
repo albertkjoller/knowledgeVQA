@@ -1,0 +1,391 @@
+Q: What food is this?
+I: hotdog.jpg
+A: hotdog
+
+Q: What sport is this?
+I: tennis.jpg
+A: tennis
+
+Q: Are they happy or unhappy?
+I: hairdresser.jpg
+A: happy
+
+Q: Where is he going?
+I: oldman.jpg
+A: up
+
+Q: What can you do with this vehicle?
+I: airplane.jpeg
+A: fly
+
+Q: How many forks are on this table?
+I: table.jpeg
+A: 2
+
+Q: did he just hear good or bad news?
+I: phone.jpg
+A: bad
+
+Q: what kind of food does this swimming ring resemble?
+I: pool.jpg
+A: watermelon
+
+Q: which animal do these resemble?
+I: teddy.jpg
+A: bear
+
+Q: What are you buying at this location?
+I: mcdonalds.jpg
+A: burger
+
+Q: What is she doing?
+I: wholefoods.jpg
+A: shopping
+
+Q: what color is he painting the wall?
+I: paint.jpg
+A: white
+
+Q: What is the man wearing?
+I: shirtguy.jpg
+A: shirt
+R: man
+
+Q: What is usually done in this room?
+I: image956.png
+A: sleep
+R: bed
+
+Q: How many people in this photo?
+I: coffee.jpg
+A: 2
+
+Q: What is he looking at?
+I: tv.jpg
+A: tv
+R: tv
+
+Q: What are they doing?
+I: thanksgiving3.jpg
+A: eat
+R: dining table
+
+Q: What object is this?
+I: bus.jpg
+A: bus
+R: bus
+
+Q: Which animal is to the left?
+I: dog-facts-cat-facts.jpg
+A: cat
+
+Q: How fast is he going?
+I: fast.jpg
+A: fast
+R: motorcycle
+
+Q: What is this?
+I: soccer.jpg
+A: goalie
+R: person
+
+Q: Who would use this house?
+I: doghouse.jpg
+A: dog
+R: dog
+
+Q: Which animal is to the left?
+I: dog-facts-cat-facts.jpg
+A: cat
+
+Q: Which animal is not to the left?
+I: dog-facts-cat-facts.jpg
+A: dog
+
+Q: What is the woman holding?
+I: baby.jpg
+A: baby
+
+Q: What is the baby holding?
+I: baby.jpg
+A: woman
+
+Q: What is the gender of this creature?
+I: running.jpg
+A: woman
+
+Q: What is a different gender than this creature?
+I: running.jpg
+A: male
+
+Q: What is the name of the red fruit?
+I: Apple_and_pear.jpg
+A: apple
+
+Q: What is the name of the fruit that is not red?
+I: Apple_and_pear.jpg
+A: pear
+
+Q: Is the swimmer under or over water?
+I: swimmer.jpg
+A: under
+
+Q: What is the device used for typing in this image?
+I: keyboard.jpg
+A: keyboard
+
+Q: What is the device not used for typing in this image?
+I: keyboard.jpg
+A: mouse
+
+Q: Which animal is smallest?
+I: feline_brothers.jpg
+A: cat
+
+Q: Which animal is largest?
+I: feline_brothers.jpg
+A: tiger
+
+Q: Is this used to sit or sleep?
+I: sit_down.jpg
+A: sit
+
+Q: Is the pot empty or full?
+I: food.jpeg
+A: full
+
+Q: What kind of animal is this?
+I: tiger.png
+A: tiger
+
+Q: What kind of animal is this?
+I: Calico_cat_phoebe.jpg
+A: cat
+
+Q: What is the gender of this creature?
+I: man.jpg
+A: male
+
+Q: What is the gender of this creature?
+I: running.jpg
+A: female
+
+Q: What is she wearing on her feet?
+I: woman.jpeg
+A: nothing
+
+Q: What is this room used for?
+I: bedroom.png
+A: sleep
+
+Q: What is this device used for?
+I: keyboard1.jpg
+A: type
+
+Q: Is this used for eating or sitting on?
+I: Apple_and_pear.jpg
+A: eat
+
+Q: Is this used for eating or sitting on?
+I: sit_down.jpg
+A: sit
+
+Q: Is this an adult or a child?
+I: man.jpg
+A: adult
+
+Q: Is this an adult or a child?
+I: like-a-child.jpg
+A: child
+
+Q: is the pot full or empty?
+I: food.jpeg
+A: full
+
+Q: is the pot full or empty?
+I: empty-pot-wooden-spoon.jpg
+A: empty
+
+Q: what animal would you find in this house?
+I: bird.jpeg
+A: bird
+
+Q: what animal would you find in this house?
+I: doghouse.jpg
+A: dog
+
+Q: What can you do with this vehicle?
+I: airplane.jpeg
+A: fly
+
+Q: Which holiday is usually associated with the object on top of the cars?
+I: cars.jpeg
+A: christmas
+
+Q: Does this fruit grow on a tree or plant?
+I: pineapple.jpg
+A: plant
+
+Q: In which city is this statue located?
+I: statue.jpg
+A: new york city
+
+Q: Is the food on this plate vegetarian or not?
+I: steak-med-pommes-frittes.jpeg
+A: not
+
+Q: Is this activity healthy or unhealthy?
+I: lynch.png
+A: unhealthy
+
+Q: What continent are these animals native to?
+I: pandas.jpg
+A: asia
+
+Q: What kind of animal do these scooters resemble?
+I: scooter.jpg
+A: leopard
+
+Q: At what time of day do you usually go here?
+I: school.jpg
+A: daytime
+
+Q: Who would typically sit in one of these?
+I: airplane.jpeg
+A: pilot
+
+Q: Which sport is associated with this object?
+I: racquet.jpg
+A: tennis
+
+Q: what color is the shirt of the woman on the bike?
+I: trainstation.jpg
+A: red
+
+Q: is the biggest monkey a parent or not?
+I: monkeys.jpg
+A: parent
+
+Q: what is he pointing at?
+I: surfers.jpg
+A: woman
+
+Q: what is the object used to talk to people called?
+I: hardhats.jpg
+A: phone
+
+Q: Which object is he standing on?
+I: football.jpg
+A: football
+
+Q: which object is in his hand?
+I: phone.jpg
+A: phone
+
+Q: what is the object to the left?
+I: mcdonalds.jpg
+A: car
+
+Q: what kind of object are they looking at?
+I: bigFatPumpkin.jpg
+A: pumpkin
+
+Q: what are they doing?
+I: treadmill.jpg
+A: run
+
+Q: what object is the woman in red on?
+I: trainstation.jpg
+A: bike
+
+Q: what color is the sky?
+I: sky.jpg
+A: red
+
+Q: what is the object he is holding in his hand?
+I: Bedtime_reading.jpg
+A: book
+
+Q: what is the object she is standing on?
+I: surfers.jpg
+A: surfboard
+
+Q: How many children are in this picture?
+I: trampoline.jpg
+A: 3
+
+Q: How many forks are on this table?
+I: table.jpg
+A: 2
+
+Q: How many phone like objects is in this image?
+I: hardhats.jpg
+A: 2
+
+Q: how many sharks are in this picture
+I: underwater.jpg
+A: 4
+
+Q: how many of these girls have black hair?
+I: cheerleaders.jpg
+A: 2
+
+Q: how many people are using the swings?
+I: swingset.jpg
+A: 2
+
+Q: How many primary colors are on these costumes?
+I: costumes.jpg
+A: 3
+
+Q: How many of these people are patients?
+I: godtsmil-tandlaegerne.jpg
+A: 1
+
+Q: How many phones are on this table?
+I: techTable.jpg
+A: 5
+
+Q: how many ties are in this image?
+I: suits.jpg
+A: 2
+
+Q: What is the color of the teddy bear in the middle?
+I: teddy.jpg
+A: yellow
+
+Q: what is the object to the left?
+I: mcdonalds.jpg
+A: car
+
+Q: how do you consume the objects on the top shelf?
+I: fridge.jpeg
+A: drinking
+
+Q: is the person in the middle wearing glasses or not?
+I: PiaK.jpg
+A: glasses
+
+Q: is the cat or the tiger in the foreground?
+I: feline_brothers.jpg
+A: cat
+
+Q: what is the gender of the creature to the right?
+I: treadmill.jpg
+A: woman
+
+Q: what is the mood of the person on the left?
+I: hairdresser.jpg
+A: happy
+
+Q: what is the color of the shirt on the woman to the left?
+I: trainstation.jpg
+A: red
+
+Q: does the person to the left or right carry the most watermelons?
+I: bigWatermelons.jpg
+A: left
+
+Q: what is the haircolor of the girl on top?
+I: hairdresser.jpg
+A: brown
