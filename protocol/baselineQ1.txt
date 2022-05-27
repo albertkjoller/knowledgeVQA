@@ -63,7 +63,7 @@ R: person
 Q: What is he looking at?
 I: tv.jpg
 A: tv
-R: tv
+R: tv/monitor
 
 Q: What are they doing?
 I: thanksgiving3.jpg
