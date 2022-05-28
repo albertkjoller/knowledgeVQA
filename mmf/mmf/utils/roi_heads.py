@@ -5,6 +5,7 @@ Originally from grid feats: https://github.com/facebookresearch/grid-feats-vqa
 modified by: https://github.com/facebookresearch/grid-feats-vqa/blob/d9a14fbb7580fb377353d8b397c5a8e5443b4117/grid_feats/roi_heads.py
 '''
 
+
 import inspect
 from typing import List, Optional
 import torch
@@ -290,7 +291,7 @@ class AttributeStandardROIHeads(AttributeROIHeads, StandardROIHeads):
             return losses
         else:
             pred_instances, _ = self.box_predictor.inference(predictions, proposals)
-            return pred_instances[0] , r_indices[0]
+            return pred_instances#[0] , r_indices[0]
 
     def get_conv5_features(self, features):
         assert len(self.in_features) == 1

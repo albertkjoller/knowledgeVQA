@@ -1,8 +1,0 @@
-image_encoder:
-  type: grid_feats_vqa
-  params:
-    name: grid_feats_vqa
-    model: X-152-region-dc5.yaml
-    output_dir: ./save/models/regions
-  resize: average_pooling
-  num_features: 49

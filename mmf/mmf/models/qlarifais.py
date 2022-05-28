@@ -96,6 +96,8 @@ class Qlarifais(BaseModel):
         image = sample_list["image"]
         image_features = self.vision_module(image) # [batch_size, num_features, i_dim]
 
+
+
         # --- GRAPH EMBEDDINGS ---
         if self.config.graph_encoder.use:
             graph_features = self.graph_encoder(sample_list['tokens']) # [batch_size, g_dim]
@@ -120,10 +122,10 @@ class Qlarifais(BaseModel):
         else:
             if self.config.image_encoder.resize == 'average_pooling':
                 # average pooling of K features of size 2048
-                denominator = (image_features.isnan() == False).sum(1) 
+                denominator = (image_features.isnan() == False).sum(1)
                 image_features = (torch.nan_to_num(image_features, nan=0).sum(axis=1) / denominator).squeeze() # [batch_size, i_dim]
 
-                
+
                 # NOT WORKING!!!
                 # torch.from_numpy(np.nanmean(torch.nan_to_num(image_features, neginf=np.nan).detach().cpu(), axis=1)).to(get_current_device())
 

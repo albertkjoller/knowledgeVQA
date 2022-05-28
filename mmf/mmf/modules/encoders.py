@@ -524,10 +524,9 @@ class gfvqaImageEncoder(Encoder):
         super().__init__()
         self.config = config
 
-        # maybe not necessary
-        #args = argparse.ArgumentParser(description="Grid feature extraction")
         # setting up config file for the defined model
         self.cfg = self.setup(args, self.config)
+
 
         if 'region' in self.config.model:
             self.type = "region"
@@ -549,6 +548,8 @@ class gfvqaImageEncoder(Encoder):
         """
         Create configs and perform basic setups.
         """
+        from mmf.utils.configuration import get_global_config
+        self.global_config = get_global_config()
         # detectron default config
         cfg = get_cfg()
         # grid-feats-vqa default config
@@ -560,7 +561,11 @@ class gfvqaImageEncoder(Encoder):
         cfg.merge_from_file('./../mmf/mmf/configs/other/feat_configs/' + model)
         cfg.OUTPUT_DIR = config.output_dir #general_config.env.save_dir
         cfg.MODEL.DEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'
-        # maybe not necessary, but logs and configs
+        # set seed
+        cfg.SEED = self.global_config.training.seed
+        # test different thresholds (default: 0.05)
+        #self.cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = 0.005
+        # saving config and logs
         #default_setup(cfg, args) #https://github.com/facebookresearch/detectron2/blob/main/detectron2/engine/defaults.py
         return cfg
 

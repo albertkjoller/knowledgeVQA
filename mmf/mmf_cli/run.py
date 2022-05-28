@@ -1,5 +1,16 @@
 #!/usr/bin/env python3 -u
 # Copyright (c) Facebook, Inc. and its affiliates.
+
+
+import sys
+import os
+
+# ------------------------
+# TO DEBUG
+# info: when debugging, also set working directory to explainableVQA/mmf/
+#sys.path.insert(0, os.path.dirname(os.getcwd()) + '/mmf')
+# ------------------------
+
 import argparse
 import logging
 import random
@@ -17,6 +28,9 @@ from mmf.utils.logger import setup_logger, setup_very_basic_config
 
 
 setup_very_basic_config()
+
+
+
 
 
 def main(configuration, init_distributed=False, predict=False):
@@ -136,4 +150,10 @@ def run(opts: typing.Optional[typing.List[str]] = None, predict: bool = False):
 
 
 if __name__ == "__main__":
-    run()
+    cmd = False
+    #cmd = 'config=configs/experiments/ablation2/graph_ama.yaml model=qlarifais dataset=okvqa run_type=train_val'
+    if cmd is not False:
+        opts = cmd.split(' ')
+        run(opts)
+    else:
+        run()

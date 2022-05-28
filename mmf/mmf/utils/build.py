@@ -5,7 +5,8 @@ import os
 import warnings
 from enum import Enum
 from typing import Any, Dict, List, Optional, Tuple, Union
-
+import glob
+import copy
 import mmf
 import pytorch_lightning as pl
 import torch
@@ -23,6 +24,10 @@ from mmf.utils.general import get_optimizer_parameters
 from omegaconf import DictConfig, OmegaConf
 from packaging import version
 
+from detectron2.data import DatasetMapper, samplers, detection_utils as utils
+from detectron2.data import transforms as T
+from detectron2.data.common import AspectRatioGroupedDataset, DatasetFromList, MapDataset
+from detectron2.data.build import get_detection_dataset_dicts, worker_init_reset_seed, trivial_batch_collator
 
 try:
     import torch_xla.core.xla_model as xm  # noqa
@@ -233,6 +238,76 @@ def build_datamodule(dataset_key) -> pl.LightningDataModule:
     )
     builder_instance: pl.LightningDataModule = dataset_builder()
     return builder_instance
+
+
+
+class TestDatasetMapper(DatasetMapper):
+    """
+    Extend DatasetMapper for feature extraction.
+    """
+
+    # building similar to: https://github.com/facebookresearch/grid-feats-vqa
+
+    def __init__(self, cfg, is_train=False):
+        super().__init__(cfg, is_train)
+
+    def __call__(self, dataset_dict):
+        dataset_dict = copy.deepcopy(dataset_dict)
+        try:
+            image = utils.read_image(dataset_dict["file_name"], format=self.image_format)
+            utils.check_image_size(dataset_dict, image)
+        except OSError:
+            return
+
+        if "annotations" not in dataset_dict:
+            image, transforms = T.apply_transform_gens(
+                ([self.crop_gen] if self.crop_gen else []) + self.tfm_gens, image
+            )
+        else:
+            if self.crop_gen:
+                crop_tfm = utils.gen_crop_transform_with_instance(
+                    self.crop_gen.get_crop_size(image.shape[:2]),
+                    image.shape[:2],
+                    np.random.choice(dataset_dict["annotations"]),
+                )
+                image = crop_tfm.apply_image(image)
+            image, transforms = T.apply_transform_gens(self.tfm_gens, image)
+            if self.crop_gen:
+                transforms = crop_tfm + transforms
+
+        image_shape = image.shape[:2]
+        dataset_dict["image"] = torch.as_tensor(
+            np.ascontiguousarray(image.transpose(2, 0, 1))
+        )
+
+        return dataset_dict
+
+
+
+def build_detection_test_loader_for_images(cfg, dataset_path, mapper=None):
+    # building similar to: https://github.com/facebookresearch/grid-feats-vqa
+    image_list = glob.glob(os.path.join(dataset_path, "*.jpg"))
+    dataset_dicts = [
+        {"file_name": x, "image_id": os.path.splitext(os.path.basename(x))[0]}
+        for x in image_list
+    ]
+
+    dataset = DatasetFromList(dataset_dicts)
+    if mapper is None:
+        mapper = TestDatasetMapper(cfg, False)
+    dataset = MapDataset(dataset, mapper)
+
+    sampler = samplers.InferenceSampler(len(dataset))
+    batch_sampler = torch.utils.data.sampler.BatchSampler(sampler, 1, drop_last=False)
+
+    data_loader = torch.utils.data.DataLoader(
+        dataset,
+        num_workers=cfg.DATALOADER.NUM_WORKERS,
+        batch_sampler=batch_sampler,
+        collate_fn=trivial_batch_collator,
+    )
+    return data_loader
+
 
 
 def build_multiple_datamodules(

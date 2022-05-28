@@ -1,0 +1,26 @@
+
+dataset_config:
+  okvqa:
+    processors:
+      image_processor:
+        type: torchvision_transforms
+        params:
+          transforms:
+            - type: Resize
+              params:
+                size:
+                  - 256
+                  - 256
+            - type: CenterCrop
+              params:
+                size:
+                  - 224
+                  - 224
+            - ToTensor
+            - GrayScaleTo3Channels
+            - type: NormalizeBGR255
+              params:
+                mean: [0, 0, 0]
+                std: [1, 1, 1]
+                to_bgr255: true
+                pad_size: -1
