@@ -12,6 +12,9 @@ from tqdm import tqdm
 import pandas as pd
 import json
 
+import matplotlib.pyplot as plt
+from matplotlib import cm
+
 from pathlib import Path
 
 from pprint import pprint
@@ -247,5 +250,30 @@ class PerformanceReport:
 
         self.logger.info(f"\n{'-'*100}")
     
-
+def plot_bars(barplot_dict, strat_type, args):
+    # Change dict to dataframe for plotting
+    newdict = {(k1, k2):v2 for k1,v1 in barplot_dict.items() \
+               for k2,v2 in barplot_dict[k1].items()}  
+    df = pd.DataFrame([newdict[i] for i in sorted(newdict)],
+                      index=pd.MultiIndex.from_tuples([i for i in sorted(newdict.keys())]))
+    
+    df['low'] = df['avg'] - df.CIs.apply(lambda x: x[0])
+    df['high'] = df['avg'] + df.CIs.apply(lambda x: x[1])
+                        
+    df = df.reset_index().rename(columns={'level_0': 'label', 'level_1': 'score'}).set_index(['label', 'score'])
+    df = df.unstack(level='label')
+    
+    df = df.rename(index={'vqa_acc': 'VQA Acc.', 'numberbatch_score': 'Numberbatch', 'acc': 'Accuracy'})
+    df = df.drop('Accuracy')
+    
+    fig = plt.figure(dpi=400)
+    cmap = cm.get_cmap('tab20')
+    df['avg'].plot(kind='barh', xerr=df[['low','high']].T.values,
+                     width=0.88, cmap=cmap,
+                     figsize=(10,8), ax=plt.gca())
+    plt.title(f"Stratified by: {strat_type}", fontsize=15)
+    plt.legend(loc='lower right')
+    
+    os.makedirs(Path(args.save_path) / f'bars', exist_ok=True)
+    plt.savefig(Path(args.save_path) / f'bars/{strat_type}.png') 
         

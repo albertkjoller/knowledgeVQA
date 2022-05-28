@@ -19,7 +19,7 @@ I: airplane.jpeg
 A: fly
 
 Q: How many forks are on this table?
-I: table.jpeg
+I: table.jpg
 A: 2
 
 Q: did he just hear good or bad news?
@@ -344,7 +344,7 @@ I: godtsmil-tandlaegerne.jpg
 A: 1
 
 Q: How many phones are on this table?
-I: techTable.jpg
+I: techtable.jpg
 A: 5
 
 Q: how many ties are in this image?

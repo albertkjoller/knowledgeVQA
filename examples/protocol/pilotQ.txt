@@ -19,7 +19,7 @@ I: airplane.jpeg
 A: fly
 
 Q: How many forks are on this table?
-I: table.jpeg
+I: table.jpg
 A: 2
 
 Q: did he just hear good or bad news?

@@ -16,14 +16,12 @@ import torch
 from tqdm import tqdm
 from collections import defaultdict
 
-import matplotlib.pyplot as plt
-from matplotlib import cm
-
 from mmf.models import Qlarifais
 
 sys.path.append("..")
 from mmexp.analyzer import *
 from mmexp.utils.tools import paths_to_okvqa, str_to_class, fetch_test_embeddings
+from mmexp.utils.visualize import plot_stratified_results
 
 import argparse
 import logging
@@ -170,10 +168,6 @@ if __name__ == '__main__':
                                          pickle_path=args.report_dir,
                                          )
             
-            # Compute t-SNE        
-            if args.tsne == True:
-                plot_TSNE(stratified_object, model_name=model_name, save_path=args.save_path)
-            
             # Performance report
             if args.performance_report == True:
                 
@@ -204,34 +198,17 @@ if __name__ == '__main__':
                     for key in performance_report.scores.keys():
                         barplot_dict[label][key]['avg'] = performance_report.scores[key]
                         barplot_dict[label][key]['CIs'] = performance_report.CIs[key]
-                        
+                
+                # Compute t-SNE        
+                if args.tsne == True:
+                    plot_TSNE(stratified_object, model_name=model_name, save_path=args.save_path)
+                
                 if args.plot_bars == True:
-                
-                    # Change dict to dataframe for plotting
-                    newdict = {(k1, k2):v2 for k1,v1 in barplot_dict.items() \
-                               for k2,v2 in barplot_dict[k1].items()}  
-                    df = pd.DataFrame([newdict[i] for i in sorted(newdict)],
-                                      index=pd.MultiIndex.from_tuples([i for i in sorted(newdict.keys())]))
-                
-                    df['low'] = df.CIs.apply(lambda x: x[0])
-                    df['high'] = df.CIs.apply(lambda x: x[1])
-                                        
-                    df = df.reset_index().rename(columns={'level_0': 'label', 'level_1': 'score'}).set_index(['label', 'score'])
-                    df = df.unstack(level='label')
+                    plot_bars(barplot_dict, strat_type, args)
                     
-                    df = df.rename(index={'vqa_acc': 'VQA Acc.', 'numberbatch_score': 'Numberbatch', 'acc': 'Accuracy'})
-                    df = df.drop('Accuracy')
-
-                    fig = plt.figure(dpi=400)
-                    cmap = cm.get_cmap('tab20')
-                    df['avg'].plot(kind='barh', xerr=df[['low','high']].T.values,
-                                     width=0.88, cmap=cmap,
-                                     figsize=(10,8), ax=plt.gca())
-                    plt.title(f"Stratified by: {strat_type}", fontsize=15)
-                    plt.legend(loc='lower right')
-                    
-                    os.makedirs(Path(args.save_path) / f'bars', exist_ok=True)
-                    plt.savefig(Path(args.save_path) / f'bars/{strat_type}.png')                    
+                plot_stratified_results(stratified_object, barplot_dict, 
+                                        strat_type, args, model_name)
+                                       
                     
                     
                     
