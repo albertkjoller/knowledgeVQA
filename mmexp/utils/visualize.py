@@ -45,7 +45,7 @@ def plot_example(input,
 
         plt.subplot(batch_size, 2, 2 + 2 * i)
         imsc(saliency[i], interpolation='none')
-        plt.title('{} for answer category {} (id: {})'.format(
+        plt.title('{} wrt. best prediction'.format(
             method, answer_vocab[class_i], class_i), fontsize=8)
 
     # Save figure if path is specified.
@@ -66,6 +66,14 @@ def plot_example(input,
 def plot_stratified_results(stratified_object, barplot_dict, strat_type,
                             args,
                             model_name: str):
+    
+    ncol_dict = {'start_words': 5, 
+                 'okvqa_categories': 2, 
+                 'question_length': 3,
+                 'answer_length': 3,
+                 'numerical_answers': 3,
+                 'num_visual_objects': 3,
+                 'visual_objects_types': 5,}
     
     # Compute t-SNE
     tsne = TSNE(2, verbose=1)
@@ -96,29 +104,32 @@ def plot_stratified_results(stratified_object, barplot_dict, strat_type,
         indices = stratified_object.data['stratification_label'][stratified_object.data['stratification_label'] == cat].index.to_numpy()
         color = colors[i]
         ax[0].scatter(tsne_proj[indices,0],tsne_proj[indices,1], c=np.array(color).reshape(1,4), label = cat ,alpha=0.5)
-        
-    #ax[0].legend(fontsize='large', markerscale=2)
-    
+            
     # Set title and legend
     ax[0].axis('off')
     ax[0].set_title(f"Qlarifais-model: {model_name}\
                     \nPredictions stratified by {stratified_object.by}",
                     fontsize=20,
                     loc='left')
-    #plt.legend(loc='center', bbox_to_anchor=(0.95, 0.3, 0.5, 0.5))
-    plt.tight_layout()
+    ax[1].legend(loc='center', bbox_to_anchor=(0.95, 0.3, 0.5, 0.5))
     
     # Plot bars
-    df['avg'].plot(kind='barh', xerr=df[['low','high']].T.values,
-                     width=0.88, color=colors,
-                     #figsize=(10,8), 
-                     ax=ax[1])
-    #ax[1].set_title(f"Stratified by: {strat_type}", fontsize=15, loc='left')
-    #ax[1].legend(loc='center', fontsize=20,
-    #             bbox_to_anchor=(1.05, 0.3, 0.5, 0.5))
-    ax[1].legend(loc='upper center', fontsize=18,
+    if strat_type == 'num_visual_objects':
+        mean = df['avg'][['< 10', '10-20', '20-30', '30-40', '40-50', '50 <']]
+        low = df['low'][['< 10', '10-20', '20-30', '30-40', '40-50', '50 <']]
+        high = df['high'][['< 10', '10-20', '20-30', '30-40', '40-50', '50 <']]
+        
+        mean.plot(kind='barh', xerr=pd.concat([low, high], axis=1).T.values,
+                         width=0.88, color=colors,
+                         ax=ax[1])
+    else:
+        df['avg'].plot(kind='barh', xerr=df[['low','high']].T.values,
+                         width=0.88, color=colors,
+                         ax=ax[1])
+    
+    plt.legend(loc='upper center', fontsize=18,
              bbox_to_anchor=(-0.8, -0.05),fancybox=False, 
-             shadow=False, ncol=2)
+             shadow=False, ncol=ncol_dict[strat_type])
     ax[1].set_ylabel('')
     plt.yticks(fontsize=18)
     plt.xticks(fontsize=16)
@@ -128,9 +139,16 @@ def plot_stratified_results(stratified_object, barplot_dict, strat_type,
                     top=0.9, 
                     wspace=0.4, 
                     hspace=0.4)
-    #plt.tight_layout()
-    fig.show()
+    #fig.show()
     
     os.makedirs(Path(args.save_path) / f'figures', exist_ok=True)
-    plt.savefig(Path(args.save_path) / f'figures/{strat_type}.png') 
+    fig.savefig(Path(args.save_path) / f'figures/{strat_type}.png', bbox_inches='tight') 
     
+    # ncol_dict = {'start_words': 5, 
+    #              'okvqa_categories', 2, 
+    #              'question_length': 3,
+    #              'answer_length': 3,
+    #              'numerical_answers': 3,
+    #              'num_visual_objects': 3,
+    #              'visual_objects_types': 5,}
+    # 5, 2 

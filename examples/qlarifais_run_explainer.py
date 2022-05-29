@@ -130,7 +130,8 @@ if __name__ == '__main__':
         image = load_image((image_path / image_name).as_posix())
         
         # Run explainability if answer is in answer vocab
-        category_id = model.processor_dict['answer_processor'].word2idx(answer)
+        cat_id = model.processor_dict['answer_processor']
+        category_id = cat_id.word2idx(answer)
         if category_id == 0:
             logger.warning(f"\nThe ground truth '{answer}'not found in answer vocab - skipping...\n")
         else:
@@ -157,6 +158,9 @@ if __name__ == '__main__':
                             prediction_str += f"{i+1}) {ans} \n" #"\t ({prob})\n"
                         logger.info(prediction_str)
                         
+                        # predicted category
+                        category_id = cat_id.word2idx(outputs[1][0])
+
                         # Run xplainability
                         save_name = Path(args.save_path) / f"explainability/{explainability_method}/{image_name.split('.')[0]}/{question.strip('?').replace(' ', '_').lower()}/{analysis_num}_{analysis_type.lower()}"
                         run_method(model, model_name, 
@@ -195,6 +199,9 @@ if __name__ == '__main__':
                             prediction_str += f"{i+1}) {ans} \n" #"\t ({prob})\n"
                         logger.info(prediction_str)
                         
+                        # predicted category
+                        category_id = cat_id.word2idx(outputs[1][0])
+                        
                         # Run xplainability
                         save_name = Path(args.save_path) / f"explainability/{explainability_method}/{image_name.split('.')[0]}/{question.strip('?').replace(' ', '_').lower()}/{analysis_num}_{analysis_type.lower()}"
                         run_method(model, model_name, 
@@ -219,6 +226,9 @@ if __name__ == '__main__':
                             prediction_str += f"{i+1}) {ans} \n" #"\t ({prob})\n"
                         logger.info(prediction_str)
                         
+                        # predicted category
+                        category_id = cat_id.word2idx(outputs[1][0])
+
                         # Run xplainability
                         save_name = Path(args.save_path) / f"explainability/{explainability_method}/{image_name.split('.')[0]}/{question.strip('?').replace(' ', '_').lower()}/{analysis_num}_{analysis_type.lower()}"
                         run_method(model, model_name, 
@@ -243,6 +253,9 @@ if __name__ == '__main__':
                             prediction_str += f"{i+1}) {ans} \n" #"\t ({prob})\n"
                         logger.info(prediction_str)
                         
+                        # predicted category
+                        category_id = cat_id.word2idx(outputs[1][0])
+
                         # Run xplainability
                         save_name = Path(args.save_path) / f"explainability/{explainability_method}/{image_name.split('.')[0]}/{question.strip('?').replace(' ', '_').lower()}/{analysis_num}_{analysis_type.lower()}"
                         run_method(model, model_name, 
