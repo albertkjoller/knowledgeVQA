@@ -76,7 +76,7 @@ def plot_stratified_results(stratified_object, barplot_dict, strat_type,
                  'visual_objects_types': 5,}
     
     # Compute t-SNE
-    tsne = TSNE(2, verbose=1)
+    tsne = TSNE(2, verbose=1, random_state=42,) #init='pca', n_iter=2000, random_state=42)
     tsne_proj = tsne.fit_transform(stratified_object.embeddings.T)
     
     # Restructure barplot-dictionary
@@ -96,11 +96,16 @@ def plot_stratified_results(stratified_object, barplot_dict, strat_type,
     
     # Scatter plot with colors based on the stratification_func
     cmap = cm.get_cmap('tab20')
-    colors = [cmap(stratified_object.cat2idx[cat]) for cat in stratified_object.categories]
+    colors = [cmap(stratified_object.cat2idx[cat]) for cat in list(df['avg'].columns)]#.categories]
 
     fig, ax = plt.subplots(1, 2, figsize=(15,10), dpi=400,
                            gridspec_kw={'width_ratios': [2, 1]})
-    for i,cat in enumerate(stratified_object.categories):
+    
+    categories = df['avg'].columns
+    if strat_type == 'num_visual_objects':
+        categories = ['< 10', '10-20', '20-30', '30-40', '40-50', '50 <']
+    
+    for i, cat in enumerate(categories):#.categories):
         indices = stratified_object.data['stratification_label'][stratified_object.data['stratification_label'] == cat].index.to_numpy()
         color = colors[i]
         ax[0].scatter(tsne_proj[indices,0],tsne_proj[indices,1], c=np.array(color).reshape(1,4), label = cat ,alpha=0.5)
@@ -144,11 +149,3 @@ def plot_stratified_results(stratified_object, barplot_dict, strat_type,
     os.makedirs(Path(args.save_path) / f'figures', exist_ok=True)
     fig.savefig(Path(args.save_path) / f'figures/{strat_type}.png', bbox_inches='tight') 
     
-    # ncol_dict = {'start_words': 5, 
-    #              'okvqa_categories', 2, 
-    #              'question_length': 3,
-    #              'answer_length': 3,
-    #              'numerical_answers': 3,
-    #              'num_visual_objects': 3,
-    #              'visual_objects_types': 5,}
-    # 5, 2 

@@ -118,7 +118,7 @@ class Stratify:
 
     def answer_length(self, ):
         # Answer length
-        answer_length = self.data['answers'].apply(lambda x: np.median([len(ans.strip(" ")) for ans in x]))
+        answer_length = self.data['answers'].apply(lambda x: np.median([len(ans.split(" ")) for ans in x]))
         # Stratification labels        
         bins, self.categories = [0, 1, 2, 4, 6, np.inf], ['very short (1)', 'short (2)', 'intermediate (3-4)', 'long (5-6)', 'very long (6 < )']
         self.data['stratification_label'] = pd.cut(answer_length, bins, labels=self.categories)
