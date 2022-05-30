@@ -8,7 +8,7 @@ import os
 # ------------------------
 # TO DEBUG
 # info: when debugging, also set working directory to explainableVQA/mmf/
-sys.path.insert(0, os.path.dirname(os.getcwd()) + '/mmf')
+#sys.path.insert(0, os.path.dirname(os.getcwd()) + '/mmf')
 # ------------------------
 
 import argparse
@@ -151,7 +151,7 @@ def run(opts: typing.Optional[typing.List[str]] = None, predict: bool = False):
 
 if __name__ == "__main__":
     cmd = False
-    cmd = 'config=configs/experiments/baseline/ama.yaml model=qlarifais dataset=okvqa run_type=train_val'
+    #cmd = 'config=configs/experiments/baseline/ama.yaml model=qlarifais dataset=okvqa run_type=train_val'
     if cmd is not False:
         opts = cmd.split(' ')
         run(opts)
