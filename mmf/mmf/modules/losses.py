@@ -1134,3 +1134,45 @@ class RefinerContrastiveLoss(nn.Module):
             loss = sum(loss) / batch_size
 
         return loss
+
+
+
+
+
+@registry.register_loss("bce_and_contrastive_loss")
+class BCEandContrastiveLoss(nn.Module):
+
+    """
+
+
+    """
+
+    def __init__(self, sim_thresh=0.1, epsilon=1e-16, lambda_bce=1, lambda_contrastive = 1, top_k=1):
+        super().__init__()
+        self.similarity_threshold = sim_thresh
+        self.epsilon = epsilon
+        if '/' in lambda_bce:
+            self.lambda_bce = float(int(self.lambda_bce.split("/")[0])/int(self.lambda_bce.split("/")[1]))
+        else:
+            self.lambda_bce = lambda_bce
+        # todo / for contr
+        self.lambda_contrastive = lambda_contrastive
+        self.top_k = top_k
+        self.bce_loss = LogitBinaryCrossEntropy()
+        self.refiner_contrastive_loss = RefinerContrastiveLoss(self.similarity_threshold, self.epsilon)
+
+    def forward(self, sample_list, model_output):
+
+        bce_input = model_output.copy()
+        bce_input['scores'] = model_output['prediction_scores']
+        num_not_top_k = bce_input['scores'].size(1) - self.top_k
+        not_top_k_indices = torch.topk(bce_input['scores'], num_not_top_k, largest=False, dim=1).indices
+        # set not top k to 0
+        for batch, indices in enumerate(not_top_k_indices):
+            bce_input['scores'][batch][indices] = 0
+
+
+        return self.lambda_bce * self.bce_loss(sample_list, bce_input) + self.lambda_contrastive * self.refiner_contrastive_loss(sample_list, model_output)
+
+
+
