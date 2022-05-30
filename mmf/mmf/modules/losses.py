@@ -1151,15 +1151,23 @@ class BCEandContrastiveLoss(nn.Module):
         super().__init__()
         self.similarity_threshold = sim_thresh
         self.epsilon = epsilon
-        if '/' in lambda_bce:
-            self.lambda_bce = float(int(self.lambda_bce.split("/")[0])/int(self.lambda_bce.split("/")[1]))
-        else:
-            self.lambda_bce = lambda_bce
-        # todo / for contr
-        self.lambda_contrastive = lambda_contrastive
+
+        self.lambda_bce = self.to_number(lambda_bce)
+        self.lambda_contrastive = self.to_number(lambda_contrastive)
+
         self.top_k = top_k
         self.bce_loss = LogitBinaryCrossEntropy()
         self.refiner_contrastive_loss = RefinerContrastiveLoss(self.similarity_threshold, self.epsilon)
+
+    def to_number(self, num):
+        if type(num) == str:
+            if '/' in num:
+                return float(int(num.split("/")[0]) / int(num.split("/")[1]))
+            else:
+                return float(num)
+        else:
+            return num
+
 
     def forward(self, sample_list, model_output):
 

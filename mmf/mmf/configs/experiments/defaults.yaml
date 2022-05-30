@@ -65,7 +65,7 @@ evaluation:
     - numberbatch_score
     - accuracy
     - vqa_accuracy
-    - f1_precision_recall
+    #- f1_precision_recall
     #- binary_f1
     #- roc_auc
 
