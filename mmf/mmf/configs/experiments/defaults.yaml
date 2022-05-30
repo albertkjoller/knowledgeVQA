@@ -2,6 +2,7 @@ includes:
   - configs/datasets/okvqa/bert.yaml
 
 # --- define default for all models ---
+seed: 1
 
 env:
   part_save_dir: ./save/models

@@ -10,8 +10,8 @@ from lib import hyperparam
 python mmf/tools/sweeps/sweep_qlarifais.py \
 --run_type train_val \
 --resume False \
---config /zhome/96/8/147177/Desktop/explainableVQA/mmf/mmf/configs/experiments/baseline/ama.yaml \
--prefix ama \
+--config /zhome/96/8/147177/Desktop/explainableVQA/mmf/mmf/configs/experiments/extra/losses/bce_contrastive.yaml \
+-prefix bce_contrastive \
 --baseline_model /zhome/96/8/147177/Desktop/explainableVQA/mmf/mmf/models/qlarifais.py \
 --backend lsf \
 --checkpoints_dir /work3/s194262/save/sweeps \
@@ -19,7 +19,7 @@ python mmf/tools/sweeps/sweep_qlarifais.py \
 --data_dir /work3/s194262/torch/mmf/data \
 -t -1 \
 -n 6 \
--q gpuv100 \
+-q gpua100 \
 -gpus "num=1:mode=exclusive_process" \
 -R "rusage[mem=5GB]" \
 -W 24:00 \
@@ -62,7 +62,7 @@ def get_grid(args):
         # dropout (fdo)
         hp.extend([hyperparam('model_config.qlarifais.fusion.params.dropout', [0.1, 0.3],
                               save_dir_key=lambda val: f"fdo{val}")])
-        
+
         # dropout (cdo)
         hp.extend([hyperparam("model_config.qlarifais.classifier.params.dropout", [0.1, 0.3], save_dir_key=lambda val: f"cdo{val}")])
 
@@ -76,11 +76,16 @@ def get_grid(args):
         # dropout (ado)
         hp.extend([hyperparam('model_config.qlarifais.attention.params.fusion.params.dropout', [0.1, 0.3],
                               save_dir_key=lambda val: f"ado{val}")])
-        
+
         # fusion hidden dimension (ahd)
         #hp.extend([hyperparam('model_config.qlarifais.attention.params.fusion.params.h_dim', [2500, 5000],
         #           save_dir_key=lambda val: f"ahd{val}")])
 
+    # sweeping lambda values
+    if experiment_type == 'losses':
+        # dropout (ado)
+        hp.extend([hyperparam('model_config.qlarifais.losses[0].params.lambda_bce', [1, 1/300, 1/2250],
+                              save_dir_key=lambda val: f"ado{val}")])
 
 
     return hp
