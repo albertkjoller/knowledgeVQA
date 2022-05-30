@@ -10,6 +10,7 @@ import copy
 import mmf
 import pytorch_lightning as pl
 import torch
+import numpy as np
 from mmf.common.meter import Meter
 from mmf.common.registry import registry
 from mmf.datasets.iteration_strategies import (
@@ -251,6 +252,19 @@ class TestDatasetMapper(DatasetMapper):
     def __init__(self, cfg, is_train=False):
         super().__init__(cfg, is_train)
 
+        if cfg.INPUT.CROP.ENABLED and is_train:
+            self.crop_gen = T.RandomCrop(cfg.INPUT.CROP.TYPE, cfg.INPUT.CROP.SIZE)
+            logging.getLogger(__name__).info("CropGen used in training: " + str(self.crop_gen))
+        else:
+            self.crop_gen = None
+
+        self.tfm_gens = utils.build_transform_gen(cfg, is_train)
+
+        # fmt: off
+        self.img_format     = cfg.INPUT.FORMAT
+        self.mask_on        = cfg.MODEL.MASK_ON
+
+
     def __call__(self, dataset_dict):
         dataset_dict = copy.deepcopy(dataset_dict)
         try:
@@ -287,10 +301,7 @@ class TestDatasetMapper(DatasetMapper):
 def build_detection_test_loader_for_images(cfg, dataset_path, mapper=None):
     # building similar to: https://github.com/facebookresearch/grid-feats-vqa
     image_list = glob.glob(os.path.join(dataset_path, "*.jpg"))
-    dataset_dicts = [
-        {"file_name": x, "image_id": os.path.splitext(os.path.basename(x))[0]}
-        for x in image_list
-    ]
+    dataset_dicts = [{"file_name": x, "image_id": os.path.splitext(os.path.basename(x))[0]} for x in image_list]
 
     dataset = DatasetFromList(dataset_dicts)
     if mapper is None:

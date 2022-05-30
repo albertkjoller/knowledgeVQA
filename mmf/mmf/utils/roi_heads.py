@@ -11,7 +11,10 @@ from typing import List, Optional
 import torch
 from torch import nn
 from torch.nn import functional as F
+from types import SimpleNamespace
 
+
+from detectron2.config import global_cfg
 from detectron2.config import configurable
 from detectron2.layers import ShapeSpec
 from detectron2.modeling.roi_heads import (
@@ -124,12 +127,35 @@ class AttributeRes5ROIHeads(AttributeROIHeads, Res5ROIHeads):
     """
     An extension of Res5ROIHeads to include attribute prediction.
     """
-    def __init__(self, cfg, input_shape):
-        super(Res5ROIHeads, self).__init__(cfg, input_shape)
 
+    @configurable
+    def __init__(
+        self,
+        *,
+        in_features: List[str],
+        pooler: ROIPooler,
+        res5: nn.Module,
+        box_predictor: nn.Module,
+        mask_head: Optional[nn.Module] = None,
+        **kwargs,
+    ):
+
+        super(Res5ROIHeads, self).__init__(**kwargs)
+        self.in_features = in_features
+        self.pooler = pooler
+        if isinstance(res5, (list, tuple)):
+            res5 = nn.Sequential(*res5)
+        self.res5 = res5
+        self.box_predictor = box_predictor
+        self.mask_on = mask_head is not None
+        if self.mask_on:
+            self.mask_head = mask_head
+        '''
+        cfg = SimpleNamespace(**kwargs)
+        # fmt: off
+        self.in_features = in_features
         assert len(self.in_features) == 1
 
-        # fmt: off
         pooler_resolution = cfg.MODEL.ROI_BOX_HEAD.POOLER_RESOLUTION
         pooler_type       = cfg.MODEL.ROI_BOX_HEAD.POOLER_TYPE
         pooler_scales     = (1.0 / input_shape[self.in_features[0]].stride, )
@@ -138,6 +164,7 @@ class AttributeRes5ROIHeads(AttributeROIHeads, Res5ROIHeads):
         self.attribute_on = cfg.MODEL.ATTRIBUTE_ON
         # fmt: on
         assert not cfg.MODEL.KEYPOINT_ON
+        assert len(self.in_features) == 1
 
         self.pooler = ROIPooler(
             output_size=pooler_resolution,
@@ -159,6 +186,15 @@ class AttributeRes5ROIHeads(AttributeROIHeads, Res5ROIHeads):
 
         if self.attribute_on:
             self.attribute_predictor = AttributePredictor(cfg, out_channels)
+        '''
+
+    '''
+    @classmethod
+    def from_config(cls, cfg, input_shape):
+        ret = super().from_config(cfg, input_shape)
+        #ret["attribute_on"] = cfg.MODEL.ATTRIBUTE_ON
+        return ret
+    '''
 
     def forward(self, images, features, proposals, targets=None):
         del images

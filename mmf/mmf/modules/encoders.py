@@ -249,6 +249,8 @@ class ImageEncoderFactory(EncoderFactory):
             self.module = FRCNNImageEncoder(params)
         elif self._type == "grid_feats_vqa":
             self.module = gfvqaImageEncoder(params)
+        elif self._type == "torchvision_frcnn50fpn":
+            self.module = TorchvisionFRCNN50FPNEncoder(params)
         else:
             raise NotImplementedError("Unknown Image Encoder: %s" % self._type)
 
@@ -258,6 +260,34 @@ class ImageEncoderFactory(EncoderFactory):
 
     def forward(self, image):
         return self.module(image)
+
+
+# Taken from facebookresearch/mmbt with some modifications
+@registry.register_encoder("resnet152")
+class ResNet152ImageEncoder(Encoder):
+    @dataclass
+    class Config(Encoder.Config):
+        name: str = "resnet152"
+        pretrained: bool = True
+        # "avg" or "adaptive"
+        pool_type: str = "avg"
+        num_output_features: int = 1
+
+    def __init__(self, config: Config, *args, **kwargs):
+        super().__init__()
+        self.config = config
+        model = torchvision.models.resnet152(pretrained=config.get("pretrained", True))
+        modules = list(model.children())[:-2]
+        self.model = nn.Sequential(*modules)
+
+
+    def forward(self, x):
+        # Bx3x224x224 -> Bx2048x7x7 -> Bx2048xN -> BxNx2048
+        out = self.pool(self.model(x))
+        out = torch.flatten(out, start_dim=2)
+        out = out.transpose(1, 2).contiguous()
+        return out  # BxNx2048
+
 
 
 # Taken from facebookresearch/mmbt with some modifications
@@ -564,7 +594,7 @@ class gfvqaImageEncoder(Encoder):
         # set seed
         cfg.SEED = self.global_config.training.seed
         # test different thresholds (default: 0.05)
-        #self.cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = 0.005
+        #cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = 0.005
         # saving config and logs
         #default_setup(cfg, args) #https://github.com/facebookresearch/detectron2/blob/main/detectron2/engine/defaults.py
         return cfg
