@@ -54,13 +54,13 @@ class TripleOneWayTopDown(nn.Module):
         # to one dim
         self.transform = norm_layer(nn.Linear(config.fusion.params.h_dim, 1), dim=None)
         #self.norm = get_norm(config.norm) # todo with dim
-        self.norm = nn.Softmax(dim=1)
+        #self.norm = nn.Softmax(dim=1)
 
 
     def forward(self, i, q1, q2):
 
         #attention = self.norm(self.transform(self.fusion_module(i, q1, q2)))
-        attention = self.norm(torch.nan_to_num(self.transform(self.fusion_module(i, q1, q2)), nan=-np.inf))
+        attention = nn.Softmax(torch.nan_to_num(self.transform(self.fusion_module(i, q1, q2)), nan=-np.inf), dim=1)
 
         return attention
 

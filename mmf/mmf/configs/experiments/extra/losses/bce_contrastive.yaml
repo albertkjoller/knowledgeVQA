@@ -1,0 +1,16 @@
+env:
+  save_dir: ${env.part_save_dir}/double_ama
+
+
+includes:
+    # include running experiment configs (defaults for all)
+  - configs/experiments/defaults.yaml
+    # fusion module
+  - configs/experiments/modules/fusions/double_two_modality_ama.yaml
+    # graph module
+  - configs/experiments/modules/graphs/numberbatch.yaml
+    # classifier
+  - configs/experiments/modules/classifiers/embeddings.yaml
+    # losses
+  - configs/experiments/modules/losses/bce_contrastive.yaml
+

@@ -10,8 +10,8 @@ from lib import hyperparam
 python mmf/tools/sweeps/sweep_qlarifais.py \
 --run_type train_val \
 --resume False \
---config /zhome/96/8/147177/Desktop/explainableVQA/mmf/mmf/configs/experiments/baseline/ama.yaml \
--prefix ama \
+--config /zhome/96/8/147177/Desktop/explainableVQA/mmf/mmf/configs/experiments/extra/losses/bce_contrastive.yaml \
+-prefix bce_contrastive \
 --baseline_model /zhome/96/8/147177/Desktop/explainableVQA/mmf/mmf/models/qlarifais.py \
 --backend lsf \
 --checkpoints_dir /work3/s194262/save/sweeps \
@@ -19,7 +19,7 @@ python mmf/tools/sweeps/sweep_qlarifais.py \
 --data_dir /work3/s194262/torch/mmf/data \
 -t -1 \
 -n 6 \
--q gpuv100 \
+-q gpua100 \
 -gpus "num=1:mode=exclusive_process" \
 -R "rusage[mem=5GB]" \
 -W 24:00 \
@@ -42,12 +42,6 @@ def get_grid(args):
 
     # --- parameters to optimize ---
 
-    # general hyperparams
-    # learning rate (lr)
-    hp.extend([hyperparam("optimizer.params.lr", [5e-3, 5e-4], save_dir_key=lambda val: f"lr{val}")])
-    # weight decay (wd) 0.0001
-    hp.extend([hyperparam("optimizer.params.weight_decay", [1e-4, 1e-6], save_dir_key=lambda val: f"wd{val}")])
-
     # classifier hp search
     # hidden dimension (chd)
     #hp.extend([hyperparam("model_config.qlarifais.classifier.params.h_dim", [2500, 5000], save_dir_key=lambda val: f"chd{val}")])
@@ -55,33 +49,67 @@ def get_grid(args):
     #hp.extend([hyperparam("model_config.qlarifais.classifier.params.num_non_linear_layers", [2, 4], save_dir_key=lambda val: f"cnl{val}")])
 
     # experiment specific hp search
+    main_experiment = args.config.split('/')[-3]
     experiment_type = args.config.split('/')[-2] # extracting experiment folder name
-    # hp search for optimal fusion module
-    if experiment_type in ['baseline', 'pilot', 'ablation1']:
-        # these experiements vary in input
-        # dropout (fdo)
-        hp.extend([hyperparam('model_config.qlarifais.fusion.params.dropout', [0.1, 0.3],
-                              save_dir_key=lambda val: f"fdo{val}")])
-        
-        # dropout (cdo)
-        hp.extend([hyperparam("model_config.qlarifais.classifier.params.dropout", [0.1, 0.3], save_dir_key=lambda val: f"cdo{val}")])
-
-        # fusion hidden dimension (fhd)
-        #hp.extend([hyperparam('model_config.qlarifais.fusion.params.h_dim', [2500, 5000],
-        #           save_dir_key=lambda val: f"fhd{val}")])
-
-    # optimal fusion module has been chosen, now sweep it in attention
-    if experiment_type in ['ablation2', 'ablation3']:
-        # these experiements do not vary in input, thus use previous optimized fusion modules
-        # dropout (ado)
-        hp.extend([hyperparam('model_config.qlarifais.attention.params.fusion.params.dropout', [0.1, 0.3],
-                              save_dir_key=lambda val: f"ado{val}")])
-        
-        # fusion hidden dimension (ahd)
-        #hp.extend([hyperparam('model_config.qlarifais.attention.params.fusion.params.h_dim', [2500, 5000],
-        #           save_dir_key=lambda val: f"ahd{val}")])
 
 
+    # sweeping lambda values
+    if main_experiment == 'extra':
+        if experiment_type == 'losses':
+            # general hyperparams
+            # learning rate (lr)
+            hp.extend([hyperparam("optimizer.params.lr", [5e-4], save_dir_key=lambda val: f"lr{val}")])
+            # weight decay (wd)
+            hp.extend([hyperparam("optimizer.params.weight_decay", [1e-6], save_dir_key=lambda val: f"wd{val}")])
+            # fusion dropout
+            hp.extend([hyperparam('model_config.qlarifais.fusion.params.dropout', [0.1],
+                                  save_dir_key=lambda val: f"fdo{val}")])
+            # classifier dropout
+            hp.extend([hyperparam("model_config.qlarifais.classifier.params.dropout", [0.3], save_dir_key=lambda val: f"cdo{val}")])
+
+            # optimal hyper params have been found
+            # lambda
+            hp.extend([hyperparam('model_config.qlarifais.losses[0].params.lambda_bce', [0, 1/100, 1/10, 1, 10, 100],
+                                  save_dir_key=lambda val: f"lbce{val}")])
+
+
+
+    elif main_experiment == 'experiments':
+
+        # general hyperparams
+        # learning rate (lr)
+        hp.extend([hyperparam("optimizer.params.lr", [5e-3, 5e-4], save_dir_key=lambda val: f"lr{val}")])
+        # weight decay (wd) 0.0001
+        hp.extend([hyperparam("optimizer.params.weight_decay", [1e-4, 1e-6], save_dir_key=lambda val: f"wd{val}")])
+
+
+        # hp search for optimal fusion module
+        if experiment_type in ['baseline', 'pilot', 'ablation1']:
+            # these experiements vary in input
+            # dropout (fdo)
+            hp.extend([hyperparam('model_config.qlarifais.fusion.params.dropout', [0.1, 0.3],
+                                  save_dir_key=lambda val: f"fdo{val}")])
+
+            # dropout (cdo)
+            hp.extend([hyperparam("model_config.qlarifais.classifier.params.dropout", [0.1, 0.3], save_dir_key=lambda val: f"cdo{val}")])
+
+            # fusion hidden dimension (fhd)
+            #hp.extend([hyperparam('model_config.qlarifais.fusion.params.h_dim', [2500, 5000],
+            #           save_dir_key=lambda val: f"fhd{val}")])
+
+        # optimal fusion module has been chosen, now sweep it in attention
+        if experiment_type in ['ablation2', 'ablation3']:
+            # these experiements do not vary in input, thus use previous optimized fusion modules
+            # dropout (ado)
+            hp.extend([hyperparam('model_config.qlarifais.attention.params.fusion.params.dropout', [0.1, 0.3],
+                                  save_dir_key=lambda val: f"ado{val}")])
+
+            # fusion hidden dimension (ahd)
+            #hp.extend([hyperparam('model_config.qlarifais.attention.params.fusion.params.h_dim', [2500, 5000],
+            #           save_dir_key=lambda val: f"ahd{val}")])
+
+    else:
+        raise NotImplementedError("Unknown main experiment: %s" % main_experiment)
 
     return hp
 

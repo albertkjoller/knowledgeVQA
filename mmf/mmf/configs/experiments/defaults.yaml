@@ -2,6 +2,7 @@ includes:
   - configs/datasets/okvqa/bert.yaml
 
 # --- define default for all models ---
+seed: 1
 
 env:
   part_save_dir: ./save/models
@@ -24,6 +25,7 @@ dataset_config:
             - GrayScaleTo3Channels
             - type: NormalizeBGR255
               params:
+
                 mean: [0, 0, 0] #[0.406, 0.456, 0.485] 
                 std: [1, 1, 1] #[0.14380469, 0.12145835,0.12221994] 
                 to_bgr255: true
@@ -64,7 +66,7 @@ evaluation:
     - numberbatch_score
     - accuracy
     - vqa_accuracy
-    - f1_precision_recall
+    #- f1_precision_recall
     #- binary_f1
     #- roc_auc
 

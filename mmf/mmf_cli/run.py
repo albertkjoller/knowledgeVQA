@@ -151,7 +151,7 @@ def run(opts: typing.Optional[typing.List[str]] = None, predict: bool = False):
 
 if __name__ == "__main__":
     cmd = False
-    #cmd = 'config=configs/experiments/baseline/ama.yaml model=qlarifais dataset=okvqa run_type=train_val'
+    #cmd = 'config=configs/experiments/ablation2/graph_ama.yaml model=qlarifais dataset=okvqa run_type=train_val training.batch_size=3'
     if cmd is not False:
         opts = cmd.split(' ')
         run(opts)

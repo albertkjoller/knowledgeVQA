@@ -116,13 +116,14 @@ class Qlarifais(BaseModel):
                 attention = self.attention_module(image_features, question_features, graph_features)
             # attention: [batch_size, num_features, 1]
             # weighted average of image features
+            image_features = attention * image_features
             image_features = torch.nan_to_num(image_features, nan=0, neginf=0).sum(1)
 
         # if not using attention
         else:
             if self.config.image_encoder.resize == 'average_pooling':
                 # average pooling of K features of size 2048
-                image_features = image_features.mean(1) # [batch_size, i_dim]
+                image_features = image_features.mean(dim=1) # [batch_size, i_dim]
                 
                 # NOT WORKING!!!
                 # torch.from_numpy(np.nanmean(torch.nan_to_num(image_features, neginf=np.nan).detach().cpu(), axis=1)).to(get_current_device())

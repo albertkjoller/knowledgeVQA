@@ -1134,3 +1134,62 @@ class RefinerContrastiveLoss(nn.Module):
             loss = sum(loss) / batch_size
 
         return loss
+
+
+
+
+
+@registry.register_loss("bce_and_contrastive_loss")
+class BCEandContrastiveLoss(nn.Module):
+
+    """
+
+
+    """
+
+    def __init__(self, sim_thresh=0.1, epsilon=1e-16, lambda_bce=1, lambda_contrastive = 1, top_k=1):
+        super().__init__()
+        self.similarity_threshold = sim_thresh
+        self.epsilon = epsilon
+
+        self.lambda_bce = self.to_number(lambda_bce)
+        self.lambda_contrastive = self.to_number(lambda_contrastive)
+
+        self.top_k = top_k
+        #self.bce_loss = LogitBinaryCrossEntropy()
+        self.bce_loss = BinaryCrossEntropyLoss() # made the most sense
+        self.refiner_contrastive_loss = RefinerContrastiveLoss(self.similarity_threshold, self.epsilon)
+
+    def to_number(self, num):
+        if type(num) == str:
+            if '/' in num:
+                return float(int(num.split("/")[0]) / int(num.split("/")[1]))
+            else:
+                return float(num)
+        else:
+            return num
+
+
+    def forward(self, sample_list, model_output):
+
+        bce_input = model_output.copy()
+        bce_input['scores'] = model_output['prediction_scores']
+        num_not_top_k = bce_input['scores'].size(1) - self.top_k
+
+
+        # set not top k to 0 and keep others at similarities
+        #not_top_k_indices = torch.topk(bce_input['scores'], num_not_top_k, largest=False, dim=1).indices
+        #for batch, indices in enumerate(not_top_k_indices):
+        #    bce_input['scores'][batch][indices] = 0
+
+        # set top k to 1 and other to 0
+        top_k_indices = torch.topk(bce_input['scores'], self.top_k, largest=True, dim=1).indices
+        bce_input['scores'] = torch.zeros(bce_input['scores'].size())
+        for batch, indices in enumerate(top_k_indices):
+            bce_input['scores'][batch][indices] = 1
+
+        # bce is divided by 100 since its output per label is maximally 100, thus reduced to [0,1] interval
+        return self.lambda_bce * self.bce_loss(sample_list, bce_input)/100 + self.lambda_contrastive * self.refiner_contrastive_loss(sample_list, model_output)
+
+
+

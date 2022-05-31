@@ -41,7 +41,7 @@ if __name__ == "__main__":
     #general_path = "/imgs/temp/giraffe"
     general_path = "/imgs/temp/"
 
-    image_file_names = ["sheep"]  # , "sheep.jpg"]
+    image_file_names = ["oktennis"]  # , "sheep.jpg"]
 
     # building image processor
     processors = build_processors(config.dataset_config.okvqa.processors)
