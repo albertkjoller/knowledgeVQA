@@ -61,10 +61,15 @@ def get_grid(args):
             hp.extend([hyperparam("optimizer.params.lr", [5e-4], save_dir_key=lambda val: f"lr{val}")])
             # weight decay (wd)
             hp.extend([hyperparam("optimizer.params.weight_decay", [1e-6], save_dir_key=lambda val: f"wd{val}")])
+            # fusion dropout
+            hp.extend([hyperparam('model_config.qlarifais.fusion.params.dropout', [0.1],
+                                  save_dir_key=lambda val: f"fdo{val}")])
+            # classifier dropout
+            hp.extend([hyperparam("model_config.qlarifais.classifier.params.dropout", [0.3], save_dir_key=lambda val: f"cdo{val}")])
 
             # optimal hyper params have been found
             # lambda
-            hp.extend([hyperparam('model_config.qlarifais.losses[0].params.lambda_bce', ['1', '1/10', '1/100', '1/1000', '1/10000'],
+            hp.extend([hyperparam('model_config.qlarifais.losses[0].params.lambda_bce', [0, 1/100, 1/10, 1, 10, 100],
                                   save_dir_key=lambda val: f"lbce{val}")])
 
 
