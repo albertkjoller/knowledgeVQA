@@ -85,7 +85,7 @@ def get_grid(args):
     if experiment_type == 'losses':
         # dropout (ado)
         hp.extend([hyperparam('model_config.qlarifais.losses[0].params.lambda_bce', [1, 1/300, 1/2250],
-                              save_dir_key=lambda val: f"ado{val}")])
+                              save_dir_key=lambda val: f"lbce{val}")])
 
 
     return hp

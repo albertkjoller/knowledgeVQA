@@ -1156,7 +1156,8 @@ class BCEandContrastiveLoss(nn.Module):
         self.lambda_contrastive = self.to_number(lambda_contrastive)
 
         self.top_k = top_k
-        self.bce_loss = LogitBinaryCrossEntropy()
+        #self.bce_loss = LogitBinaryCrossEntropy()
+        self.bce_loss = BinaryCrossEntropyLoss() # made the most sense
         self.refiner_contrastive_loss = RefinerContrastiveLoss(self.similarity_threshold, self.epsilon)
 
     def to_number(self, num):
@@ -1174,13 +1175,21 @@ class BCEandContrastiveLoss(nn.Module):
         bce_input = model_output.copy()
         bce_input['scores'] = model_output['prediction_scores']
         num_not_top_k = bce_input['scores'].size(1) - self.top_k
-        not_top_k_indices = torch.topk(bce_input['scores'], num_not_top_k, largest=False, dim=1).indices
-        # set not top k to 0
-        for batch, indices in enumerate(not_top_k_indices):
-            bce_input['scores'][batch][indices] = 0
 
 
-        return self.lambda_bce * self.bce_loss(sample_list, bce_input) + self.lambda_contrastive * self.refiner_contrastive_loss(sample_list, model_output)
+        # set not top k to 0 and keep others at similarities
+        #not_top_k_indices = torch.topk(bce_input['scores'], num_not_top_k, largest=False, dim=1).indices
+        #for batch, indices in enumerate(not_top_k_indices):
+        #    bce_input['scores'][batch][indices] = 0
+
+        # set top k to 1 and other to 0
+        top_k_indices = torch.topk(bce_input['scores'], self.top_k, largest=True, dim=1).indices
+        bce_input['scores'] = torch.zeros(bce_input['scores'].size())
+        for batch, indices in enumerate(top_k_indices):
+            bce_input['scores'][batch][indices] = 1
+
+        # bce is divided by 100 since its output per label is maximally 100, thus reduced to [0,1] interval
+        return self.lambda_bce * self.bce_loss(sample_list, bce_input)/100 + self.lambda_contrastive * self.refiner_contrastive_loss(sample_list, model_output)
 
 
 

@@ -7,5 +7,5 @@ model_config:
       params:
         lambda_bce: 1/2250
         lambda_contrastive: 1
-        top_k: 3
+        top_k: 1
 
