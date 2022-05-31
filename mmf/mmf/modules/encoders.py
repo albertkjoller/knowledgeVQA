@@ -573,7 +573,11 @@ class gfvqaImageEncoder(Encoder):
         # activating the model
         self.grid_feats_vqa = build_model(self.cfg)
         DetectionCheckpointer(self.grid_feats_vqa, save_dir=self.cfg.OUTPUT_DIR).resume_or_load(self.cfg.MODEL.WEIGHTS, resume=True)
-
+        
+        for param in self.grid_feats_vqa.parameters():
+            param.requires_grad = False
+        
+        
     def setup(self, args, config):
         """
         Create configs and perform basic setups.
@@ -605,7 +609,8 @@ class gfvqaImageEncoder(Encoder):
         batch_size = len(images)
         # constructing desired imput
         inputs = [{"image": image} for image in images]
-        self.grid_feats_vqa.eval()
+        
+        #self.grid_feats_vqa.eval()
         #with inference_context(self.grid_feats_vqa):
 
         if self.type == 'grid':
