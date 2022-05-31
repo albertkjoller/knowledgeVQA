@@ -125,7 +125,7 @@ class Qlarifais(BaseModel):
                 # average pooling of K features of size 2048
                 #denominator = (image_features.isnan() == False).sum(1)
                 #image_features = (torch.nan_to_num(image_features, nan=0).sum(axis=1) / denominator).squeeze() # [batch_size, i_dim]
-                image_features = image_features.sum(dim=1)
+                image_features = image_features.mean(dim=1)
 
                 # NOT WORKING!!!
                 # torch.from_numpy(np.nanmean(torch.nan_to_num(image_features, neginf=np.nan).detach().cpu(), axis=1)).to(get_current_device())
