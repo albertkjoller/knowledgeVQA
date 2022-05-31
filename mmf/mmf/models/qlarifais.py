@@ -124,7 +124,7 @@ class Qlarifais(BaseModel):
             if self.config.image_encoder.resize == 'average_pooling':
                 # average pooling of K features of size 2048
                 image_features = image_features.mean(dim=1) # [batch_size, i_dim]
-                
+
                 # NOT WORKING!!!
                 # torch.from_numpy(np.nanmean(torch.nan_to_num(image_features, neginf=np.nan).detach().cpu(), axis=1)).to(get_current_device())
 

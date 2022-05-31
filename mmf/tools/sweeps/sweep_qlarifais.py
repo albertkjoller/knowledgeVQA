@@ -69,7 +69,7 @@ def get_grid(args):
 
             # optimal hyper params have been found
             # lambda
-            hp.extend([hyperparam('model_config.qlarifais.losses[0].params.lambda_bce', [0, 1/100, 1/10, 1, 10, 100],
+            hp.extend([hyperparam('model_config.qlarifais.losses[0].params.lambda_bce', [0, 1/100, 1/10, 1/5, 1, 5, 10, 100],
                                   save_dir_key=lambda val: f"lbce{val}")])
 
 
