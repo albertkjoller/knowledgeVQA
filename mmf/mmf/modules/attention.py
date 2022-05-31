@@ -34,12 +34,12 @@ class DualOneWayTopDown(nn.Module):
         self.transform = norm_layer(nn.Linear(config.fusion.params.h_dim, 1), dim=None)
         # e.g. softmax or sigmoid
         #self.norm = get_norm(config.norm)
-        #self.norm = nn.Softmax(dim=1) # todo with dim
+        self.norm = nn.Softmax(dim=1) # todo with dim
 
     def forward(self, i, q):
         #attention = self.norm(self.transform(self.fusion_module(i, q)))
         # nan sum if some regions are nan because of padding, become 0 in softmax
-        attention = nn.Softmax(torch.nan_to_num(self.transform(self.fusion_module(i, q)), nan=-np.inf), dim=1)
+        attention = self.norm(torch.nan_to_num(self.transform(self.fusion_module(i, q)), nan=-np.inf))
 
         return attention
 

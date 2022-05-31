@@ -116,6 +116,7 @@ class Qlarifais(BaseModel):
                 attention = self.attention_module(image_features, question_features, graph_features)
             # attention: [batch_size, num_features, 1]
             # weighted average of image features
+            image_features = attention * image_features
             image_features = torch.nan_to_num(image_features, nan=0, neginf=0).sum(1)
 
         # if not using attention
