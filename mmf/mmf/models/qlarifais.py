@@ -161,7 +161,7 @@ class Qlarifais(BaseModel):
                 
                 
                 # vis_im_PIL = Image.fromarray(vis_im, 'RGB')
-            
+    
         # if not using attention
         else:
             if self.config.image_encoder.resize == 'average_pooling':
