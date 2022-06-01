@@ -11,5 +11,6 @@ includes:
   - configs/experiments/modules/graphs/numberbatch.yaml
     # classifier
   - configs/experiments/modules/classifiers/embeddings.yaml
-
+    # loss
+  - configs/experiments/modules/losses/refiner_contrastive.yaml
 

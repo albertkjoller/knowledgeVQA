@@ -13,6 +13,8 @@ includes:
   - configs/experiments/modules/featurizers/regions.yaml
     # classifier
   - configs/experiments/modules/classifiers/embeddings.yaml
+    # loss
+  - configs/experiments/modules/losses/refiner_contrastive.yaml
     # TODO: what is the optimized?
     # fusion module
   - configs/experiments/modules/fusions/double_two_modality_ama.yaml

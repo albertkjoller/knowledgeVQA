@@ -23,6 +23,28 @@ python mmf/tools/sweeps/sweep_qlarifais.py \
 -gpus "num=1:mode=exclusive_process" \
 -R "rusage[mem=5GB]" \
 -W 24:00 \
+
+
+
+python mmf/tools/sweeps/sweep_qlarifais.py \
+--run_type train_val \
+--resume False \
+--config /zhome/2d/7/138174/Desktop/explainableVQA/mmf/mmf/configs/experiments/extra/losses/bce_contrastive.yaml \
+-prefix bce_contrastive \
+--baseline_model /zhome/2d/7/138174/Desktop/explainableVQA/mmf/mmf/models/qlarifais.py \
+--backend lsf \
+--checkpoints_dir /work3/s184984/save/sweeps \
+--cache_dir /work3/s184984/torch/mmf \
+--data_dir /work3/s184984/torch/mmf/data \
+-t -1 \
+-n 6 \
+-q gpua100 \
+-gpus "num=1:mode=exclusive_process" \
+-R "rusage[mem=5GB]" \
+-W 16:00 \
+
+
+
 '''
 
 
@@ -69,7 +91,7 @@ def get_grid(args):
 
             # optimal hyper params have been found
             # lambda
-            hp.extend([hyperparam('model_config.qlarifais.losses[0].params.lambda_bce', [0, 1/100, 1/10, 1, 10, 100],
+            hp.extend([hyperparam('model_config.qlarifais.losses[0].params.lambd', [0, 1/600, 1/550, 1/500, 1/450, 1/400, 1],
                                   save_dir_key=lambda val: f"lbce{val}")])
 
 

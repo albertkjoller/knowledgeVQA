@@ -1143,17 +1143,21 @@ class RefinerContrastiveLoss(nn.Module):
 class BCEandContrastiveLoss(nn.Module):
 
     """
+    A combination of binary cross entropy and refiner contrastive loss.
 
-
+    The lambd value is calculated based on how much percentage of the true BCE w.r.t.
+    the true contrastive loss is being used, with 1 being only BCE, 0 being only contrastive
+    and 0.5 being equal contibution of both true losses.
     """
 
-    def __init__(self, sim_thresh=0.1, epsilon=1e-16, lambda_bce=1, lambda_contrastive = 1, top_k=1):
+    def __init__(self, sim_thresh=0.1, epsilon=1e-16, lambd=1, top_k=1):
         super().__init__()
+        from mmf.utils.general import get_current_device
+        self.device = get_current_device()
         self.similarity_threshold = sim_thresh
         self.epsilon = epsilon
 
-        self.lambda_bce = self.to_number(lambda_bce)
-        self.lambda_contrastive = self.to_number(lambda_contrastive)
+        self.lambd = self.to_number(lambd)
 
         self.top_k = top_k
         #self.bce_loss = LogitBinaryCrossEntropy()
@@ -1169,27 +1173,31 @@ class BCEandContrastiveLoss(nn.Module):
         else:
             return num
 
-
     def forward(self, sample_list, model_output):
 
-        bce_input = model_output.copy()
-        bce_input['scores'] = model_output['prediction_scores']
-        num_not_top_k = bce_input['scores'].size(1) - self.top_k
+        # bce_input = copy.deepcopy(model_output)
+        # .to(device=desired_device)
+        # bce_input['scores'] = model_output['prediction_scores']
+        # bce_input = {'scores': model_output['prediction_scores'].clone()}
 
+        # bce_input['scores'].grad = bce_input['scores'].grad.to(self.device)
 
         # set not top k to 0 and keep others at similarities
-        #not_top_k_indices = torch.topk(bce_input['scores'], num_not_top_k, largest=False, dim=1).indices
-        #for batch, indices in enumerate(not_top_k_indices):
+        # not_top_k_indices = torch.topk(bce_input['scores'], num_not_top_k, largest=False, dim=1).indices
+        # for batch, indices in enumerate(not_top_k_indices):
         #    bce_input['scores'][batch][indices] = 0
+        num_not_top_k = model_output['prediction_scores'].size(1) - self.top_k
 
         # set top k to 1 and other to 0
-        top_k_indices = torch.topk(bce_input['scores'], self.top_k, largest=True, dim=1).indices
-        bce_input['scores'] = torch.zeros(bce_input['scores'].size())
+        top_k_indices = torch.topk(model_output['prediction_scores'], self.top_k, largest=True, dim=1).indices
+        bce_input = {'scores': torch.zeros(model_output['prediction_scores'].size(), device=self.device)}
         for batch, indices in enumerate(top_k_indices):
             bce_input['scores'][batch][indices] = 1
-
         # bce is divided by 100 since its output per label is maximally 100, thus reduced to [0,1] interval
-        return self.lambda_bce * self.bce_loss(sample_list, bce_input)/100 + self.lambda_contrastive * self.refiner_contrastive_loss(sample_list, model_output)
+        loss = {'bce': self.lambd * self.bce_loss(sample_list, bce_input),
+                'refiner_contrastive': (1-self.lambd) * self.refiner_contrastive_loss(sample_list, model_output)}
+
+        return loss
 
 
 

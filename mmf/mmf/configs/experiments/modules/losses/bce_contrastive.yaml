@@ -5,7 +5,6 @@ model_config:
     losses:
     - type: bce_and_contrastive_loss
       params:
-        lambda_bce: 1/2250
-        lambda_contrastive: 1
+        lambd: 1
         top_k: 1
 

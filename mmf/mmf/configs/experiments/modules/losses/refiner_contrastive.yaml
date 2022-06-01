@@ -1,0 +1,8 @@
+
+model_config:
+  qlarifais:
+    losses:
+      - type: refiner_contrastive_loss
+
+
+
