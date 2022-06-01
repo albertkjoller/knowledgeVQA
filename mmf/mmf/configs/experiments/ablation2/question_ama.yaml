@@ -12,6 +12,8 @@ includes:
   - configs/experiments/modules/attentions/question.yaml
     # classifier
   - configs/experiments/modules/classifiers/embeddings.yaml
+    # loss
+  - configs/experiments/modules/losses/refiner_contrastive.yaml
     # TODO: what is the optimized?
     # image featurizer
   - configs/experiments/modules/featurizers/grids.yaml

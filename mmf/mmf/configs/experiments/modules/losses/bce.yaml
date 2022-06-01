@@ -1,0 +1,7 @@
+
+model_config:
+  qlarifais:
+    losses:
+      # binary cross-entropy loss since each question has multiple answers (MGFAN with ref.)
+      - type: logit_bce
+
