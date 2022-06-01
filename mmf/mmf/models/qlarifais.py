@@ -97,7 +97,6 @@ class Qlarifais(BaseModel):
         image_features = self.vision_module(image) # [batch_size, num_features, i_dim]
 
 
-
         # --- GRAPH EMBEDDINGS ---
         if self.config.graph_encoder.use:
             graph_features = self.graph_encoder(sample_list['tokens']) # [batch_size, g_dim]
@@ -118,7 +117,51 @@ class Qlarifais(BaseModel):
             # weighted average of image features
             image_features = attention * image_features
             image_features = torch.nan_to_num(image_features, nan=0, neginf=0).sum(1)
+            
+            try_this = False
+            if try_this:
+                from PIL import Image
+                import skimage
+                import matplotlib.pyplot as plt
+                
+                opacity = False
+                
+                att = attention.detach().numpy()
+                grid_shape = (7,7)
+                im = np.transpose(image.squeeze(0).detach().numpy(), axes=[1,2,0])
 
+                softmax = np.reshape(att, grid_shape)
+                att_map = skimage.transform.resize(softmax, im.shape[:2], order=3)
+                
+                if opacity == True:
+                    att_map = att_map[..., np.newaxis]
+                    att_map = att_map*0.95+0.05
+                else:
+                    att_map = skimage.filters.gaussian(att_map, 0.02*max(im.shape[:2]))
+                    att_map -= att_map.min()
+                    att_map /= att_map.max()
+                    
+                    # color attention map
+                    cmap = plt.get_cmap('jet')
+                    att_map = cmap(att_map)
+                    att_map = np.delete(att_map, 3, 2)
+                    
+                # convert to bgr
+                im = im[:, :, [2, 1, 0]]
+                vis_im = im*att_map + (att_map)*255
+                vis_im = vis_im.astype(im.dtype)
+        
+                # plot figure
+                fig, ax = plt.subplots(1, 2)
+                ax[0].imshow(np.clip(im, 0, 255) / 255)
+                ax[0].axis('off')
+                ax[1].imshow(np.clip(vis_im, 0, 255) / 255)
+                ax[1].axis('off')
+                plt.show()
+                
+                
+                # vis_im_PIL = Image.fromarray(vis_im, 'RGB')
+            
         # if not using attention
         else:
             if self.config.image_encoder.resize == 'average_pooling':

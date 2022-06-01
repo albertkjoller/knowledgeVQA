@@ -829,6 +829,9 @@ class Any_TransformerEncoder(Encoder):
         self.original_config = self.config
         self.config = self.module.config
         self._init_segment_embeddings()
+        
+        for param in self.module.parameters():
+            param.requires_grad = False
 
     def _init_segment_embeddings(self):
         if self.original_config.get("num_segments", None):
