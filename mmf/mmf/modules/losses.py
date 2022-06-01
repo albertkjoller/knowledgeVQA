@@ -1147,7 +1147,7 @@ class BCEandContrastiveLoss(nn.Module):
 
     The lambd value is calculated based on how much percentage of the true BCE w.r.t.
     the true contrastive loss is being used, with 1 being only BCE, 0 being only contrastive
-    and 0.5 being and equal amount of both true 'initial' losses.
+    and 0.5 being equal contibution of both true losses.
     """
 
     def __init__(self, sim_thresh=0.1, epsilon=1e-16, lambd=1, top_k=1):
