@@ -87,8 +87,9 @@ training:
   fast_read: true # TODO: is it faster now?
   early_stop:
     # Whether to use early stopping, (Default: false)
-    enabled: false
-    criteria: okvqa/numberbatch_score
+    enabled: true
+    criteria: okvqa/vqa_accuracy
+    patience: 12000
     minimize: false
 
 checkpoint:
