@@ -118,7 +118,7 @@ class Qlarifais(BaseModel):
             image_features = attention * image_features
             image_features = torch.nan_to_num(image_features, nan=0, neginf=0).sum(1)
             
-            try_this = False
+            try_this = True
             if try_this:
                 from PIL import Image
                 import skimage

@@ -100,20 +100,21 @@ def get_grid(args):
 
         # general hyperparams
         # learning rate (lr)
-        hp.extend([hyperparam("optimizer.params.lr", [5e-3, 5e-4], save_dir_key=lambda val: f"lr{val}")])
+        hp.extend([hyperparam("optimizer.params.lr", [0.0045, 0.0075, 0.01], save_dir_key=lambda val: f"lr{val}")])
         # weight decay (wd) 0.0001
-        hp.extend([hyperparam("optimizer.params.weight_decay", [1e-4, 1e-6], save_dir_key=lambda val: f"wd{val}")])
+        hp.extend([hyperparam("optimizer.params.weight_decay", [1e-5, 1e-6, 1e-7, 1e-8, 1e-9], save_dir_key=lambda val: f"wd{val}")])
 
 
         # hp search for optimal fusion module
         if experiment_type in ['baseline', 'pilot', 'ablation1']:
             # these experiements vary in input
             # dropout (fdo)
-            hp.extend([hyperparam('model_config.qlarifais.fusion.params.dropout', [0.1, 0.3],
+            hp.extend([hyperparam('model_config.qlarifais.fusion.params.dropout', [0.1], # [0.1, 0.3],
                                   save_dir_key=lambda val: f"fdo{val}")])
 
             # dropout (cdo)
-            hp.extend([hyperparam("model_config.qlarifais.classifier.params.dropout", [0.1, 0.3], save_dir_key=lambda val: f"cdo{val}")])
+            hp.extend([hyperparam("model_config.qlarifais.classifier.params.dropout", [0.3], # [0.1, 0.3], 
+                                  save_dir_key=lambda val: f"cdo{val}")])
 
             # fusion hidden dimension (fhd)
             #hp.extend([hyperparam('model_config.qlarifais.fusion.params.h_dim', [2500, 5000],
