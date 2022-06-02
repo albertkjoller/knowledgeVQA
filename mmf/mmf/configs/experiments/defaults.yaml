@@ -88,8 +88,8 @@ training:
   early_stop:
     # Whether to use early stopping, (Default: false)
     enabled: true
-    criteria: okvqa/vqa_accuracy
-    patience: 12000
+    criteria: okvqa/numberbatch_score
+    patience: 16000
     minimize: false
 
 checkpoint:

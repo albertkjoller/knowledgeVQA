@@ -151,7 +151,11 @@ def run(opts: typing.Optional[typing.List[str]] = None, predict: bool = False):
 
 if __name__ == "__main__":
     cmd = False
+    # train
     #cmd = 'config=configs/experiments/ablation2/graph_ama.yaml model=qlarifais dataset=okvqa run_type=train_val training.batch_size=3'
+    # test
+    #cmd = 'config=configs/experiments/ablation2/graph_ama.yaml checkpoint.resume_file=/Users/arond.jacobsen/Documents/GitHub/explainableVQA/mmf/save/models/test model=qlarifais dataset=okvqa run_type=test training.batch_size=3'
+
     if cmd is not False:
         opts = cmd.split(' ')
         run(opts)
