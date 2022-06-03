@@ -118,7 +118,7 @@ class Qlarifais(BaseModel):
             image_features = attention * image_features
             image_features = torch.nan_to_num(image_features, nan=0, neginf=0).sum(1)
             
-            try_this = True
+            try_this = False
             if try_this:
                 from PIL import Image
                 import skimage
@@ -148,19 +148,21 @@ class Qlarifais(BaseModel):
                     
                 # convert to bgr
                 im = im[:, :, [2, 1, 0]]
-                vis_im = im*att_map + (att_map)*255
-                vis_im = vis_im.astype(im.dtype)
-        
+                orig_im = (im - im.min()) / (im.max() - im.min())
+                
                 # plot figure
-                fig, ax = plt.subplots(1, 2)
-                ax[0].imshow(np.clip(im, 0, 255) / 255)
+                fig, ax = plt.subplots(1, 3, dpi=400)
+                ax[0].imshow(orig_im)
                 ax[0].axis('off')
-                ax[1].imshow(np.clip(vis_im, 0, 255) / 255)
+                ax[0].set_title('Original')
+                ax[1].imshow(im / 255)
                 ax[1].axis('off')
+                ax[1].set_title('Model input')
+                ax[2].imshow(np.clip(im, 0, 255) / 255)
+                ax[2].imshow(att_map, alpha=0.5)
+                ax[2].axis('off')
+                ax[2].set_title('Attention map')
                 plt.show()
-                
-                
-                # vis_im_PIL = Image.fromarray(vis_im, 'RGB')
     
         # if not using attention
         else:
