@@ -100,9 +100,9 @@ def get_grid(args):
 
         # general hyperparams
         # learning rate (lr)
-        hp.extend([hyperparam("optimizer.params.lr", [0.0045, 0.0075, 0.01], save_dir_key=lambda val: f"lr{val}")])
+        hp.extend([hyperparam("optimizer.params.lr", [0.0001, 0.005, 0.01, 0.02], save_dir_key=lambda val: f"lr{val}")])
         # weight decay (wd) 0.0001
-        hp.extend([hyperparam("optimizer.params.weight_decay", [1e-5, 1e-6, 1e-7, 1e-8, 1e-9], save_dir_key=lambda val: f"wd{val}")])
+        hp.extend([hyperparam("optimizer.params.weight_decay", [1e-4, 5e-5, 1e-5, 5e-6], save_dir_key=lambda val: f"wd{val}")])
 
 
         # hp search for optimal fusion module
