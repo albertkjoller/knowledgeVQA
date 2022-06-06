@@ -92,8 +92,9 @@ class QlarifaisInterface(nn.Module):
             return output['scores']
             
         else:
+            # Similarity-based so softmax output does not make sense in terms of probabilities.
+            # However, it still finds the maximum index.
             scores = nn.functional.softmax(output["prediction_scores"], dim=1)                      
-            # TODO: check probability of prediction        
             
             if top_k != None:
                 confidence, indices = scores.topk(5, dim=1)

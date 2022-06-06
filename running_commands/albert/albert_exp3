@@ -6,8 +6,8 @@ python mmf/tools/sweeps/sweep_qlarifais.py \
 --resume False \
 --resume_best False \
 --max_to_keep 1 \
---config /zhome/b8/5/147299/Desktop/explainableVQA/mmf/mmf/configs/experiments/ablation1/grids.yaml \
--prefix ablation1_grids \
+--config /zhome/b8/5/147299/Desktop/explainableVQA/mmf/mmf/configs/experiments/pilot/double_ama.yaml \
+-prefix pilot_double_ama_grid1 \
 --tensorboard 1 \
 --tensorboard_logdir /work3/s194253/save/sweeps/tensorboard \
 --baseline_model /zhome/b8/5/147299/Desktop/explainableVQA/mmf/mmf/models/qlarifais.py \
@@ -17,7 +17,7 @@ python mmf/tools/sweeps/sweep_qlarifais.py \
 --data_dir /work3/s194253/torch/mmf/data \
 -t -1 \
 -n 6 \
--q gpuv100 \
+-q gpua100 \
 -gpus "num=1:mode=exclusive_process" \
 -R "rusage[mem=5GB]" \
 -W 24:00 \

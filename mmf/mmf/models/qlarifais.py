@@ -25,6 +25,8 @@ from mmf.utils.build import (
     build_attention_module
     )
 
+#from mmexp.methods import attention_map
+
 '''
 mmf_run config='configs/experiments/ablation1/regions.yaml' model=qlarifais dataset=okvqa run_type=train_val
 
@@ -75,12 +77,6 @@ class Qlarifais(BaseModel):
             # initiating attention module
             self.attention_module = build_attention_module(self.config.attention.params)
 
-
-        #emb_vocab_file = os.path.join('/'.join(self.config.vocab_file.split('/')[:-1]), 'embedded_answer_vocab.pt')
-        #self.embedded_answer_vocab = EmbeddedVocab(self.mmf_indirect(emb_vocab_file), self.mmf_indirect(self.config.vocab_file),
-        #                                           self.graph_encoder).embedded_answer_vocab
-        #self.embedded_answer_vocab.to(get_current_device())
-
         # initialized and used when generating predictions w.r.t. answer vocabulary
         self.answer_vocab = VocabDict(self.mmf_indirect(self.config.vocab_file))
         self.embedded_answer_vocab = self.graph_encoder(self.answer_vocab.word_list)
@@ -118,60 +114,15 @@ class Qlarifais(BaseModel):
             image_features = attention * image_features
             image_features = torch.nan_to_num(image_features, nan=0, neginf=0).sum(1)
             
-            try_this = False
-            if try_this:
-                from PIL import Image
-                import skimage
-                import matplotlib.pyplot as plt
-                
-                opacity = False
-                
-                att = attention.detach().numpy()
-                grid_shape = (7,7)
-                im = np.transpose(image.squeeze(0).detach().numpy(), axes=[1,2,0])
-
-                softmax = np.reshape(att, grid_shape)
-                att_map = skimage.transform.resize(softmax, im.shape[:2], order=3)
-                
-                if opacity == True:
-                    att_map = att_map[..., np.newaxis]
-                    att_map = att_map*0.95+0.05
-                else:
-                    att_map = skimage.filters.gaussian(att_map, 0.02*max(im.shape[:2]))
-                    att_map -= att_map.min()
-                    att_map /= att_map.max()
-                    
-                    # color attention map
-                    cmap = plt.get_cmap('jet')
-                    att_map = cmap(att_map)
-                    att_map = np.delete(att_map, 3, 2)
-                    
-                # convert to bgr
-                im = im[:, :, [2, 1, 0]]
-                orig_im = (im - im.min()) / (im.max() - im.min())
-                
-                # plot figure
-                fig, ax = plt.subplots(1, 3, dpi=400)
-                ax[0].imshow(orig_im)
-                ax[0].axis('off')
-                ax[0].set_title('Original')
-                ax[1].imshow(im / 255)
-                ax[1].axis('off')
-                ax[1].set_title('Model input')
-                ax[2].imshow(np.clip(im, 0, 255) / 255)
-                ax[2].imshow(att_map, alpha=0.5)
-                ax[2].axis('off')
-                ax[2].set_title('Attention map')
-                plt.show()
+            plot_attention = False
+            if plot_attention:
+                attention_map(image, attention)
     
         # if not using attention
         else:
             if self.config.image_encoder.resize == 'average_pooling':
                 # average pooling of K features of size 2048
                 image_features = image_features.mean(dim=1) # [batch_size, i_dim]
-
-                # NOT WORKING!!!
-                # torch.from_numpy(np.nanmean(torch.nan_to_num(image_features, neginf=np.nan).detach().cpu(), axis=1)).to(get_current_device())
 
         # --- FUSION ---
         # type of fusion based on inputs

@@ -12,6 +12,7 @@ from .torchray.multimodal_gradient import multimodal_gradient as MMGradient
 from .torchray.multimodal_gradcam import multimodal_gradcam as MMGradCAM
 from .qlarifais.random_noise import random_image as VisualNoise
 from .qlarifais.random_noise import random_question as TextualNoise
+from .qlarifais.attention_map import attention_map
 
 __all__ = [
     "OR",
@@ -20,4 +21,5 @@ __all__ = [
     "MMEP",
     "MMGradient",
     "MMGradCAM",   
+    "attention_map",
 ]
