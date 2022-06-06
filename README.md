@@ -56,6 +56,7 @@ So now you've got the basics for training and testing multi-modal models through
 
 And that's it! Now, you should be able to reproduce the findings of this project!	
 
+<!---
 ## Pre-trained models
 
 Download pre-trained models [here](https://drive.google.com/drive/folders/17o9YjWwAQ0rtvYC5QKM6TI_0yHcu6iSY?usp=sharing).
@@ -67,6 +68,7 @@ Now, you're ready to use the pre-trained model for predictions! Change directory
 
     cd examples
     python qlarifais_predict.py
+--->
 
 ## Training your own model
 
