@@ -1,6 +1,6 @@
 # Qlarifais - Investigating Multi-Modal learning and top-down attention through explainability
 
-*Project repository related to bachelor thesis on Technical University of Denmark (DTU) in spring 2022.*
+*Project repository related to bachelor thesis on Technical University of Denmark (DTU) in spring 2022. [Access thesis here!](https://findit.dtu.dk/en/catalog/62c6c822d4fccf03d747b3db?)*
 
 <p align="center">
   <img src="https://github.com/albertkjoller/explainableVQA/blob/main/imgs/logo/qlarifais_yellow.png" alt="drawing"/>
